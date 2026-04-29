@@ -1,0 +1,153 @@
+{% extends "store/base.html" %}
+{% load static store_filters %}
+{% block title %}Sản phẩm - Rabona Sport{% endblock %}
+
+{% block nav_giay %}{% if active_category.slug == 'giay-bong-a-2727' or not active_category %}active{% endif %}{% endblock %}
+{% block nav_quan_ao %}{% if active_category.slug == 'ao-au-2727' %}active{% endif %}{% endblock %}
+{% block nav_phu_kien %}{% if active_category.slug == 'phu-kien-2727' %}active{% endif %}{% endblock %}
+{% block mobile_nav_giay %}{% if active_category.slug == 'giay-bong-a-2727' or not active_category %}active{% endif %}{% endblock %}
+{% block mobile_nav_quan_ao %}{% if active_category.slug == 'ao-au-2727' %}active{% endif %}{% endblock %}
+{% block mobile_nav_phu_kien %}{% if active_category.slug == 'phu-kien-2727' %}active{% endif %}{% endblock %}
+
+{% block extra_css %}
+  .page-wrap { max-width:1440px; margin:0 auto; padding:32px 16px 60px; }
+  @media(min-width:768px){ .page-wrap{ padding:32px 32px 60px; } }
+  @media(min-width:1024px){ .page-wrap{ padding:32px 40px 60px; } }
+  .breadcrumb { display:flex; align-items:center; gap:6px; font-size:12px; color:#9ca3af; margin-bottom:20px; flex-wrap:wrap; }
+  .breadcrumb a { color:#9ca3af; text-decoration:none; } .breadcrumb a:hover { color:var(--brand-green); } .breadcrumb span { color:#d1d5db; }
+  .product-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:20px; }
+  @media(max-width:1200px){ .product-grid{ grid-template-columns:repeat(4,minmax(0,1fr)); } }
+  @media(max-width:992px){ .product-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+  @media(max-width:680px){ .product-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media(max-width:420px){ .product-grid{ grid-template-columns:1fr; } }
+  .product-card { position:relative; border:1px solid #e5e7eb; background:#fff; border-radius:4px; transition:box-shadow 0.2s,transform 0.2s; cursor:pointer; overflow:hidden; }
+  .product-card:hover { box-shadow:0 4px 20px rgba(0,0,0,0.1); transform:translateY(-2px); }
+  .cart-btn { position:absolute; top:10px; right:10px; width:32px; height:32px; background:rgba(255,255,255,0.9); border:none; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; transition:background 0.15s; }
+  .cart-btn:hover { background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+  .product-image { height:160px; display:flex; align-items:center; justify-content:center; padding:16px; background:#f9fafb; }
+  .product-image img { max-width:100%; max-height:100%; object-fit:contain; }
+  .variant-row { padding:6px 12px; display:flex; align-items:center; gap:6px; }
+  .variant-dot { width:16px; height:16px; border-radius:2px; border:1px solid rgba(0,0,0,0.1); }
+  .product-info { padding:0 12px 14px; }
+  .product-name { font-size:12px; font-weight:500; color:var(--brand-dark); line-height:1.4; min-height:32px; }
+  .product-price { margin-top:5px; font-size:13px; font-weight:700; color:var(--brand-dark); }
+  .empty-state { text-align:center; padding:80px 20px; color:#9ca3af; font-size:14px; grid-column:1/-1; }
+{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <nav class="breadcrumb">
+    <a href="{% url 'store:home' %}">Trang chủ</a><span>›</span>
+    {% if query %}
+      <a href="{% url 'store:product_list' %}">Tất cả sản phẩm</a><span>›</span>
+      <span style="color:var(--brand-dark);">Kết quả tìm kiếm: "{{ query }}"</span>
+    {% else %}
+      <span style="color:var(--brand-dark);">{% if active_category %}{{ active_category.name }}{% else %}Tất cả sản phẩm{% endif %}</span>
+    {% endif %}
+  </nav>
+
+  {% if query %}
+  <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <h2 style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:700;color:var(--brand-dark);margin:0;">
+      Kết quả cho "<span style="color:var(--brand-green);">{{ query }}</span>"
+      <span style="font-size:13px;font-weight:400;color:#9ca3af;margin-left:8px;">({{ products|length }} sản phẩm)</span>
+    </h2>
+    <a href="{% url 'store:product_list' %}" style="font-size:13px;color:#6b7280;text-decoration:none;display:flex;align-items:center;gap:4px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#6b7280" stroke-width="2" stroke-linecap="round"/></svg>
+      Xóa tìm kiếm
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Thanh tìm kiếm mobile -->
+  <form method="get" action="{% url 'store:product_list' %}" style="display:flex;align-items:center;gap:8px;margin-bottom:20px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 14px;">
+    {% if active_category %}<input type="hidden" name="category" value="{{ active_category.slug }}" />{% endif %}
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><path d="M14.35 13.65L11.22 10.52A6 6 0 1 0 10.52 11.22l3.13 3.13a.5.5 0 0 0 .7-.7z" stroke="#9ca3af" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <input type="text" name="q" value="{{ query }}" placeholder="Tìm kiếm sản phẩm..." style="flex:1;border:none;outline:none;background:transparent;font-size:13px;color:#374151;font-family:Inter,sans-serif;" />
+    {% if query %}
+    <a href="{% url 'store:product_list' %}{% if active_category %}?category={{ active_category.slug }}{% endif %}" style="color:#9ca3af;text-decoration:none;display:flex;align-items:center;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg>
+    </a>
+    {% endif %}
+    <button type="submit" style="background:var(--brand-green);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-family:Montserrat,sans-serif;font-weight:700;cursor:pointer;white-space:nowrap;">Tìm</button>
+  </form>
+
+  <div class="product-grid">
+    {% for product in products %}
+    {% with first_variant=product.variants.first %}
+    <article class="product-card">
+      <button class="cart-btn" aria-label="Thêm vào giỏ"
+        onclick="event.stopPropagation();quickAdd({{ first_variant.id|default:'null' }},'{{ product.name|escapejs }}','{{ product.price|vnd }}','{{ product.display_image }}')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M6.5 6.5H21L19.6 14.4C19.5 15.2 18.9 15.7 18.1 15.7H9.1C8.3 15.7 7.7 15.2 7.6 14.4L6.5 6.5Z" stroke="var(--brand-red)" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M4 6H6.5" stroke="var(--brand-red)" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="10" cy="19.2" r="1" stroke="var(--brand-red)" stroke-width="2"/>
+          <circle cx="17" cy="19.2" r="1" stroke="var(--brand-red)" stroke-width="2"/>
+        </svg>
+      </button>
+      <a href="{% url 'store:product_detail' product.slug %}" style="text-decoration:none;color:inherit;display:block;">
+        <div class="product-image">
+          <img src="{{ product.display_image }}" alt="{{ product.name }}" loading="lazy" />
+        </div>
+        <div class="variant-row">
+          {% for v in product.variants.values_list.distinct %}{% endfor %}
+          {% for v in product.variants.all|slice:":4" %}
+          <span class="variant-dot" style="background:{{ v.color_hex }};"></span>
+          {% endfor %}
+        </div>
+        <div class="product-info">
+          <div class="product-name">{{ product.name }}</div>
+          <div class="product-price">{{ product.price|vnd }}</div>
+        </div>
+      </a>
+    </article>
+    {% endwith %}
+    {% empty %}
+    <div class="empty-state">
+      {% if query %}
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="margin-bottom:12px;opacity:0.3;"><path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <p style="font-weight:600;color:#374151;">Không tìm thấy sản phẩm nào cho "{{ query }}"</p>
+      <p style="font-size:12px;margin-top:4px;">Thử tìm với từ khóa khác hoặc xem tất cả sản phẩm.</p>
+      <a href="{% url 'store:product_list' %}" style="color:var(--brand-green);font-weight:700;text-decoration:none;">Xem tất cả →</a>
+      {% else %}
+      <p>Không có sản phẩm nào.</p>
+      <a href="{% url 'store:product_list' %}" style="color:var(--brand-green);font-weight:700;text-decoration:none;">Xem tất cả →</a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const CART_ADD_BASE = "{% url 'store:cart_add' 0 %}".replace('/0/', '/');
+  const IS_AUTH = {{ user.is_authenticated|yesno:"true,false" }};
+  const LOGIN_URL = "{% url 'login' %}";
+  const CSRF = "{{ csrf_token }}";
+
+  function quickAdd(variantId, name, price, img) {
+    if (!IS_AUTH) { window.location.href = LOGIN_URL; return; }
+    if (!variantId) { window.location.href = "{% url 'store:product_list' %}"; return; }
+    fetch(CART_ADD_BASE + variantId + '/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'quantity=1'
+    }).then(r => r.json()).then(data => {
+      if (data.success) showToast(name, img, data.cart_count);
+    }).catch(() => showToast(name, img, null));
+  }
+
+  function showToast(name, img, count) {
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.innerHTML = `<img class="toast-img" src="${img}" alt="${name}" onerror="this.style.display='none'" />
+      <div class="toast-body"><div class="toast-msg">Đã thêm vào giỏ hàng!</div></div>
+      <a href="{% url 'store:cart_detail' %}" class="toast-btn">Xem giỏ</a>`;
+    container.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+    setTimeout(() => { el.classList.remove('show'); el.classList.add('hide'); setTimeout(() => el.remove(), 350); }, 3000);
+  }
+</script>
+{% endblock %}

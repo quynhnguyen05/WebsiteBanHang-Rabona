@@ -1,0 +1,139 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load humanize %}
+
+{% block title %}Báo cáo doanh thu - Rabona Sport{% endblock %}
+{% block page_title %}BÁO CÁO DOANH THU{% endblock %}
+{% block breadcrumb %}Admin > <span>Báo cáo doanh thu</span>{% endblock %}
+
+{% block content %}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- STATS -->
+<div class="stats-cards">
+    <div class="stat-card">
+        <i class="fas fa-money-bill-wave stat-icon green"></i>
+        <div class="stat-info">
+            <span class="stat-title">Tổng doanh thu (30 ngày)</span>
+            <span class="stat-value">{{ stats.total_revenue|default:0|intcomma }} đ</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <i class="fas fa-shopping-cart stat-icon blue"></i>
+        <div class="stat-info">
+            <span class="stat-title">Đơn hàng hoàn tất</span>
+            <span class="stat-value">{{ stats.order_count|default:0 }}</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <i class="fas fa-chart-line stat-icon orange"></i>
+        <div class="stat-info">
+            <span class="stat-title">Giá trị đơn trung bình</span>
+            <span class="stat-value">{{ stats.avg_value|default:0|floatformat:0|intcomma }} đ</span>
+        </div>
+    </div>
+</div>
+
+<!-- CHART -->
+<div class="table-container" style="padding: 25px; margin-bottom: 25px;">
+    <h3 style="margin-bottom: 20px; font-size: 16px; color: #333;">
+        XU HƯỚNG DOANH THU
+    </h3>
+
+    <!-- FIX HEIGHT CHART -->
+    <div style="height: 280px; max-height: 280px;">
+        <canvas id="revenueChart"></canvas>
+    </div>
+</div>
+
+<!-- TABLE -->
+<div class="table-container">
+    <div style="padding: 20px; border-bottom: 1px solid #eee;">
+        <h3 style="font-size: 16px; color: #333;">
+            CÁC ĐƠN HÀNG THÀNH CÔNG GẦN ĐÂY
+        </h3>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Mã Đơn</th>
+                <th>Ngày thanh toán</th>
+                <th>Khách hàng</th>
+                <th>Phương thức</th>
+                <th>Tổng tiền</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for order in recent_orders %}
+            <tr>
+                <td><span class="order-id">#{{ order.order_code }}</span></td>
+                <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                <td>{{ order.recipient_name }}</td>
+                <td>{{ order.get_payment_method_display|default:"COD" }}</td>
+                <td class="price">{{ order.total|intcomma }} đ</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align:center; padding:30px;">
+                    Chưa có dữ liệu doanh thu.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for item in daily_revenue %}
+                    '{{ item.date|date:"d/m" }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Doanh thu ngày (VNĐ)',
+                data: [
+                    {% for item in daily_revenue %}
+                        {{ item.daily_total }},
+                    {% endfor %}
+                ],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                pointBackgroundColor: '#10b981'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,   // QUAN TRỌNG
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: (value) => value.toLocaleString() + ' đ'
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Cập nhật tài khoản - Rabona Sport{% endblock %}
+{% block page_title %}CẬP NHẬT THÔNG TIN TÀI KHOẢN{% endblock %}
+{% block breadcrumb %}Admin > <span>Cập nhật tài khoản</span>{% endblock %}
+
+{% block content %}
+<div class="account-update-container">
+    <form method="post" action="{% url 'admin_panel:cap_nhat_tai_khoan' %}" enctype="multipart/form-data" class="account-update-form">
+        {% csrf_token %}
+        <h2 class="form-title">CẬP NHẬT THÔNG TIN TÀI KHOẢN</h2>
+
+        <label for="username">Tên đăng nhập:</label>
+        <input type="text" id="username" name="username" value="{{ user.username }}" disabled>
+
+        <label for="full_name">Họ và tên:</label>
+        <input type="text" id="full_name" name="full_name" value="{{ profile.full_name|default:'' }}" placeholder="Nhập họ và tên...">
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="{{ user.email|default:'' }}" placeholder="Nhập email...">
+
+        <label for="phone">Số điện thoại:</label>
+        <input type="text" id="phone" name="phone" value="{{ profile.phone|default:'' }}" placeholder="Nhập số điện thoại...">
+
+        <label for="avatar">Ảnh đại diện:</label>
+        {% if profile.avatar %}
+        <div style="margin-bottom: 12px;">
+            <img src="{{ profile.avatar.url }}" alt="Avatar" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb;">
+        </div>
+        {% endif %}
+        <input type="file" id="avatar" name="avatar" accept="image/*"
+               style="width:100%; padding: 10px 15px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 8px; margin-bottom: 20px; background: #fafafa;">
+
+        <button type="submit" class="btn-submit">Lưu thay đổi</button>
+    </form>
+</div>
+
+<!-- Popup thành công -->
+<div id="success-popup" class="popup-overlay">
+    <div class="popup-content">
+        <div class="icon-success"><i class="fas fa-check-circle"></i></div>
+        <h3>Thành công!</h3>
+        <p>Thông tin tài khoản đã được cập nhật.</p>
+        <button class="btn-close-popup" onclick="document.getElementById('success-popup').style.display='none'">Đóng</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success' %}
+                document.getElementById('success-popup').style.display = 'flex';
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+});
+</script>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends "store/base.html" %}
+{% load static %}
+{% block title %}Địa chỉ giao hàng - Rabona Sport{% endblock %}
+
+{% block extra_css %}
+  .page-wrap { max-width:1440px; margin:0 auto; padding:24px 16px 60px; }
+  @media(min-width:768px){ .page-wrap{ padding:32px 32px 60px; } }
+  @media(min-width:1024px){ .page-wrap{ padding:32px 40px 60px; } }
+  .breadcrumb { display:flex; align-items:center; gap:6px; font-size:12px; color:#9ca3af; margin-bottom:24px; flex-wrap:wrap; }
+  .breadcrumb a { color:#9ca3af; text-decoration:none; }
+  .breadcrumb a:hover { color:var(--brand-green); }
+  .breadcrumb span { color:#d1d5db; }
+  .addr-grid { display:grid; grid-template-columns:1fr; gap:24px; }
+  @media(min-width:768px){ .addr-grid{ grid-template-columns:220px 1fr; gap:28px; } }
+  /* Sidebar */
+  .profile-sidebar { border:1px solid #e5e7eb; border-radius:6px; overflow:hidden; height:fit-content; }
+  .sidebar-nav-link { display:flex; align-items:center; gap:10px; padding:12px 16px; font-size:13px; font-weight:500; color:#374151; text-decoration:none; border-bottom:1px solid #f3f4f6; transition:background 0.12s,color 0.12s; }
+  .sidebar-nav-link:last-child { border-bottom:none; }
+  .sidebar-nav-link:hover { background:#f9fafb; color:var(--brand-green); }
+  .sidebar-nav-link.active { background:#f0fdf4; color:var(--brand-green); font-weight:700; border-left:3px solid var(--brand-green); }
+  /* Address list */
+  .addr-list { display:grid; grid-template-columns:1fr; gap:14px; margin-bottom:28px; }
+  @media(min-width:640px){ .addr-list{ grid-template-columns:1fr 1fr; } }
+  .addr-card { border:2px solid #e5e7eb; border-radius:6px; padding:16px; position:relative; transition:border-color 0.15s; }
+  .addr-card.default { border-color:var(--brand-green); background:#f0fdf4; }
+  .addr-card-name { font-weight:700; font-size:14px; color:var(--brand-dark); }
+  .addr-card-phone { font-size:12px; color:#6b7280; margin-top:2px; }
+  .addr-card-detail { font-size:13px; color:#374151; margin-top:8px; line-height:1.6; }
+  .default-badge { display:inline-block; padding:2px 8px; background:var(--brand-green); color:#fff; border-radius:10px; font-size:10px; font-weight:700; text-transform:uppercase; margin-top:8px; }
+  .addr-card-actions { display:flex; gap:8px; margin-top:12px; }
+  .addr-action-btn { padding:5px 12px; border-radius:4px; font-size:11px; font-weight:700; cursor:pointer; font-family:Montserrat,sans-serif; transition:background 0.15s,color 0.15s; }
+  .btn-set-default { border:1.5px solid var(--brand-green); background:#fff; color:var(--brand-green); }
+  .btn-set-default:hover { background:var(--brand-green); color:#fff; }
+  .btn-delete { border:1.5px solid #ef4444; background:#fff; color:#ef4444; }
+  .btn-delete:hover { background:#ef4444; color:#fff; }
+  /* Add form */
+  .add-form-card { border:1px solid #e5e7eb; border-radius:6px; overflow:hidden; }
+  .add-form-header { padding:16px 20px; background:#f9fafb; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; }
+  .add-form-title { font-family:Montserrat,sans-serif; font-weight:700; font-size:14px; color:var(--brand-dark); margin:0; }
+  .toggle-form-btn { font-size:12px; color:var(--brand-green); cursor:pointer; font-weight:600; background:none; border:none; }
+  .add-form-body { padding:20px; display:none; }
+  .add-form-body.open { display:block; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media(max-width:480px){ .form-row{ grid-template-columns:1fr; } }
+  .form-group { display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
+  .form-label { font-size:12px; font-weight:600; color:#374151; }
+  .form-input { padding:10px 12px; border:1px solid #d1d5db; border-radius:4px; font-size:13px; outline:none; width:100%; }
+  .form-input:focus { border-color:var(--brand-green); }
+  .checkbox-row { display:flex; align-items:center; gap:8px; margin-bottom:16px; font-size:13px; color:#374151; cursor:pointer; }
+  .checkbox-row input { accent-color:var(--brand-green); width:16px; height:16px; }
+  .save-btn { padding:11px 28px; background:var(--brand-green); color:#fff; border:none; border-radius:4px; font-family:Montserrat,sans-serif; font-weight:700; font-size:13px; cursor:pointer; transition:background 0.15s; }
+  .save-btn:hover { background:#0f9a4e; }
+  /* Empty */
+  .empty-state { text-align:center; padding:40px 20px; color:#9ca3af; font-size:14px; border:2px dashed #e5e7eb; border-radius:6px; }
+{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <nav class="breadcrumb">
+    <a href="{% url 'store:home' %}">Trang chủ</a>
+    <span>›</span>
+    <a href="{% url 'store:profile' %}">Hồ sơ</a>
+    <span>›</span>
+    <span style="color:var(--brand-dark);">Địa chỉ giao hàng</span>
+  </nav>
+
+  <div class="addr-grid">
+    <!-- Sidebar -->
+    <aside class="profile-sidebar">
+      <a href="{% url 'store:profile' %}" class="sidebar-nav-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 21C5.5 17.134 8.634 14 12.5 14C16.366 14 19.5 17.134 19.5 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Hồ sơ của tôi
+      </a>
+      <a href="{% url 'store:order_list' %}" class="sidebar-nav-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 8h10M7 12h6M7 16h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Đơn hàng của tôi
+      </a>
+      <a href="{% url 'store:address_manage' %}" class="sidebar-nav-link active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4.5 8-12a8 8 0 10-16 0c0 7.5 8 12 8 12z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+        Địa chỉ giao hàng
+      </a>
+      <a href="{% url 'logout' %}" class="sidebar-nav-link" style="color:#ef4444;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Đăng xuất
+      </a>
+    </aside>
+
+    <!-- Content -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <h2 style="font-family:Montserrat,sans-serif;font-weight:800;font-size:18px;color:var(--brand-dark);margin:0;">Địa chỉ giao hàng</h2>
+        <button class="save-btn" onclick="toggleAddForm()" style="font-size:12px;padding:8px 16px;">+ Thêm địa chỉ</button>
+      </div>
+
+      <!-- Danh sách địa chỉ -->
+      {% if addresses %}
+      <div class="addr-list">
+        {% for addr in addresses %}
+        <div class="addr-card {% if addr.is_default %}default{% endif %}">
+          <div class="addr-card-name">{{ addr.full_name }}</div>
+          <div class="addr-card-phone">{{ addr.phone }}</div>
+          <div class="addr-card-detail">{{ addr.detail }}, {{ addr.city }}</div>
+          {% if addr.is_default %}
+          <span class="default-badge">Mặc định</span>
+          {% endif %}
+          <div class="addr-card-actions">
+            {% if not addr.is_default %}
+            <form method="post" action="{% url 'store:address_manage' %}" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="set_default" value="{{ addr.id }}" />
+              <button type="submit" class="addr-action-btn btn-set-default">Đặt mặc định</button>
+            </form>
+            {% endif %}
+            <form method="post" action="{% url 'store:address_manage' %}" style="display:inline;"
+              onsubmit="return confirm('Xóa địa chỉ này?')">
+              {% csrf_token %}
+              <input type="hidden" name="delete_id" value="{{ addr.id }}" />
+              <button type="submit" class="addr-action-btn btn-delete">Xóa</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state" style="margin-bottom:24px;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" style="opacity:0.3;margin-bottom:10px;">
+          <path d="M12 22s8-4.5 8-12a8 8 0 10-16 0c0 7.5 8 12 8 12z" stroke="#9ca3af" stroke-width="1.5"/>
+          <circle cx="12" cy="10" r="3" stroke="#9ca3af" stroke-width="1.5"/>
+        </svg>
+        <p>Bạn chưa có địa chỉ nào. Hãy thêm địa chỉ giao hàng.</p>
+      </div>
+      {% endif %}
+
+      <!-- Form thêm địa chỉ -->
+      <div class="add-form-card">
+        <div class="add-form-header">
+          <h3 class="add-form-title">Thêm địa chỉ mới</h3>
+          <button class="toggle-form-btn" onclick="toggleAddForm()" id="toggleFormBtn">▼ Mở rộng</button>
+        </div>
+        <div class="add-form-body {% if not addresses %}open{% endif %}" id="addFormBody">
+          <form method="post" action="{% url 'store:address_manage' %}">
+            {% csrf_token %}
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Họ và tên *</label>
+                <input type="text" name="full_name" class="form-input" placeholder="Nguyễn Văn A" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Số điện thoại *</label>
+                <input type="tel" name="phone" class="form-input" placeholder="0xxxxxxxxx" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Địa chỉ chi tiết *</label>
+              <input type="text" name="detail" class="form-input" placeholder="Số nhà, tên đường, phường/xã..." required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tỉnh / Thành phố *</label>
+              <input type="text" name="city" class="form-input" placeholder="Đà Nẵng" required />
+            </div>
+            <label class="checkbox-row">
+              <input type="checkbox" name="is_default" />
+              Đặt làm địa chỉ mặc định
+            </label>
+            <button type="submit" class="save-btn">Lưu địa chỉ</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function toggleAddForm() {
+    const body = document.getElementById('addFormBody');
+    const btn = document.getElementById('toggleFormBtn');
+    const isOpen = body.classList.toggle('open');
+    btn.textContent = isOpen ? '▲ Thu gọn' : '▼ Mở rộng';
+  }
+</script>
+{% endblock %}

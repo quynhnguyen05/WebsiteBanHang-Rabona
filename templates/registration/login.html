@@ -1,0 +1,352 @@
+{% load static %}
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rabona Sport - Đăng nhập / Đăng ký</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@700;800&display=swap");
+    :root { --brand-dark:#333f48; --brand-green:#14ae5c; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, sans-serif; background: #fff; color: #0f172a; }
+    .site-header { background: var(--brand-dark); position: sticky; top: 0; z-index: 50; }
+    .header-inner { max-width: 1440px; margin: 0 auto; padding: 0 40px; height: 73px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 800; color: var(--brand-green); font-size: 20px; line-height: 1.1; }
+    .nav-desktop { display: flex; align-items: center; height: 73px; gap: 0; }
+    .nav-link { height: 73px; display: flex; align-items: center; padding: 0 18px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; text-decoration: none; color: #fff; white-space: nowrap; }
+    .nav-link:hover { color: var(--brand-green); }
+    .spacer { flex: 1; }
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+    .search { display: flex; align-items: center; border-radius: 10px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.12); width: 160px; gap: 6px; }
+    .search input { width: 100%; border: none; outline: none; background: transparent; color: #fff; font-size: 12px; }
+    .search input::placeholder { color: rgba(156,163,175,0.8); }
+    .icon-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; }
+    .auth-link { font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #fff; text-decoration: none; white-space: nowrap; }
+    .auth-link:hover { color: var(--brand-green); }
+    .page { min-height: calc(100vh - 73px); display: flex; align-items: center; justify-content: center; padding: 40px 16px; }
+    .auth-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; width: 100%; max-width: 440px; padding: 36px 40px 32px; box-shadow: 0 2px 16px rgba(0,0,0,0.07); }
+    .auth-title { font-family: Montserrat, sans-serif; font-weight: 800; font-size: 20px; text-align: center; letter-spacing: 0.5px; margin-bottom: 24px; }
+    .tab-row { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #e5e7eb; margin-bottom: 22px; }
+    .tab-btn { flex: 1; padding: 10px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 13px; border: none; background: #fff; cursor: pointer; color: #6b7280; transition: background 0.15s, color 0.15s; }
+    .tab-btn.active { background: var(--brand-green); color: #fff; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #374151; }
+    .form-group input { width: 100%; padding: 10px 40px 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none; font-family: Inter, sans-serif; transition: border-color 0.15s; }
+    .form-group input:focus { border-color: var(--brand-green); }
+    .input-wrap { position: relative; }
+    .input-wrap input { padding-right: 40px; }
+    .eye-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #9ca3af; display: flex; align-items: center; }
+    .submit-btn { width: 100%; padding: 13px; background: var(--brand-dark); color: #fff; border: none; border-radius: 6px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; letter-spacing: 0.5px; margin-top: 6px; transition: background 0.15s; }
+    .submit-btn:hover { background: #222c34; }
+    .switch-text { text-align: center; margin-top: 16px; font-size: 13px; color: #6b7280; }
+    .switch-text a { color: var(--brand-green); font-weight: 600; text-decoration: none; }
+    .switch-text a:hover { text-decoration: underline; }
+    .error-msg { font-size: 12px; color: #ef4444; margin-top: 4px; display: none; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box { background: #fff; border-radius: 24px; padding: 40px 36px 32px; width: 360px; max-width: calc(100vw - 32px); text-align: center; position: relative; transform: translateY(16px); transition: transform 0.2s; }
+    .modal-overlay.open .modal-box { transform: translateY(0); }
+    .modal-close { position: absolute; top: 14px; right: 18px; background: none; border: none; font-size: 18px; cursor: pointer; color: #9ca3af; }
+    .modal-icon { width: 64px; height: 64px; background: var(--brand-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+    .modal-title { font-family: Montserrat, sans-serif; font-weight: 800; font-size: 18px; color: var(--brand-green); margin-bottom: 8px; }
+    .modal-sub { font-size: 13px; color: #6b7280; margin-bottom: 28px; }
+    .modal-actions { display: flex; flex-direction: row; gap: 12px; justify-content: center; flex-wrap: nowrap; }
+    .modal-btn { flex: 1; max-width: 160px; padding: 12px 16px; border-radius: 999px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; border: 2px solid var(--brand-green); transition: background 0.15s, color 0.15s; white-space: nowrap; text-align: center; }
+    .modal-btn.filled { background: var(--brand-green); color: #fff; }
+    .modal-btn.filled:hover { background: #0f9a4e; }
+    .modal-btn.outline { background: #fff; color: var(--brand-dark); border-color: #d1d5db; }
+    .modal-btn.outline:hover { background: #f3f4f6; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="{% url 'store:home' %}"><span>RABONA</span><br/><span>SPORT</span></a>
+    <nav class="nav-desktop">
+      <a class="nav-link" href="{% url 'store:home' %}">TRANG CHỦ</a>
+      <a class="nav-link" href="{% url 'store:product_list' %}">GIÀY BÓNG ĐÁ</a>
+      <a class="nav-link" href="#">QUẦN ÁO</a>
+      <a class="nav-link" href="#">PHỤ KIỆN</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="header-actions">
+      <div class="search">
+        <input type="text" placeholder="Tìm sản phẩm..." />
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M14.35 13.65L11.22 10.52A6 6 0 1 0 10.52 11.22l3.13 3.13a.5.5 0 0 0 .7-.7z" stroke="white" stroke-opacity="0.9" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </div>
+      <button class="icon-btn" aria-label="Giỏ hàng">
+        <svg width="26" height="26" viewBox="0 0 35 35" fill="none"><path d="M5.83 13.13H29.17L27.95 26.51C27.88 27.24 27.55 27.91 27.01 28.4C26.47 28.89 25.77 29.17 25.05 29.17H9.95C9.23 29.17 8.53 28.89 7.99 28.4C7.45 27.91 7.12 27.24 7.05 26.51L5.83 13.13Z" stroke="white" stroke-width="1.7" stroke-linejoin="round"/><path d="M11.67 16.04V11.67C11.67 10.12 12.28 8.64 13.38 7.54C14.47 6.45 15.95 5.83 17.5 5.83C19.05 5.83 20.53 6.45 21.62 7.54C22.72 8.64 23.33 10.12 23.33 11.67V16.04" stroke="white" stroke-width="1.7" stroke-linecap="round"/></svg>
+      </button>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" stroke="white" stroke-width="1.5"/><path d="M5.5 21C5.5 17.134 8.634 14 12.5 14C16.366 14 19.5 17.134 19.5 21" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <a class="auth-link" href="{% url 'login' %}">Đăng nhập</a>
+      <span style="color:rgba(255,255,255,0.4)">|</span>
+      <a class="auth-link" href="{% url 'login' %}?mode=register">Đăng ký</a>
+    </div>
+  </div>
+</header>
+
+<!-- Page -->
+<div class="page">
+  <!-- ĐĂNG NHẬP (hiện mặc định) -->
+  <div class="auth-card" id="loginCard">
+    <div class="auth-title">ĐĂNG NHẬP</div>
+    <div class="tab-row">
+      <button class="tab-btn active" id="login-tab-email" onclick="switchLoginTab('email')">Tên đăng nhập</button>
+      <button class="tab-btn" id="login-tab-phone" onclick="switchLoginTab('phone')">Số điện thoại</button>
+    </div>
+    <form onsubmit="handleLogin(event)">
+      {% csrf_token %}
+      <div class="form-group" id="login-email-group">
+        <label>Tên đăng nhập</label>
+        <input type="text" id="login-email" placeholder="Nhập tên đăng nhập" />
+        <div class="error-msg" id="login-email-err">Vui lòng nhập tên đăng nhập.</div>
+      </div>
+      <div class="form-group" id="login-phone-group" style="display:none">
+        <label>Số điện thoại</label>
+        <input type="tel" id="login-phone" placeholder="0xxxxxxxxx" />
+        <div class="error-msg" id="login-phone-err">Vui lòng nhập số điện thoại.</div>
+      </div>
+      <div class="form-group">
+        <label>Mật khẩu</label>
+        <div class="input-wrap">
+          <input type="password" id="login-pass" />
+          <button type="button" class="eye-btn" onclick="togglePwd('login-pass', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#9ca3af" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#9ca3af" stroke-width="1.5"/></svg></button>
+        </div>
+        <div class="error-msg" id="login-pass-err">Vui lòng nhập mật khẩu.</div>
+      </div>
+      <div class="error-msg" id="login-general-err" style="display:block;margin-bottom:8px;text-align:center;"></div>
+      <button type="submit" class="submit-btn">ĐĂNG NHẬP</button>
+    </form>
+    <div class="switch-text" style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+      <a href="#" onclick="showForgot()" style="color:var(--brand-green);font-size:13px;font-weight:600;text-decoration:none;">Quên mật khẩu?</a>
+      <span style="font-size:13px;color:#6b7280;">Chưa có tài khoản? <a href="#" onclick="showRegister()" style="color:var(--brand-green);font-weight:600;text-decoration:none;">Đăng ký</a></span>
+    </div>
+  </div>
+
+  <!-- ĐĂNG KÝ -->
+  <div class="auth-card" id="registerCard" style="display:none">
+    <div class="auth-title">ĐĂNG KÝ</div>
+    <div class="tab-row">
+      <button class="tab-btn active" id="reg-tab-email" onclick="switchRegTab('email')">Tên đăng nhập</button>
+      <button class="tab-btn" id="reg-tab-phone" onclick="switchRegTab('phone')">Số điện thoại</button>
+    </div>
+    <form onsubmit="handleRegister(event)">
+      {% csrf_token %}
+      <div class="form-group" id="reg-email-group">
+        <label>Tên đăng nhập</label>
+        <input type="text" id="reg-email" placeholder="" />
+        <div class="error-msg" id="reg-email-err">Vui lòng nhập email.</div>
+      </div>
+      <div class="form-group" id="reg-phone-group" style="display:none">
+        <label>Số điện thoại</label>
+        <input type="tel" id="reg-phone" placeholder="" />
+        <div class="error-msg" id="reg-phone-err">Vui lòng nhập số điện thoại.</div>
+      </div>
+      <div class="form-group">
+        <label>Mật khẩu</label>
+        <div class="input-wrap">
+          <input type="password" id="reg-pass" />
+          <button type="button" class="eye-btn" onclick="togglePwd('reg-pass', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#9ca3af" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#9ca3af" stroke-width="1.5"/></svg></button>
+        </div>
+        <div class="error-msg" id="reg-pass-err">Vui lòng nhập mật khẩu.</div>
+      </div>
+      <div class="form-group">
+        <label>Xác nhận mật khẩu</label>
+        <div class="input-wrap">
+          <input type="password" id="reg-pass2" />
+          <button type="button" class="eye-btn" onclick="togglePwd('reg-pass2', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#9ca3af" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#9ca3af" stroke-width="1.5"/></svg></button>
+        </div>
+        <div class="error-msg" id="reg-pass2-err">Mật khẩu không khớp.</div>
+      </div>
+      <div class="error-msg" id="reg-general-err" style="display:block;margin-bottom:8px;text-align:center;"></div>
+      <button type="submit" class="submit-btn">ĐĂNG KÝ</button>
+    </form>
+    <div class="switch-text">Đã có tài khoản? <a href="#" onclick="showLogin()">Đăng nhập</a></div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeForgot()">✕</button>
+    <div id="forgotStep1">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="width:56px;height:56px;background:#f0fdf4;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="var(--brand-green)" stroke-width="1.8"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="var(--brand-green)" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:17px;color:#0f172a;margin-bottom:6px;">Quên mật khẩu?</div>
+        <div style="font-size:13px;color:#6b7280;line-height:1.6;">Nhập email tài khoản của bạn, chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.</div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="forgot-email" class="form-group input" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;" placeholder="example@email.com" />
+        <div class="error-msg" id="forgot-email-err" style="display:none;">Vui lòng nhập email hợp lệ.</div>
+      </div>
+      <button type="button" class="submit-btn" onclick="submitForgot()">GỬI YÊU CẦU</button>
+    </div>
+    <div id="forgotStep2" style="display:none;text-align:center;padding:10px 0;">
+      <div style="width:64px;height:64px;background:var(--brand-green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:17px;color:var(--brand-green);margin-bottom:8px;">Đã gửi!</div>
+      <div style="font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:24px;">Nếu email <strong id="forgotEmailDisplay"></strong> tồn tại trong hệ thống, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu trong vài phút.</div>
+      <button type="button" class="submit-btn" onclick="closeForgot()">Quay lại đăng nhập</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="modal-title">Đăng kí thành công!</div>
+    <div class="modal-sub">Tài khoản của bạn đã được tạo.</div>
+    <div class="modal-actions">
+      <button class="modal-btn filled" onclick="goLogin()">Đăng nhập</button>
+      <button class="modal-btn outline" onclick="goHome()">Về trang chủ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const CSRF = '{{ csrf_token }}';
+  const LOGIN_URL = '{% url "login" %}';
+  const REGISTER_URL = '{% url "store:register" %}';
+  const HOME_URL = '{% url "store:home" %}';
+  const NEXT_URL = '{{ next|default:"" }}';
+
+  // Check URL param
+  const params = new URLSearchParams(location.search);
+  if (params.get('mode') === 'register') showRegister();
+
+  function showLogin() {
+    document.getElementById('registerCard').style.display = 'none';
+    document.getElementById('loginCard').style.display = 'block';
+  }
+  function showRegister() {
+    document.getElementById('loginCard').style.display = 'none';
+    document.getElementById('registerCard').style.display = 'block';
+  }
+
+  function switchRegTab(tab) {
+    document.getElementById('reg-tab-email').classList.toggle('active', tab === 'email');
+    document.getElementById('reg-tab-phone').classList.toggle('active', tab === 'phone');
+    document.getElementById('reg-email-group').style.display = tab === 'email' ? '' : 'none';
+    document.getElementById('reg-phone-group').style.display = tab === 'phone' ? '' : 'none';
+  }
+  function switchLoginTab(tab) {
+    document.getElementById('login-tab-email').classList.toggle('active', tab === 'email');
+    document.getElementById('login-tab-phone').classList.toggle('active', tab === 'phone');
+    document.getElementById('login-email-group').style.display = tab === 'email' ? '' : 'none';
+    document.getElementById('login-phone-group').style.display = tab === 'phone' ? '' : 'none';
+  }
+
+  function togglePwd(id, btn) {
+    const inp = document.getElementById(id);
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  // ĐĂNG NHẬP - gửi lên Django, nhận redirect từ server
+  function handleLogin(e) {
+    e.preventDefault();
+    ['login-email-err','login-phone-err','login-pass-err'].forEach(id => document.getElementById(id).style.display = 'none');
+    const errEl = document.getElementById('login-general-err');
+    errEl.textContent = '';
+
+    const isEmail = document.getElementById('login-email-group').style.display !== 'none';
+    const username = isEmail ? document.getElementById('login-email').value.trim() : document.getElementById('login-phone').value.trim();
+    const password = document.getElementById('login-pass').value;
+
+    if (!username) { document.getElementById(isEmail ? 'login-email-err' : 'login-phone-err').style.display = 'block'; return; }
+    if (!password) { document.getElementById('login-pass-err').style.display = 'block'; return; }
+
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('password', password);
+    formData.append('csrfmiddlewaretoken', CSRF);
+    if (NEXT_URL) formData.append('next', NEXT_URL);
+
+    fetch('/login/', { method: 'POST', body: formData })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = data.redirect;
+        } else {
+          errEl.textContent = data.error || 'Tên đăng nhập hoặc mật khẩu không đúng.';
+        }
+      })
+      .catch(() => { errEl.textContent = 'Có lỗi xảy ra, vui lòng thử lại.'; });
+  }
+
+  // ĐĂNG KÝ - gửi lên Django
+  function handleRegister(e) {
+    e.preventDefault();
+    ['reg-email-err','reg-phone-err','reg-pass-err','reg-pass2-err'].forEach(id => document.getElementById(id).style.display = 'none');
+    const errEl = document.getElementById('reg-general-err');
+    errEl.textContent = '';
+
+    const isEmail = document.getElementById('reg-email-group').style.display !== 'none';
+    const username = isEmail ? document.getElementById('reg-email').value.trim() : document.getElementById('reg-phone').value.trim();
+    const password = document.getElementById('reg-pass').value;
+    const password2 = document.getElementById('reg-pass2').value;
+
+    if (!username) { document.getElementById(isEmail ? 'reg-email-err' : 'reg-phone-err').style.display = 'block'; return; }
+    if (!password) { document.getElementById('reg-pass-err').style.display = 'block'; return; }
+    if (password !== password2) { document.getElementById('reg-pass2-err').style.display = 'block'; return; }
+
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('password1', password);
+    formData.append('password2', password2);
+    formData.append('csrfmiddlewaretoken', CSRF);
+
+    fetch(REGISTER_URL, { method: 'POST', body: formData })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('successModal').classList.add('open');
+        } else {
+          errEl.textContent = data.error || 'Đăng ký thất bại, vui lòng thử lại.';
+        }
+      })
+      .catch(() => { errEl.textContent = 'Có lỗi xảy ra, vui lòng thử lại.'; });
+  }
+
+  function closeModal() { document.getElementById('successModal').classList.remove('open'); }
+  function goLogin() { closeModal(); showLogin(); }
+  function goHome() { window.location.href = HOME_URL; }
+
+  function showForgot() {
+    document.getElementById('forgotStep1').style.display = 'block';
+    document.getElementById('forgotStep2').style.display = 'none';
+    document.getElementById('forgot-email').value = '';
+    document.getElementById('forgot-email-err').style.display = 'none';
+    document.getElementById('forgotModal').classList.add('open');
+  }
+  function closeForgot() {
+    document.getElementById('forgotModal').classList.remove('open');
+  }
+  function submitForgot() {
+    const email = document.getElementById('forgot-email').value.trim();
+    const errEl = document.getElementById('forgot-email-err');
+    if (!email || !email.includes('@')) { errEl.style.display = 'block'; return; }
+    errEl.style.display = 'none';
+    // Hiện bước 2 (thông báo đã gửi) — không cần backend thật
+    document.getElementById('forgotEmailDisplay').textContent = email;
+    document.getElementById('forgotStep1').style.display = 'none';
+    document.getElementById('forgotStep2').style.display = 'block';
+  }
+
+  // Đóng modal khi click nền
+  ['successModal','forgotModal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', e => { if (e.target.id === id) e.target.classList.remove('open'); });
+  });
+</script>
+</body>
+</html>
