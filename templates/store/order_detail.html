@@ -119,6 +119,14 @@
               <label>Trạng thái</label>
               <span>{{ order.get_status_display }}</span>
             </div>
+            {% if order.payment_method == 'bank' and order.payment_proof %}
+            <div class="info-item" style="grid-column: 1 / -1;">
+              <label>Biên lai chuyển khoản</label>
+              <a href="{{ order.payment_proof.url }}" target="_blank">
+                <img src="{{ order.payment_proof.url }}" alt="Biên lai chuyển khoản" style="max-width: 200px; height: auto; border-radius: 4px; border: 1px solid #e5e7eb; margin-top: 8px;" />
+              </a>
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>

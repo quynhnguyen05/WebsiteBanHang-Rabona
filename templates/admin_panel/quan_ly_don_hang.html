@@ -162,6 +162,26 @@
                     <div class="info-row"><span class="info-label">Khách hàng:</span> <span class="info-value">{{ don.recipient_name }}</span></div>
                     <div class="info-row"><span class="info-label">SĐT:</span> <span class="info-value">{{ don.recipient_phone }}</span></div>
                     <div class="info-row"><span class="info-label">Trạng thái:</span> <span class="info-value status-text">{{ don.get_status_display }}</span></div>
+                    <div class="info-row">
+                        <span class="info-label">Phương thức thanh toán:</span>
+                        <span class="info-value">
+                            {% if don.payment_method == 'bank' %}
+                                <span style="color: #3b82f6; font-weight: 600;">Chuyển khoản ngân hàng</span>
+                            {% elif don.payment_method == 'cod' %}
+                                <span style="color: #10b981; font-weight: 600;">Thanh toán khi nhận hàng</span>
+                            {% else %}
+                                {{ don.get_payment_method_display|default:"Chưa xác định" }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% if don.payment_method == 'bank' and don.payment_proof %}
+                    <div class="info-row" style="flex-direction: column; align-items: flex-start;">
+                        <span class="info-label" style="margin-bottom: 10px;">📎 Biên lai chuyển khoản:</span>
+                        <a href="{{ don.payment_proof.url }}" target="_blank" style="display: inline-block;">
+                            <img src="{{ don.payment_proof.url }}" alt="Biên lai chuyển khoản" style="max-width: 200px; height: auto; border-radius: 6px; border: 2px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s;" />
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
 
                 <table class="modal-table">
@@ -193,7 +213,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <a href="{% url 'admin_panel:xuat_hoa_don' don.order_code %}" target="_blank" class="btn-submit" style="background-color: #3b82f6; text-decoration: none; padding: 10px 25px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px; color: white;">
+                <a href="{% url 'admin_panel:xuat_hoa_don' don.order_code %}" target="_blank" class="btn-submit" style="background-color: var(--primary-green); text-decoration: none; padding: 10px 25px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px; color: white;">
                     <i class="fas fa-print"></i> Xem hóa đơn
                 </a>
                 <button class="btn-exit" style="background-color: #e5e7eb; color: #374151; border: none; padding: 10px 25px; border-radius: 4px; font-weight: 600; cursor: pointer;" onclick="closeModal('modalView_{{ don.order_code }}')">Thoát</button>
@@ -232,11 +252,6 @@
                     <div class="step {% if don.status == 'delivered' %}active{% elif don.status == 'completed' %}completed{% endif %}"
                          onclick="{% if don.status == 'shipping' %}openConfirmModal(this, 'delivered', '{{ don.order_code }}'){% endif %}">
                         <div class="step-dot">4</div><div class="step-label">Đã giao hàng</div>
-                    </div>
-
-                    <div class="step {% if don.status == 'completed' %}active{% endif %}"
-                         onclick="{% if don.status == 'delivered' %}openConfirmModal(this, 'completed', '{{ don.order_code }}'){% endif %}">
-                        <div class="step-dot">5</div><div class="step-label">Hoàn thành</div>
                     </div>
                 </div>
 
