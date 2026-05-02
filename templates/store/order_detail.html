@@ -119,6 +119,14 @@
               <label>Trạng thái</label>
               <span>{{ order.get_status_display }}</span>
             </div>
+            {% if order.payment_method == 'bank' and order.payment_proof %}
+            <div class="info-item" style="grid-column: 1 / -1;">
+              <label>Biên lai chuyển khoản</label>
+              <a href="{{ order.payment_proof.url }}" target="_blank">
+                <img src="{{ order.payment_proof.url }}" alt="Biên lai chuyển khoản" style="max-width: 200px; height: auto; border-radius: 4px; border: 1px solid #e5e7eb; margin-top: 8px;" />
+              </a>
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -202,7 +210,33 @@
             <div style="font-size:13px;color:#374151;line-height:1.7;">
               <div style="margin-bottom:6px;"><strong>Trạng thái hiện tại:</strong> <span style="color:#15803d;font-weight:700;">{{ order.return_request.get_status_display }}</span></div>
               <div style="margin-bottom:6px;"><strong>Lý do yêu cầu:</strong> {{ order.return_request.get_reason_display }}</div>
+              <!-- HIỂN THỊ SỐ TIỀN TRỰC QUAN CHO KHÁCH HÀNG -->
+              {% if order.return_request and order.return_request.status != 'pending' and order.return_request.status != 'rejected' %}
+              <div style="margin-top: 15px; padding: 15px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+                  <div style="font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; margin-bottom: 5px;">
+                      {% if order.return_request.status == 'completed' %}
+                          SỐ TIỀN ĐÃ HOÀN TRẢ
+                      {% else %}
+                          SỐ TIỀN HOÀN DỰ KIẾN
+                      {% endif %}
+                  </div>
+                  <div style="font-size: 20px; font-weight: 800; color: #15803d;">
+                      {{ order.return_request.refund_amount|vnd }}
+                  </div>
 
+                  {% if order.return_request.status == 'completed' %}
+                      {% if order.return_request.admin_note %}
+                      <div style="margin-top: 10px; font-size: 13px; color: #065f46; background: #d1fae5; padding: 10px; border-radius: 4px; border-left: 3px solid #10b981;">
+                          <strong>Ghi chú từ Cửa hàng:</strong> {{ order.return_request.admin_note }}
+                      </div>
+                      {% endif %}
+                  {% else %}
+                      <p style="font-size: 12px; color: #16a34a; margin-top: 8px; font-style: italic; line-height: 1.4;">
+                          <i class="fas fa-exclamation-circle"></i> <strong>Lưu ý:</strong> Đây là số tiền dự kiến. Shop sẽ kiểm tra tình trạng sản phẩm thực tế khi nhận lại tại kho để chốt số tiền hoàn chính thức cho bạn.
+                      </p>
+                  {% endif %}
+              </div>
+              {% endif %}
               {% if order.return_request.refund_proof %}
               <div style="margin:15px 0; padding:15px; background:white; border-radius:8px; border:2px solid #bbf7d0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
                 <div style="font-weight:800; color:#166534; font-size:12px; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">

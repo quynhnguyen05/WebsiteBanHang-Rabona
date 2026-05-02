@@ -59,7 +59,7 @@
             <tr>
                 <td><span class="order-id">#{{ user.id }}</span></td>
                 <td style="text-align: left; font-weight: 600;">{{ user.username }}</td>
-                <td style="text-align: left;">{{ user.get_full_name|default:"(Chưa cập nhật)" }}</td>
+                <td style="text-align: left;">{{ user.last_name }} {{ user.first_name }}</td>
                 <td style="text-align: left;">{{ user.email|default:"(Chưa cập nhật)" }}</td>
                 <td style="text-align: left; max-width: 200px; font-size: 13px;">{{ user.display_address }}</td>
                 <td>{{ user.date_joined|date:"d/m/Y" }}</td>

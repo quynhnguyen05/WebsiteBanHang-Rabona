@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-
+import time
+import uuid
 
 # ─────────────────────────────────────────
 #  SẢN PHẨM
@@ -28,7 +29,6 @@ class Product(models.Model):
     slug        = models.SlugField(unique=True)
     description = models.TextField(blank=True, verbose_name='Mô tả')
     price       = models.DecimalField(max_digits=12, decimal_places=0, verbose_name='Giá (đ)')
-    stock       = models.PositiveIntegerField(default=0, verbose_name='Tồn kho')
     sold        = models.PositiveIntegerField(default=0, verbose_name='Đã bán')
     image       = models.ImageField(upload_to='products/', blank=True, null=True, verbose_name='Ảnh chính')
     origin      = models.CharField(max_length=100, blank=True, verbose_name='Xuất xứ')
@@ -215,8 +215,10 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.order_code:
-            import time
-            self.order_code = 'DH' + str(int(time.time()))
+            # DH + Timestamp + 4 ký tự ngẫu nhiên
+            random_str = uuid.uuid4().hex[:4].upper()
+            self.order_code = f"DH{int(time.time())}{random_str}"
+
         self.total = self.subtotal - self.discount_amount + self.shipping_fee
         super().save(*args, **kwargs)
 
@@ -273,7 +275,9 @@ class ReturnRequest(models.Model):
     note       = models.TextField(blank=True, verbose_name='Ghi chú')
     status     = models.CharField(max_length=22, choices=STATUS_CHOICES, default='pending', verbose_name='Trạng thái')
     created_at = models.DateTimeField(auto_now_add=True)
-
+    admin_note = models.TextField(blank=True, null=True, verbose_name='Ghi chú của Admin (Lý do từ chối)')
+    # Lưu số tiền cuối cùng sau khi đã trừ các loại phí
+    refund_amount = models.DecimalField(max_digits=12, decimal_places=0, blank=True, null=True, verbose_name='Số tiền thực hoàn')
     # Thêm các trường thông tin chuyển khoản
     bank_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='Tên ngân hàng')
     bank_account_number = models.CharField(max_length=50, blank=True, null=True, verbose_name='Số tài khoản')

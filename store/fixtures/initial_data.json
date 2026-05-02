@@ -2,7 +2,17 @@
   {
     "model": "store.category",
     "pk": 1,
-    "fields": { "name": "Giày bóng đá", "slug": "giay-bong-da" }
+    "fields": { "name": "Giày bóng đá", "slug": "giay-bong-a-3927" }
+  },
+  {
+    "model": "store.category",
+    "pk": 2,
+    "fields": { "name": "Quần áo", "slug": "ao-au-3927" }
+  },
+  {
+    "model": "store.category",
+    "pk": 3,
+    "fields": { "name": "Phụ kiện", "slug": "phu-kien-3927" }
   },
   {
     "model": "store.product",
@@ -10,7 +20,7 @@
     "fields": {
       "category": 1, "name": "Giày bóng đá Lingy UST083", "slug": "giay-bong-da-lingy-ust083",
       "description": "Giày đá bóng Lingy UST083 được thiết kế với đế cao su giảm chấn, mang lại cảm giác thoải mái khi di chuyển.",
-      "price": "1120000", "stock": 35, "sold": 2000, "image": "", "origin": "Việt Nam",
+      "price": "1120000", "sold": 2000, "image": "", "origin": "Việt Nam",
       "gender": "unisex", "is_active": true, "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z"
     }
   },
@@ -20,7 +30,7 @@
     "fields": {
       "category": 1, "name": "Giày bóng đá Nike Mercurial Vapor 13 Pro", "slug": "nike-mercurial-vapor-13-pro",
       "description": "Nike Mercurial Vapor 13 Pro Hard Ground - tốc độ và kiểm soát tuyệt vời.",
-      "price": "799000", "stock": 20, "sold": 1500, "image": "", "origin": "Việt Nam",
+      "price": "799000", "sold": 1500, "image": "", "origin": "Việt Nam",
       "gender": "unisex", "is_active": true, "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z"
     }
   },
@@ -30,7 +40,7 @@
     "fields": {
       "category": 1, "name": "Giày bóng đá Adidas F5E Elite Lawn", "slug": "adidas-f5e-elite-lawn",
       "description": "Adidas F5E Elite Lawn - thiết kế nhẹ, phù hợp sân cỏ nhân tạo.",
-      "price": "270000", "stock": 50, "sold": 800, "image": "", "origin": "Việt Nam",
+      "price": "270000", "sold": 800, "image": "", "origin": "Việt Nam",
       "gender": "unisex", "is_active": true, "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z"
     }
   },
@@ -40,7 +50,7 @@
     "fields": {
       "category": 1, "name": "Giày bóng đá Nike Mercurial Vapor 16 Elite", "slug": "nike-mercurial-vapor-16-elite",
       "description": "Nike Mercurial Vapor 16 Elite - công nghệ mới nhất từ Nike.",
-      "price": "750000", "stock": 15, "sold": 600, "image": "", "origin": "Việt Nam",
+      "price": "750000", "sold": 600, "image": "", "origin": "Việt Nam",
       "gender": "unisex", "is_active": true, "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z"
     }
   },
@@ -50,7 +60,7 @@
     "fields": {
       "category": 1, "name": "Giày bóng đá Mizuno Neo 4", "slug": "mizuno-neo-4",
       "description": "Mizuno Neo 4 - chất lượng Nhật Bản, bền bỉ và thoải mái.",
-      "price": "365000", "stock": 25, "sold": 400, "image": "", "origin": "Việt Nam",
+      "price": "365000", "sold": 400, "image": "", "origin": "Việt Nam",
       "gender": "unisex", "is_active": true, "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z"
     }
   },
