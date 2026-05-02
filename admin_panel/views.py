@@ -59,7 +59,7 @@ def cap_nhat_tai_khoan(request):
 @admin_required
 def dashboard(request):
     tong_don = Order.objects.count()
-    doanh_thu = Order.objects.filter(status='completed').aggregate(
+    doanh_thu = Order.objects.filter(status__in=['delivered', 'completed']).aggregate(
         total=Sum('total'))['total'] or 0
     dang_giao = Order.objects.filter(status='shipping').count()
     don_moi = Order.objects.order_by('-created_at')[:10]
@@ -114,6 +114,7 @@ def quan_ly_don_hang(request):
             'Đang giao': 'shipping',
             'Đã giao': 'delivered',
             'Trả hàng': 'returning',
+            'Đã trả hàng': 'returned',
             'Đã hủy': 'cancelled',
         }
         status_code = status_map.get(trang_thai, trang_thai)
