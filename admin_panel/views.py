@@ -121,6 +121,7 @@ def quan_ly_don_hang(request):
             'Đang giao': 'shipping',
             'Đã giao': 'delivered',
             'Trả hàng': 'returning',
+            'Đã trả hàng': 'returned',
             'Đã hủy': 'cancelled',
         }
         status_code = status_map.get(trang_thai, trang_thai)

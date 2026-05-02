@@ -351,7 +351,7 @@ body{background:var(--bg);}
             {% elif order.status == 'cancelled' %}
               <span style="font-size:12px;color:#ef4444;font-weight:600;">Đã hủy</span>
             {% elif order.status == 'returning' %}
-              <span style="font-size:12px;color:#f59e0b;font-weight:600;">Đang xử lý trả hàng</span>
+              <span style="font-size:12px;color:#f59e0b;font-weight:600;">Trả hàng</span>
             {% endif %}
           </div>
         </div>
@@ -547,7 +547,7 @@ function openInfo(orderCode) {
       const returnBtn = canReturn
         ? `<button class="btn-line" onclick="closeInfo();openReturn('${o.order_code}','${o.recipient_name}','${o.recipient_phone}')">Yêu cầu trả hàng</button>`
         : o.has_return_request
-          ? `<span style="font-size:12px;color:#f59e0b;font-weight:600;">Đang xử lý trả hàng</span>`
+          ? `<span style="font-size:12px;color:#f59e0b;font-weight:600;">Trả hàng</span>`
           : o.status === 'pending'
             ? `<button class="btn-line" style="color:#ef4444;border-color:#ef4444;" onclick="openCancel('${o.order_code}')">Hủy đơn</button>`
             : '';
@@ -588,16 +588,16 @@ function openInfo(orderCode) {
               <div class="tl-content"><div class="tl-event">Đặt hàng thành công</div><div class="tl-time">${o.created_at}</div></div>
             </div>
             <div class="tl-item">
-              <div class="tl-spine"><div class="tl-dot ${['confirmed','shipping','delivered','completed'].includes(o.status) ? 'green' : ''}"></div><div class="tl-line"></div></div>
-              <div class="tl-content"><div class="tl-event ${['confirmed','shipping','delivered','completed'].includes(o.status) ? '' : 'muted'}">Đã xác nhận</div></div>
+              <div class="tl-spine"><div class="tl-dot ${['confirmed','shipping','delivered','completed','returning'].includes(o.status) ? 'green' : ''}"></div><div class="tl-line"></div></div>
+              <div class="tl-content"><div class="tl-event ${['confirmed','shipping','delivered','completed', 'returning'].includes(o.status) ? '' : 'muted'}">Đã xác nhận</div></div>
             </div>
             <div class="tl-item">
-              <div class="tl-spine"><div class="tl-dot ${['shipping','delivered','completed'].includes(o.status) ? 'blue' : ''}"></div><div class="tl-line"></div></div>
-              <div class="tl-content"><div class="tl-event ${['shipping','delivered','completed'].includes(o.status) ? '' : 'muted'}">Đang vận chuyển</div></div>
+              <div class="tl-spine"><div class="tl-dot ${['shipping','delivered','completed', 'returning'].includes(o.status) ? 'green' : ''}"></div><div class="tl-line"></div></div>
+              <div class="tl-content"><div class="tl-event ${['shipping','delivered','completed', 'returning'].includes(o.status) ? '' : 'muted'}">Đang vận chuyển</div></div>
             </div>
             <div class="tl-item">
-              <div class="tl-spine"><div class="tl-dot ${['delivered','completed'].includes(o.status) ? 'green' : ''}"></div></div>
-              <div class="tl-content"><div class="tl-event ${['delivered','completed'].includes(o.status) ? '' : 'muted'}">Hoàn thành</div></div>
+              <div class="tl-spine"><div class="tl-dot ${['delivered','completed', 'returning'].includes(o.status) ? 'green' : ''}"></div></div>
+              <div class="tl-content"><div class="tl-event ${['delivered','completed', 'returning'].includes(o.status) ? '' : 'muted'}">Hoàn thành</div></div>
             </div>
           </div>
         </div>`;

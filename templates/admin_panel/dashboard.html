@@ -40,7 +40,7 @@
             <i class="fas fa-hand-holding-usd stat-icon green"></i>
             <div class="stat-info">
                 <span class="stat-title">Tổng doanh thu (Đã giao)</span>
-                <span class="stat-value">{{ doanh_thu }} đ</span>
+                <span class="stat-value">{{ doanh_thu|floatformat:0 }} đ</span>
             </div>
         </div>
         <div class="stat-card">
@@ -78,13 +78,14 @@
                     <td><span class="order-id">#{{ don.order_code }}</span></td>
                     <td>{{ don.recipient_name }}</td>
                     <td>{{ don.created_at|date:"d/m/Y H:i" }}</td>
-                    <td class="price">{{ don.total }} đ</td>
+                    <td class="price">{{ don.total|floatformat:0 }} đ</td>
                     <td>
                         {% if don.status == 'pending' %}<span style="color: #f59e0b; font-weight: 600;">Chờ xác nhận</span>
                         {% elif don.status == 'confirmed' %}<span style="color: #8b5cf6; font-weight: 600;">Đang chuẩn bị</span>
                         {% elif don.status == 'shipping' %}<span style="color: #3b82f6; font-weight: 600;">Đang giao</span>
                         {% elif don.status == 'delivered' %}<span style="color: #10b981; font-weight: 600;">Đã giao</span>
                         {% elif don.status == 'returning' %}<span style="color: #ef4444; font-weight: 600;">Trả hàng</span>
+                        {% elif don.status == 'returned' %}<span style="color: #6b7280; font-weight: 600;">Đã trả hàng</span>
                         {% else %}<span style="color: #6b7280; font-weight: 600;">{{ don.get_status_display }}</span>{% endif %}
                     </td>
                     <td><button class="btn-action btn-view" onclick="openModal('modalView_{{ don.order_code }}')"><i class="fas fa-eye"></i> Xem</button></td>
@@ -133,7 +134,7 @@
                             <td>{{ item.size }}</td>
                             <td>{{ item.color }}</td>
                             <td>{{ item.quantity }}</td>
-                            <td style="font-weight: 600;">{{ item.price }} đ</td>
+                            <td style="font-weight: 600;">{{ item.price|floatformat:0 }} đ</td>
                         </tr>
                         {% empty %}
                         <tr><td colspan="5" style="text-align:center;">Không có sản phẩm</td></tr>
@@ -142,10 +143,10 @@
                 </table>
 
                 <div class="totals-box">
-                    <div class="total-row"><span>Phí vận chuyển</span> <span>{{ don.shipping_fee }} đ</span></div>
+                    <div class="total-row"><span>Phí vận chuyển</span> <span>{{ don.shipping_fee|floatformat:0 }} đ</span></div>
                     <div class="total-row divider">
                         <span style="font-weight: bold;">Tổng thanh toán</span>
-                        <span class="total-final">{{ don.total }} đ</span>
+                        <span class="total-final">{{ don.total|floatformat:0 }} đ</span>
                     </div>
                 </div>
             </div>
