@@ -1,8 +1,13 @@
+from django.db import models
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.models import Sum, Count, Avg, Q, Prefetch
-from django.db.models.functions import TruncDate
+
+# Đã thêm FloatField vào đây để lấy chuẩn từ thư viện gốc của Django
+from decimal import Decimal
+from django.db.models import Sum, Count, Avg, Q, Prefetch, FloatField, DecimalField
+from django.db.models.functions import TruncDate, Coalesce
+
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.utils import timezone
@@ -19,11 +24,13 @@ from store.models import (
 
 def admin_required(view_func):
     """Decorator: chỉ cho phép staff/superuser."""
+
     @login_required(login_url='/login/')
     def wrapper(request, *args, **kwargs):
         if not (request.user.is_staff or request.user.is_superuser):
             return redirect('store:home')
         return view_func(request, *args, **kwargs)
+
     return wrapper
 
 
@@ -59,8 +66,7 @@ def cap_nhat_tai_khoan(request):
 @admin_required
 def dashboard(request):
     tong_don = Order.objects.count()
-    doanh_thu = Order.objects.filter(status__in=['delivered', 'completed']).aggregate(
-        total=Sum('total'))['total'] or 0
+    doanh_thu = Order.objects.filter(status__in=['delivered', 'completed']).aggregate(total=Coalesce(Sum('total'), Decimal('0'), output_field=DecimalField()))['total']
     dang_giao = Order.objects.filter(status='shipping').count()
     don_moi = Order.objects.order_by('-created_at')[:10]
     tong_sp = Product.objects.count()
@@ -84,10 +90,11 @@ def quan_ly_don_hang(request):
         try:
             data = json.loads(request.body)
             order = Order.objects.get(order_code=data['order_code'])
-            
+
             # Kiểm tra trạng thái hiện tại của đơn hàng
             if order.status in ['delivered', 'completed']:
-                return JsonResponse({'status': 'error', 'message': 'Không thể thay đổi trạng thái đơn hàng đã giao hoặc đã hoàn thành.'})
+                return JsonResponse({'status': 'error',
+                                     'message': 'Không thể thay đổi trạng thái đơn hàng đã giao hoặc đã hoàn thành.'})
 
             order.status = data['status']
             order.save()
@@ -97,12 +104,12 @@ def quan_ly_don_hang(request):
 
     trang_thai = request.GET.get('trang_thai', 'Tat_ca')
     search = request.GET.get('q', '')
-    
+
     orders_qs = Order.objects.order_by('-created_at')
-    
+
     if search:
         orders_qs = orders_qs.filter(
-            Q(order_code__icontains=search) | 
+            Q(order_code__icontains=search) |
             Q(recipient_name__icontains=search)
         )
 
@@ -120,8 +127,6 @@ def quan_ly_don_hang(request):
         status_code = status_map.get(trang_thai, trang_thai)
         orders_qs = orders_qs.filter(status=status_code)
 
-    paginator = Paginator(orders_qs, 15)
-    danh_sach_don = paginator.get_page(request.GET.get('page'))
 
     # Thêm thuộc tính hiển thị cho mỗi đơn
     status_display = {
@@ -134,13 +139,24 @@ def quan_ly_don_hang(request):
         'returning': 'Trả hàng',
         'returned': 'Đã trả hàng',
     }
+    # Phân trang đơn hàng
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(orders_qs, 15)
+    danh_sach_don = paginator.get_page(page_number)
+
+    # Tạo dãy trang < 1 2 ... 10 >
+    custom_page_range = paginator.get_elided_page_range(
+        page_number, on_each_side=2, on_ends=1
+    )
 
     return render(request, 'admin_panel/quan_ly_don_hang.html', {
         'danh_sach_don': danh_sach_don,
+        'custom_page_range': custom_page_range,
         'trang_thai_hien_tai': trang_thai,
         'search': search,
         'tong_don_hang': Order.objects.count(),
-        'doanh_thu': Order.objects.filter(status__in=['delivered','completed']).aggregate(total=Sum('total'))['total'] or 0,
+        'doanh_thu': Order.objects.filter(status__in=['delivered', 'completed']).aggregate(total=Sum('total'))[
+                         'total'] or 0,
         'don_dang_giao': Order.objects.filter(status='shipping').count(),
         'status_display': status_display,
     })
@@ -155,72 +171,188 @@ def xuat_hoa_don(request, order_code):
     })
 
 
-# ─── XỬ LÝ TRẢ HÀNG ─────────────────────────────────────────
+# ─── 1. XỬ LÝ YÊU CẦU TRẢ HÀNG (CSKH - Duyệt/Từ chối) ────────────────────────
 @admin_required
-def xu_ly_tra_hang(request):
+def tra_hang(request):
     if request.method == 'POST':
         try:
-            # Hỗ trợ cả FormData (để upload file) và JSON
-            if request.content_type and 'multipart/form-data' in request.content_type:
-                rr_id = request.POST.get('id')
-                new_status = request.POST.get('status')
-            else:
-                data = json.loads(request.body)
-                rr_id = data.get('id')
-                new_status = data.get('status')
+            data = json.loads(request.body)
+            rr = ReturnRequest.objects.select_related('order').get(id=data.get('id'))
+            new_status = data.get('status')
 
-            rr = ReturnRequest.objects.select_related('order').get(id=rr_id)
-            
-            # Nếu đang ở trạng thái hoàn tiền rồi thì không cho đổi
-            if rr.status == 'completed' and new_status != 'completed':
-                return JsonResponse({'status': 'error', 'message': 'Yêu cầu đã hoàn tiền, không thể chuyển trạng thái khác.'})
-            
-            # Nếu chuyển sang hoàn tiền, xử lý file ảnh
-            if new_status == 'completed':
-                if 'refund_proof' in request.FILES:
-                    rr.refund_proof = request.FILES['refund_proof']
-                elif not rr.refund_proof:
-                    return JsonResponse({'status': 'error', 'message': 'Vui lòng cung cấp ảnh biên lai hoàn tiền.'})
+            if new_status == 'approved':
+                order = rr.order
+                shop_faults = ['defective', 'wrong_item', 'damaged', 'late']
+
+                # Ưu tiên lấy số tiền Admin tự điều chỉnh trên giao diện
+                refund_val = data.get('refund_amount')
+                if refund_val and str(refund_val).strip() != '':
+                    rr.refund_amount = float(refund_val)
+                else:
+                    # Nếu Admin không chỉnh, lấy theo logic hệ thống mặc định (2 chiều)
+                    if rr.reason in shop_faults:
+                        rr.refund_amount = order.total
+                    else:
+                        rr.refund_amount = order.subtotal - order.shipping_fee
+
+                order.status = 'returning'
+                order.save()
+                rr.save()
+            elif new_status == 'rejected':
+                rr.admin_note = f"Lý do từ chối: {data.get('ly_do_tu_choi', '').strip()}"
+                rr.order.status = 'delivered'
+                rr.order.save()
 
             rr.status = new_status
             rr.save()
-
-            # Đồng bộ Order.status
-            order = rr.order
-            if new_status == 'approved':
-                order.status = 'returning'
-            elif new_status == 'completed':
-                order.status = 'returned'
-            elif new_status == 'rejected':
-                order.status = 'delivered'
-            elif new_status in ['picking', 'returning_to_warehouse', 'received', 'processing']:
-                order.status = 'returning'
-            order.save()
-
             return JsonResponse({'status': 'success'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
-    status_filter = request.GET.get('status', '')
-    qs = ReturnRequest.objects.select_related('order').order_by('-created_at')
-    if status_filter:
-        qs = qs.filter(status=status_filter)
+# 1. Lấy dữ liệu từ URL
+    status_filter = request.GET.get('status', 'pending')
+    search_query = request.GET.get('q', '').strip()
 
-    paginator = Paginator(qs, 15)
-    phieu_list = paginator.get_page(request.GET.get('page'))
+    # 2. Khởi tạo QuerySet
+    qs = ReturnRequest.objects.select_related('order').filter(
+        status__in=['pending', 'rejected']
+    ).order_by('-created_at')
+
+    # 3. Lọc theo từ khóa tìm kiếm
+    if search_query:
+        clean_query = search_query.replace('#', '')
+        qs = qs.filter(
+            Q(id__icontains=clean_query) |
+            Q(order__order_code__icontains=clean_query) |
+            Q(order__recipient_name__icontains=search_query)
+        )
+
+    # 4. Tính toán số liệu (Stats) dựa trên kết quả đã tìm kiếm
+    cho_duyet_count = qs.filter(status='pending').count()
+    tu_choi_count = qs.filter(status='rejected').count()
+
+    # --- 5. LOGIC TỰ ĐỘNG CHUYỂN TAB THÔNG MINH ---
+    if search_query:
+        if status_filter == 'pending' and cho_duyet_count == 0 and tu_choi_count > 0:
+            status_filter = 'rejected'
+        elif status_filter == 'rejected' and tu_choi_count == 0 and cho_duyet_count > 0:
+            status_filter = 'pending'
+
+    # 6. Lọc lại QuerySet theo Tab cuối cùng sau khi đã kiểm tra
+    qs = qs.filter(status=status_filter)
 
     stats = {
-        'tong': ReturnRequest.objects.count(),
-        'cho_duyet': ReturnRequest.objects.filter(status='pending').count(),
-        'da_duyet': ReturnRequest.objects.filter(status='approved').count(),
+        'tong_yeu_cau': cho_duyet_count + tu_choi_count,
+        'cho_duyet': cho_duyet_count,
+        'tu_choi': tu_choi_count,
     }
-    return render(request, 'admin_panel/xu_ly_tra_hang.html', {
-        'phieu_list': phieu_list,
-        'stats': stats,
+
+    paginator = Paginator(qs, 15)
+    paginator = Paginator(qs, 15)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    # TẠO DÃY TRANG CÓ DẤU "..."
+    # on_each_side: số trang hiện ra bên cạnh trang hiện tại
+    # on_ends: số trang hiện ra ở 2 đầu (trang 1 và trang cuối)
+    custom_page_range = paginator.get_elided_page_range(
+        page_number,
+        on_each_side=2,
+        on_ends=1
+    )
+
+    return render(request, 'admin_panel/xu_ly_yeu_cau.html', {
+        'phieu_list': page_obj,
+        'custom_page_range': custom_page_range,  # Truyền dãy trang mới này vào HTML
         'current_status': status_filter,
+        'stats': stats,
+        'search': search_query,
     })
 
+# ─── 2. CẬP NHẬT TRẠNG THÁI TRẢ HÀNG (KHO & KẾ TOÁN) ────────────────────────
+@admin_required
+def cap_nhat_trang_thai_tra(request):
+    if request.method == 'POST':
+        try:
+            if request.content_type and 'multipart/form-data' in request.content_type:
+                rr_id = request.POST.get('id'); new_status = request.POST.get('status')
+            else:
+                data = json.loads(request.body); rr_id = data.get('id'); new_status = data.get('status')
 
+            rr = ReturnRequest.objects.select_related('order').get(id=rr_id)
+            if new_status == 'completed':
+                if 'refund_proof' in request.FILES: rr.refund_proof = request.FILES['refund_proof']
+                order = rr.order; order.status = 'returned'; order.save()
+                for item in order.items.all():
+                    if item.variant: item.variant.stock += item.quantity; item.variant.save()
+            elif new_status in ['picking', 'returning_to_warehouse', 'received', 'processing']:
+                rr.order.status = 'returning'; rr.order.save()
+            rr.status = new_status; rr.save()
+            return JsonResponse({'status': 'success'})
+        except Exception as e: return JsonResponse({'status': 'error', 'message': str(e)})
+
+    # --- LOGIC HIỂN THỊ, TÌM KIẾM VÀ BỘ LỌC CHI TIẾT ---
+    status_filter = request.GET.get('status', 'processing_all')
+    search_query = request.GET.get('q', '').strip()
+    sub_status = request.GET.get('sub_status', '').strip()
+
+    valid_statuses = ['approved', 'picking', 'returning_to_warehouse', 'received', 'processing', 'completed']
+    qs = ReturnRequest.objects.select_related('order').filter(status__in=valid_statuses).order_by('-created_at')
+
+    # 1. LỌC THEO TÌM KIẾM
+    if search_query:
+        clean_query = search_query.replace('#', '')
+        qs = qs.filter(
+            Q(id__icontains=clean_query) |
+            Q(order__order_code__icontains=clean_query) |
+            Q(order__recipient_name__icontains=search_query)
+        )
+
+    # 2. TÍNH TOÁN SỐ LIỆU TỔNG QUAN (Trước khi lọc sub_status)
+    dang_xu_ly_count = qs.filter(status__in=['approved', 'picking', 'returning_to_warehouse', 'received', 'processing']).count()
+    da_hoan_tien_count = qs.filter(status='completed').count()
+
+    # 3. LOGIC TỰ ĐỘNG NHẢY TAB (Chỉ nhảy nếu chưa chọn sub_status)
+    if search_query and not sub_status:
+        if status_filter == 'processing_all' and dang_xu_ly_count == 0 and da_hoan_tien_count > 0:
+            status_filter = 'completed'
+        elif status_filter == 'completed' and da_hoan_tien_count == 0 and dang_xu_ly_count > 0:
+            status_filter = 'processing_all'
+
+    # 4. LỌC CHI TIẾT THEO TRẠNG THÁI CON
+    if sub_status:
+        qs = qs.filter(status=sub_status)
+    else:
+        # Nếu không có sub_status thì lọc theo Tab lớn
+        if status_filter == 'completed':
+            qs = qs.filter(status='completed')
+        else:
+            qs = qs.filter(status__in=['approved', 'picking', 'returning_to_warehouse', 'received', 'processing'])
+
+    sub_status_choices = [
+        ('approved', 'Đã duyệt'), ('picking', 'Chờ lấy hàng'),
+        ('returning_to_warehouse', 'Đang về kho'), ('received', 'Đã nhận hàng'),
+        ('processing', 'Đang xử lý'),
+    ]
+
+    # Phân trang phiếu trả hàng
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(qs, 15)
+    phieu_list_page = paginator.get_page(page_number)
+
+    # Tạo dãy trang < 1 2 ... 10 >
+    custom_page_range = paginator.get_elided_page_range(
+        page_number, on_each_side=2, on_ends=1
+    )
+    return render(request, 'admin_panel/cap_nhat_tra_hang.html', {
+        'phieu_list': paginator.get_page(request.GET.get('page')),
+        'custom_page_range': custom_page_range,
+        'current_status': status_filter,
+        'current_sub_status': sub_status,
+        'stats': {'dang_xu_ly': dang_xu_ly_count, 'da_hoan_tien': da_hoan_tien_count},
+        'search': search_query,
+        'sub_status_choices': sub_status_choices,
+    })
 # ─── QUẢN LÝ SẢN PHẨM ───────────────────────────────────────
 @admin_required
 def quan_ly_san_pham(request):
@@ -335,7 +467,7 @@ def sua_san_pham(request, pk):
             price = request.POST.get('price')
             if price:
                 sp.price = price
-            
+
             # Cập nhật ảnh nếu có
             if 'image' in request.FILES:
                 sp.image = request.FILES['image']
@@ -343,22 +475,19 @@ def sua_san_pham(request, pk):
 
             # 1. Xử lý Cập nhật và Xóa các biến thể hiện có
             list_variant_ids = request.POST.getlist('variant_id[]')
-            # Lấy các biến thể hiện tại của SP
             existing_variants = sp.variants.all()
-            
-            # Xóa các biến thể không còn nằm trong danh sách gửi lên (bị bấm X)
+
             for ev in existing_variants:
                 if str(ev.id) not in list_variant_ids:
                     ev.delete()
                 else:
-                    # Cập nhật thông tin biến thể cũ
                     ev.size = request.POST.get(f'kichCo_{ev.id}', ev.size)
                     ev.color_name = request.POST.get(f'mauSac_{ev.id}', ev.color_name)
                     stock_val = request.POST.get(f'soLuongTon_{ev.id}')
                     ev.stock = int(stock_val) if stock_val else 0
                     ev.save()
 
-            # 2. Xử lý Thêm biến thể mới (nếu có)
+            # 2. Xử lý Thêm biến thể mới
             new_sizes = request.POST.getlist('new_kichCo[]')
             new_colors = request.POST.getlist('new_mauSac[]')
             new_stocks = request.POST.getlist('new_soLuongTon[]')
@@ -391,24 +520,22 @@ def xoa_san_pham(request, pk):
 @admin_required
 def ds_khach_hang(request):
     search = request.GET.get('q', '')
-    
-    # Prefetch addresses để tránh N+1 query khi lấy địa chỉ hiển thị
+
     qs = User.objects.filter(is_staff=False).prefetch_related(
         Prefetch('addresses', queryset=Address.objects.all(), to_attr='user_addresses')
     ).order_by('-date_joined')
-    
+
     if search:
         qs = qs.filter(Q(username__icontains=search) | Q(email__icontains=search))
 
     paginator = Paginator(qs, 15)
     users_page = paginator.get_page(request.GET.get('page'))
-    
-    # Gán địa chỉ hiển thị cho từng user trong trang hiện tại
+
     for user in users_page:
         default_addr = next((addr for addr in user.user_addresses if addr.is_default), None)
         if not default_addr and user.user_addresses:
             default_addr = user.user_addresses[0]
-        
+
         if default_addr:
             user.display_address = f"{default_addr.detail}, {default_addr.city}"
         else:
@@ -424,12 +551,17 @@ def ds_khach_hang(request):
 # ─── BÁO CÁO DOANH THU ───────────────────────────────────────
 @admin_required
 def bao_cao_doanh_thu(request):
+    # 1. Lấy các đơn hàng đã giao thành công
     orders = Order.objects.filter(status__in=['delivered', 'completed'])
+
+    # 2. Thống kê tổng quan (Ép kiểu nghiêm ngặt về Decimal)
     stats = orders.aggregate(
-        total_revenue=Sum('total'),
+        total_revenue=Coalesce(Sum('total'), Decimal('0'), output_field=DecimalField()),
         order_count=Count('id'),
-        avg_value=Avg('total'),
+        avg_value=Coalesce(Avg('total'), Decimal('0'), output_field=DecimalField()),
     )
+
+    # 3. Thống kê theo ngày để vẽ biểu đồ
     daily = (orders.annotate(date=TruncDate('created_at'))
              .values('date')
              .annotate(daily_total=Sum('total'))
@@ -459,7 +591,7 @@ def ajax_luu_phi_ship(request):
         try:
             ten = request.POST.get('tenKhuVuc', '').strip()
             phi = request.POST.get('phiShip', '0')
-            tg  = request.POST.get('thoiGianGiao', '').strip() or None
+            tg = request.POST.get('thoiGianGiao', '').strip() or None
             if not ten:
                 return JsonResponse({'status': 'error', 'message': 'Thiếu tên khu vực'})
             obj, _ = PhiVanChuyen.objects.update_or_create(
