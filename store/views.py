@@ -473,6 +473,29 @@ def order_detail(request, order_code):
 
 @login_required
 @require_POST
+def upload_payment_proof(request, order_code):
+    order = get_object_or_404(Order, order_code=order_code, user=request.user)
+
+    if order.payment_method != 'bank':
+        messages.error(request, 'Chỉ có thể tải biên lai cho đơn hàng thanh toán bằng chuyển khoản.')
+        return redirect('store:order_detail', order_code=order_code)
+
+    if order.payment_proof:
+        messages.warning(request, 'Biên lai đã được tải lên trước đó.')
+        return redirect('store:order_detail', order_code=order_code)
+
+    if request.method == 'POST' and 'payment_proof' in request.FILES:
+        order.payment_proof = request.FILES['payment_proof']
+        order.save()
+        messages.success(request, 'Biên lai chuyển khoản đã được tải lên thành công!')
+    else:
+        messages.error(request, 'Vui lòng chọn một file biên lai để tải lên.')
+    
+    return redirect('store:order_detail', order_code=order_code)
+
+
+@login_required
+@require_POST
 def return_request(request, order_code):
     order = get_object_or_404(Order, order_code=order_code, user=request.user)
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'

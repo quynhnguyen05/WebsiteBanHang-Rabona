@@ -78,6 +78,16 @@
   /* Toast notification */
   .success-toast { position:fixed; bottom:24px; right:24px; z-index:400; background:#fff; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.13); border-left:5px solid var(--brand-green); display:flex; align-items:center; gap:14px; padding:16px 20px 16px 16px; min-width:300px; max-width:380px; transform:translateX(120%); opacity:0; transition:transform 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease; }
   .success-toast.show { transform:translateX(0); opacity:1; }
+
+  /* Payment Proof Upload */
+  .upload-zone { border: 2px dashed #d1d5db; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
+  .upload-zone:hover { border-color: var(--brand-green); }
+  .upload-zone input[type="file"] { display: none; }
+  .upload-zone-text { font-size: 14px; font-weight: 600; color: #374151; margin-top: 8px; }
+  .upload-zone-sub { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+  .upload-preview { max-width: 100%; max-height: 200px; border-radius: 6px; margin-top: 15px; border: 1px solid #e5e7eb; display: block; margin-left: auto; margin-right: auto; }
+  .upload-btn { background-color: var(--brand-green); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 15px; width: 100%; }
+  .upload-btn:hover { background-color: #10b981; }
 {% endblock %}
 
 {% block content %}
@@ -119,17 +129,39 @@
               <label>Trạng thái</label>
               <span>{{ order.get_status_display }}</span>
             </div>
-            {% if order.payment_method == 'bank' and order.payment_proof %}
-            <div class="info-item" style="grid-column: 1 / -1;">
-              <label>Biên lai chuyển khoản</label>
-              <a href="{{ order.payment_proof.url }}" target="_blank">
-                <img src="{{ order.payment_proof.url }}" alt="Biên lai chuyển khoản" style="max-width: 200px; height: auto; border-radius: 4px; border: 1px solid #e5e7eb; margin-top: 8px;" />
-              </a>
-            </div>
-            {% endif %}
           </div>
         </div>
       </div>
+
+      <!-- Biên lai chuyển khoản -->
+      {% if order.payment_method == 'bank' %}
+      <div class="od-section">
+        <div class="od-section-title">Biên lai chuyển khoản</div>
+        <div class="od-section-body">
+          {% if order.payment_proof %}
+            <div style="text-align: center;">
+              <p style="font-size:13px; color:#374151; margin-bottom:10px;">Biên lai đã được tải lên:</p>
+              <a href="{{ order.payment_proof.url }}" target="_blank">
+                <img src="{{ order.payment_proof.url }}" alt="Biên lai chuyển khoản" class="upload-preview" style="max-height: 250px;" />
+              </a>
+              <p style="font-size:11px; color:#9ca3af; text-align:center; margin-top:10px; font-weight:500;">(Nhấp vào ảnh để xem kích thước đầy đủ)</p>
+            </div>
+          {% else %}
+            <form method="post" action="{% url 'store:upload_payment_proof' order.order_code %}" enctype="multipart/form-data">
+              {% csrf_token %}
+              <label class="upload-zone">
+                <input type="file" name="payment_proof" accept="image/jpeg,image/png" onchange="previewUpload(event)" required />
+                <i class="fas fa-cloud-upload-alt" style="font-size: 30px; color: #9ca3af;"></i>
+                <div class="upload-zone-text">Kéo thả hoặc nhấn để chọn ảnh</div>
+                <div class="upload-zone-sub">Hỗ trợ JPG, PNG - Tối đa 5MB</div>
+                <img id="uploadPreview" class="upload-preview" style="display:none;" />
+              </label>
+              <button type="submit" class="upload-btn">Tải lên biên lai</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
 
       <!-- Địa chỉ giao hàng -->
       <div class="od-section">
@@ -454,5 +486,15 @@
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 4500);
   {% endif %}
+
+  function previewUpload(event) {
+    const reader = new FileReader();
+    reader.onload = function(){
+      const output = document.getElementById('uploadPreview');
+      output.src = reader.result;
+      output.style.display = 'block';
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  }
 </script>
 {% endblock %}

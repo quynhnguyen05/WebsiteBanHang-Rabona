@@ -312,7 +312,7 @@ def cap_nhat_trang_thai_tra(request):
     dang_xu_ly_count = qs.filter(status__in=['approved', 'picking', 'returning_to_warehouse', 'received', 'processing']).count()
     da_hoan_tien_count = qs.filter(status='completed').count()
 
-    # 3. LOGIC TỰ ĐỘNG NHẢY TAB (Chỉ nhảy nếu chưa chọn sub_status)
+    # 3. LOGIC TỰ ĐỘNG NHẢ TAB (Chỉ nhảy nếu chưa chọn sub_status)
     if search_query and not sub_status:
         if status_filter == 'processing_all' and dang_xu_ly_count == 0 and da_hoan_tien_count > 0:
             status_filter = 'completed'
@@ -577,11 +577,19 @@ def bao_cao_doanh_thu(request):
 # ─── QUẢN LÝ PHÍ VẬN CHUYỂN ─────────────────────────────────
 @admin_required
 def quan_ly_phi_ship(request):
-    ds_phi = PhiVanChuyen.objects.all().order_by('tenKhuVuc')
-    phi_trung_binh = ds_phi.aggregate(avg=Avg('phiShip'))['avg'] or 0
+    search_query = request.GET.get('q', '').strip()
+
+    ds_phi_qs = PhiVanChuyen.objects.all().order_by('tenKhuVuc')
+
+    if search_query:
+        ds_phi_qs = ds_phi_qs.filter(tenKhuVuc__icontains=search_query)
+
+    phi_trung_binh = ds_phi_qs.aggregate(avg=Avg('phiShip'))['avg'] or 0
+
     return render(request, 'admin_panel/quan_ly_phi_ship.html', {
-        'ds_phi': ds_phi,
+        'ds_phi': ds_phi_qs,
         'phi_trung_binh': phi_trung_binh,
+        'search_query': search_query, # Truyền search_query vào context
     })
 
 

@@ -29,6 +29,7 @@ urlpatterns = [
     path('orders/', views.order_list, name='order_list'),
     path('orders/<str:order_code>/', views.order_detail, name='order_detail'),
     path('orders/<str:order_code>/return/', views.return_request, name='return_request'),
+    path('orders/<str:order_code>/upload-payment-proof/', views.upload_payment_proof, name='upload_payment_proof'),
 
     # Hồ sơ
     path('profile/', views.profile, name='profile'),
