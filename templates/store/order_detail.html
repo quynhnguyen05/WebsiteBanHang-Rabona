@@ -150,11 +150,11 @@
             <form method="post" action="{% url 'store:upload_payment_proof' order.order_code %}" enctype="multipart/form-data">
               {% csrf_token %}
               <label class="upload-zone">
-                <input type="file" name="payment_proof" accept="image/jpeg,image/png" onchange="previewUpload(event)" required />
+                <input type="file" name="payment_proof" accept="image/jpeg,image/png" onchange="previewUpload(event, 'uploadPreviewPayment')" required />
                 <i class="fas fa-cloud-upload-alt" style="font-size: 30px; color: #9ca3af;"></i>
                 <div class="upload-zone-text">Kéo thả hoặc nhấn để chọn ảnh</div>
                 <div class="upload-zone-sub">Hỗ trợ JPG, PNG - Tối đa 5MB</div>
-                <img id="uploadPreview" class="upload-preview" style="display:none;" />
+                <img id="uploadPreviewPayment" class="upload-preview" style="display:none;" />
               </label>
               <button type="submit" class="upload-btn">Tải lên biên lai</button>
             </form>
@@ -269,6 +269,21 @@
                   {% endif %}
               </div>
               {% endif %}
+
+              <!-- HIỂN THỊ ẢNH/VIDEO KHÁCH HÀNG TẢI LÊN -->
+              {% if order.return_request.customer_return_proof %}
+              <div style="margin:15px 0; padding:15px; background:white; border-radius:8px; border:2px solid #bbf7d0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <div style="font-weight:800; color:#166534; font-size:12px; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    ẢNH/VIDEO SẢN PHẨM KHÁCH HÀNG CUNG CẤP
+                </div>
+                <a href="{{ order.return_request.customer_return_proof.url }}" target="_blank">
+                    <img src="{{ order.return_request.customer_return_proof.url }}" style="max-width:100%; max-height:250px; border-radius:6px; border:1px solid #e5e7eb; display:block; margin:0 auto; transition: 0.3s;" onmouseover="this.style.opacity='0.9'">
+                </a>
+                <p style="font-size:11px; color:#6b7280; text-align:center; margin-top:10px; font-weight:500;">(Nhấp vào ảnh để xem kích thước đầy đủ)</p>
+              </div>
+              {% endif %}
+
               {% if order.return_request.refund_proof %}
               <div style="margin:15px 0; padding:15px; background:white; border-radius:8px; border:2px solid #bbf7d0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
                 <div style="font-weight:800; color:#166534; font-size:12px; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
@@ -302,7 +317,7 @@
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l-4 4 4 4m5-9a8 8 0 11-8 8V7a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
               Gửi yêu cầu trả hàng & nhận hoàn tiền
             </div>
-            <form method="post" action="{% url 'store:return_request' order.order_code %}" id="returnFormDetail">
+            <form method="post" action="{% url 'store:return_request' order.order_code %}" id="returnFormDetail" enctype="multipart/form-data">
               {% csrf_token %}
 
               <div class="form-group">
@@ -316,6 +331,18 @@
                   <option value="late">Giao hàng quá lâu</option>
                   <option value="other">Lý do khác</option>
                 </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Ảnh/Video sản phẩm trả (nếu có)</label>
+                <label class="upload-zone">
+                  <input type="file" name="customer_return_proof" accept="image/*,video/*" onchange="previewUpload(event, 'uploadPreviewCustomerReturn')" />
+                  <i class="fas fa-cloud-upload-alt" style="font-size: 30px; color: #9ca3af;"></i>
+                  <div class="upload-zone-text">Kéo thả hoặc nhấn để chọn ảnh/video</div>
+                  <div class="upload-zone-sub">Hỗ trợ JPG, PNG, MP4 - Tối đa 10MB</div>
+                  <img id="uploadPreviewCustomerReturn" class="upload-preview" style="display:none;" />
+                  <video id="videoPreviewCustomerReturn" class="upload-preview" controls style="display:none;"></video>
+                </label>
               </div>
 
               <div style="background: rgba(255,255,255,0.8); padding: 18px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #f59e0b;">
@@ -487,12 +514,28 @@
   setTimeout(() => toast.remove(), 4500);
   {% endif %}
 
-  function previewUpload(event) {
+  function previewUpload(event, imgId) {
     const reader = new FileReader();
     reader.onload = function(){
-      const output = document.getElementById('uploadPreview');
-      output.src = reader.result;
-      output.style.display = 'block';
+      const output = document.getElementById(imgId);
+      const videoOutput = document.getElementById('videoPreviewCustomerReturn'); // Only for customer return proof
+
+      // Reset previous previews
+      if (output) output.style.display = 'none';
+      if (videoOutput) videoOutput.style.display = 'none';
+
+      const file = event.target.files[0];
+      if (file.type.startsWith('image/')) {
+        if (output) {
+          output.src = reader.result;
+          output.style.display = 'block';
+        }
+      } else if (file.type.startsWith('video/')) {
+        if (videoOutput) {
+          videoOutput.src = reader.result;
+          videoOutput.style.display = 'block';
+        }
+      }
     };
     reader.readAsDataURL(event.target.files[0]);
   }
