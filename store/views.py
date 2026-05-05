@@ -438,7 +438,7 @@ def order_list(request):
         orders = orders.filter(status=status)
     return render(request, 'store/order_list.html', {
         'orders': orders,
-        'active_status': active_status,
+        'active_status': status,
     })
 
 

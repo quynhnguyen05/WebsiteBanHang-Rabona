@@ -91,12 +91,6 @@ body { background: #f0f0f0; }
     <a class="sb-link" id="lnk-password" href="#" onclick="switchTab('password');return false;">Đổi mật khẩu</a>
     <a class="sb-link" id="lnk-address" href="#" onclick="switchTab('address');return false;">Địa chỉ</a>
     <div class="sb-divider"></div>
-    <div class="sb-group-title">Danh mục</div>
-    <a class="sb-link" href="{% url 'store:product_list' %}?category=giay-bong-da">Giày bóng đá</a>
-    <a class="sb-link" href="{% url 'store:product_list' %}?category=ao-dau">Áo đấu</a>
-    <a class="sb-link" href="{% url 'store:product_list' %}?category=phu-kien">Phụ kiện</a>
-    <a class="sb-link" href="{% url 'store:product_list' %}?category=bong-thi-dau">Bóng thi đấu</a>
-    <div class="sb-divider"></div>
     <div class="sb-group-title">Đơn hàng</div>
     <a class="sb-link" href="{% url 'store:order_list' %}">Tất cả</a>
     <a class="sb-link" href="{% url 'store:order_list' %}?status=shipping">Vận chuyển</a>
