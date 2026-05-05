@@ -45,9 +45,6 @@
         <input type="text" name="q" value="{{ search_query }}" placeholder="Tìm theo tên khu vực..."
                style="padding: 8px 14px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; flex: 1; max-width: 300px;">
         <button type="submit" style="padding: 8px 20px; background: var(--primary-green); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Tìm kiếm</button>
-        {% if search_query %}
-            <a href="{% url 'admin_panel:phi_ship' %}" style="padding: 8px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; text-decoration: none;">Xóa tìm kiếm</a>
-        {% endif %}
     </form>
 
     <div class="table-container" style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
