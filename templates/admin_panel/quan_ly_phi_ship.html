@@ -75,8 +75,11 @@
                         </span>
                     </td>
                     <td style="padding: 15px 20px; text-align: center;">
-                        <button class="btn-edit-sm" onclick="editShip('{{ p.tenKhuVuc }}', '{{ p.phiShip }}', '{{ p.thoiGianGiao }}')" style="background: #ef4444; border: 1px solid #e2e8f0; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.3s;">
+                        <button class="btn-edit-sm" onclick="editShip('{{ p.tenKhuVuc }}', '{{ p.phiShip }}', '{{ p.thoiGianGiao }}')" style="background: #3b82f6; border: none; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.3s; margin-right: 8px;">
                             <i class="fas fa-edit"></i> Sửa
+                        </button>
+                        <button class="btn-delete-sm" onclick="deleteShip('{{ p.pk }}', '{{ p.tenKhuVuc|escapejs }}')" style="background: #ef4444; border: none; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.3s;">
+                            <i class="fas fa-trash-alt"></i> Xóa
                         </button>
                     </td>
                 </tr>
@@ -135,6 +138,7 @@
                             <option value="Hậu Giang">Hậu Giang</option>
                             <option value="Hòa Bình">Hòa Bình</option>
                             <option value="Hưng Yên">Hưng Yên</option>
+                            <option value="Nha Trang">Nha Trang</option>
                             <option value="Khánh Hòa">Khánh Hòa</option>
                             <option value="Kiên Giang">Kiên Giang</option>
                             <option value="Kon Tum">Kon Tum</option>
@@ -168,7 +172,7 @@
                             <option value="Vĩnh Long">Vĩnh Long</option>
                             <option value="Vĩnh Phúc">Vĩnh Phúc</option>
                             <option value="Yên Bái">Yên Bái</option>
-                            <option value="Khác">Yên Bái</option>
+                            <option value="Khác">Khác</option>
                         </select>
                 </div>
 
@@ -214,7 +218,13 @@
                 closeModal('shipModal');
                 showSuccessPopup("Đã cập nhật bảng phí vận chuyển!");
                 setTimeout(() => window.location.reload(), 1500);
+            } else {
+                alert('Lỗi: ' + data.message);
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Đã xảy ra lỗi khi lưu thông tin.');
         });
     }
 
@@ -226,6 +236,34 @@
         openModal('shipModal');
     }
 
+    // Hàm xóa khu vực vận chuyển
+    function deleteShip(pk, tenKhuVuc) {
+        if (confirm(`Bạn có chắc chắn muốn xóa khu vực "${tenKhuVuc}" không?`)) {
+            // Create the URL by replacing a dummy '0' with the actual PK
+            const url = "{% url 'admin_panel:xoa_phi_ship' pk=0 %}".replace('0', pk);
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showSuccessPopup("Đã xóa khu vực vận chuyển!");
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi xóa khu vực vận chuyển.');
+            });
+        }
+    }
+
     // Các hàm phụ trợ
     function openModal(id) {
         const modal = document.getElementById(id);
@@ -235,6 +273,11 @@
         const modal = document.getElementById(id);
         modal.style.display = 'none';
         document.getElementById('shipForm').reset();
+    }
+
+    // Simple success popup (you might have a more sophisticated one)
+    function showSuccessPopup(message) {
+        alert(message); // Replace with your actual popup implementation
     }
 </script>
 {% endblock %}

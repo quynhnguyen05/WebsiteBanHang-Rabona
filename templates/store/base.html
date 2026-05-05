@@ -120,10 +120,10 @@
   <div class="container header-inner">
     <a class="logo" href="{% url 'store:home' %}"><span>RABONA</span><span>SPORT</span></a>
     <nav class="nav-desktop">
-      <a class="nav-link {% block nav_home %}{% endblock %}" href="{% url 'store:home' %}">TRANG CHỦ</a>
-      <a class="nav-link {% block nav_giay %}{% endblock %}" href="{% url 'store:product_list' %}?category=giay-bong-da">GIÀY BÓNG ĐÁ</a>
-      <a class="nav-link {% block nav_quan_ao %}{% endblock %}" href="{% url 'store:product_list' %}?category=quan-ao">QUẦN ÁO</a>
-      <a class="nav-link {% block nav_phu_kien %}{% endblock %}" href="{% url 'store:product_list' %}?category=phu-kien">PHỤ KIỆN</a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'store:home' %}">TRANG CHỦ</a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'product_list' and request.GET.category == 'giay-bong-da' %}active{% endif %}" href="{% url 'store:product_list' %}?category=giay-bong-da">GIÀY BÓNG ĐÁ</a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'product_list' and request.GET.category == 'quan-ao' %}active{% endif %}" href="{% url 'store:product_list' %}?category=quan-ao">QUẦN ÁO</a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'product_list' and request.GET.category == 'phu-kien' %}active{% endif %}" href="{% url 'store:product_list' %}?category=phu-kien">PHỤ KIỆN</a>
     </nav>
     <div class="spacer"></div>
     <div class="header-actions">
@@ -222,10 +222,10 @@
       <label class="nav-toggle" for="mobile-toggle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 12H21M3 6H21M3 18H21" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></label>
       <nav class="mobile-nav">
         <div class="mobile-nav-dropdown">
-          <a class="mobile-nav-link {% block mobile_nav_home %}{% endblock %}" href="{% url 'store:home' %}">TRANG CHỦ</a>
-          <a class="mobile-nav-link {% block mobile_nav_giay %}{% endblock %}" href="{% url 'store:product_list' %}?category=giay-bong-da">GIÀY BÓNG ĐÁ</a>
-          <a class="mobile-nav-link {% block mobile_nav_quan_ao %}{% endblock %}" href="{% url 'store:product_list' %}?category=quan-ao">QUẦN ÁO</a>
-          <a class="mobile-nav-link {% block mobile_nav_phu_kien %}{% endblock %}" href="{% url 'store:product_list' %}?category=phu-kien">PHỤ KIỆN</a>
+          <a class="mobile-nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'store:home' %}">TRANG CHỦ</a>
+          <a class="mobile-nav-link {% if request.resolver_match.url_name == 'product_list' and request.GET.category == 'giay-bong-da' %}active{% endif %}" href="{% url 'store:product_list' %}?category=giay-bong-da">GIÀY BÓNG ĐÁ</a>
+          <a class="mobile-nav-link {% if request.resolver_match.url_name == 'product_list' and request.GET.category == 'quan-ao' %}active{% endif %}" href="{% url 'store:product_list' %}?category=quan-ao">QUẦN ÁO</a>
+          <a class="mobile-nav-link {% if request.resolver_match.url_name == 'product_list' and request.GET.category == 'phu-kien' %}active{% endif %}" href="{% url 'store:product_list' %}?category=phu-kien">PHỤ KIỆN</a>
           {% if user.is_authenticated %}
           <a class="mobile-nav-link" href="{% url 'store:order_list' %}">ĐƠN HÀNG</a>
           <form method="post" action="{% url 'logout' %}" style="margin:0;">
@@ -548,7 +548,7 @@ function goToCheckout() {
       },
       body: JSON.stringify({ ids: selectedIds }),
     })
-    .then r => r.json())
+    .then(r => r.json())
     .then(data => {
       if (data.success) {
         closeCart();
