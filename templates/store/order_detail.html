@@ -78,16 +78,6 @@
   /* Toast notification */
   .success-toast { position:fixed; bottom:24px; right:24px; z-index:400; background:#fff; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.13); border-left:5px solid var(--brand-green); display:flex; align-items:center; gap:14px; padding:16px 20px 16px 16px; min-width:300px; max-width:380px; transform:translateX(120%); opacity:0; transition:transform 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease; }
   .success-toast.show { transform:translateX(0); opacity:1; }
-
-  /* Payment Proof Upload */
-  .upload-zone { border: 2px dashed #d1d5db; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
-  .upload-zone:hover { border-color: var(--brand-green); }
-  .upload-zone input[type="file"] { display: none; }
-  .upload-zone-text { font-size: 14px; font-weight: 600; color: #374151; margin-top: 8px; }
-  .upload-zone-sub { font-size: 12px; color: #9ca3af; margin-top: 4px; }
-  .upload-preview { max-width: 100%; max-height: 200px; border-radius: 6px; margin-top: 15px; border: 1px solid #e5e7eb; display: block; margin-left: auto; margin-right: auto; }
-  .upload-btn { background-color: var(--brand-green); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 15px; width: 100%; }
-  .upload-btn:hover { background-color: #10b981; }
 {% endblock %}
 
 {% block content %}
@@ -129,39 +119,17 @@
               <label>Trạng thái</label>
               <span>{{ order.get_status_display }}</span>
             </div>
+            {% if order.payment_method == 'bank' and order.payment_proof %}
+            <div class="info-item" style="grid-column: 1 / -1;">
+              <label>Biên lai chuyển khoản</label>
+              <a href="{{ order.payment_proof.url }}" target="_blank">
+                <img src="{{ order.payment_proof.url }}" alt="Biên lai chuyển khoản" style="max-width: 200px; height: auto; border-radius: 4px; border: 1px solid #e5e7eb; margin-top: 8px;" />
+              </a>
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>
-
-      <!-- Biên lai chuyển khoản -->
-      {% if order.payment_method == 'bank' %}
-      <div class="od-section">
-        <div class="od-section-title">Biên lai chuyển khoản</div>
-        <div class="od-section-body">
-          {% if order.payment_proof %}
-            <div style="text-align: center;">
-              <p style="font-size:13px; color:#374151; margin-bottom:10px;">Biên lai đã được tải lên:</p>
-              <a href="{{ order.payment_proof.url }}" target="_blank">
-                <img src="{{ order.payment_proof.url }}" alt="Biên lai chuyển khoản" class="upload-preview" style="max-height: 250px;" />
-              </a>
-              <p style="font-size:11px; color:#9ca3af; text-align:center; margin-top:10px; font-weight:500;">(Nhấp vào ảnh để xem kích thước đầy đủ)</p>
-            </div>
-          {% else %}
-            <form method="post" action="{% url 'store:upload_payment_proof' order.order_code %}" enctype="multipart/form-data">
-              {% csrf_token %}
-              <label class="upload-zone">
-                <input type="file" name="payment_proof" accept="image/jpeg,image/png" onchange="previewUpload(event, 'uploadPreviewPayment')" required />
-                <i class="fas fa-cloud-upload-alt" style="font-size: 30px; color: #9ca3af;"></i>
-                <div class="upload-zone-text">Kéo thả hoặc nhấn để chọn ảnh</div>
-                <div class="upload-zone-sub">Hỗ trợ JPG, PNG - Tối đa 5MB</div>
-                <img id="uploadPreviewPayment" class="upload-preview" style="display:none;" />
-              </label>
-              <button type="submit" class="upload-btn">Tải lên biên lai</button>
-            </form>
-          {% endif %}
-        </div>
-      </div>
-      {% endif %}
 
       <!-- Địa chỉ giao hàng -->
       <div class="od-section">
@@ -269,21 +237,6 @@
                   {% endif %}
               </div>
               {% endif %}
-
-              <!-- HIỂN THỊ ẢNH/VIDEO KHÁCH HÀNG TẢI LÊN -->
-              {% if order.return_request.customer_return_proof %}
-              <div style="margin:15px 0; padding:15px; background:white; border-radius:8px; border:2px solid #bbf7d0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                <div style="font-weight:800; color:#166534; font-size:12px; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    ẢNH/VIDEO SẢN PHẨM KHÁCH HÀNG CUNG CẤP
-                </div>
-                <a href="{{ order.return_request.customer_return_proof.url }}" target="_blank">
-                    <img src="{{ order.return_request.customer_return_proof.url }}" style="max-width:100%; max-height:250px; border-radius:6px; border:1px solid #e5e7eb; display:block; margin:0 auto; transition: 0.3s;" onmouseover="this.style.opacity='0.9'">
-                </a>
-                <p style="font-size:11px; color:#6b7280; text-align:center; margin-top:10px; font-weight:500;">(Nhấp vào ảnh để xem kích thước đầy đủ)</p>
-              </div>
-              {% endif %}
-
               {% if order.return_request.refund_proof %}
               <div style="margin:15px 0; padding:15px; background:white; border-radius:8px; border:2px solid #bbf7d0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
                 <div style="font-weight:800; color:#166534; font-size:12px; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
@@ -317,7 +270,7 @@
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l-4 4 4 4m5-9a8 8 0 11-8 8V7a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
               Gửi yêu cầu trả hàng & nhận hoàn tiền
             </div>
-            <form method="post" action="{% url 'store:return_request' order.order_code %}" id="returnFormDetail" enctype="multipart/form-data">
+            <form method="post" action="{% url 'store:return_request' order.order_code %}" id="returnFormDetail">
               {% csrf_token %}
 
               <div class="form-group">
@@ -331,18 +284,6 @@
                   <option value="late">Giao hàng quá lâu</option>
                   <option value="other">Lý do khác</option>
                 </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Ảnh/Video sản phẩm trả (nếu có)</label>
-                <label class="upload-zone">
-                  <input type="file" name="customer_return_proof" accept="image/*,video/*" onchange="previewUpload(event, 'uploadPreviewCustomerReturn')" />
-                  <i class="fas fa-cloud-upload-alt" style="font-size: 30px; color: #9ca3af;"></i>
-                  <div class="upload-zone-text">Kéo thả hoặc nhấn để chọn ảnh/video</div>
-                  <div class="upload-zone-sub">Hỗ trợ JPG, PNG, MP4 - Tối đa 10MB</div>
-                  <img id="uploadPreviewCustomerReturn" class="upload-preview" style="display:none;" />
-                  <video id="videoPreviewCustomerReturn" class="upload-preview" controls style="display:none;"></video>
-                </label>
               </div>
 
               <div style="background: rgba(255,255,255,0.8); padding: 18px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #f59e0b;">
@@ -513,31 +454,5 @@
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 4500);
   {% endif %}
-
-  function previewUpload(event, imgId) {
-    const reader = new FileReader();
-    reader.onload = function(){
-      const output = document.getElementById(imgId);
-      const videoOutput = document.getElementById('videoPreviewCustomerReturn'); // Only for customer return proof
-
-      // Reset previous previews
-      if (output) output.style.display = 'none';
-      if (videoOutput) videoOutput.style.display = 'none';
-
-      const file = event.target.files[0];
-      if (file.type.startsWith('image/')) {
-        if (output) {
-          output.src = reader.result;
-          output.style.display = 'block';
-        }
-      } else if (file.type.startsWith('video/')) {
-        if (videoOutput) {
-          videoOutput.src = reader.result;
-          videoOutput.style.display = 'block';
-        }
-      }
-    };
-    reader.readAsDataURL(event.target.files[0]);
-  }
 </script>
 {% endblock %}

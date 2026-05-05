@@ -154,6 +154,13 @@
                             {% if don.status != 'delivered' and don.status != 'completed' and don.status != 'cancelled' %}
                             <button class="btn-action btn-edit" onclick="openModal('modalEdit_{{ don.order_code }}')" style="background-color: #ef4444; margin-left: 5px;"><i class="fas fa-edit"></i> Sửa</button>
                             {% endif %}
+                            <!-- NÚT IN HÓA ĐƠN THÊM MỚI -->
+                            {% if don.status != 'pending' and don.status != 'cancelled' %}
+                            <a href="{% url 'admin_panel:xuat_hoa_don' don.order_code %}" target="_blank" class="btn-action" style="background-color: #0ea5e9; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 4px; font-size: 13px; margin-top: 5px;">
+                                <i class="fas fa-print"></i> Hóa đơn
+                            </a>
+                            {% endif %}
+
                         {% endif %}
                     </td>
                 </tr>

@@ -12,8 +12,8 @@ urlpatterns = [
     path('products/', views.product_list, name='product_list'),
     path('products/<slug:slug>/', views.product_detail, name='product_detail'),
 
-    # Giỏ hàng (cart_detail redirect về home vì giỏ hàng dùng modal popup)
-    path('cart/', views.cart_redirect, name='cart_detail'),
+    # Giỏ hàng
+    path('cart/', views.cart_detail, name='cart_detail'),
     path('cart/json/', views.cart_json, name='cart_json'),
     path('cart/add/<int:variant_id>/', views.cart_add, name='cart_add'),
     path('cart/update/<int:item_id>/', views.cart_update, name='cart_update'),
@@ -29,7 +29,6 @@ urlpatterns = [
     path('orders/', views.order_list, name='order_list'),
     path('orders/<str:order_code>/', views.order_detail, name='order_detail'),
     path('orders/<str:order_code>/return/', views.return_request, name='return_request'),
-    path('orders/<str:order_code>/upload-payment-proof/', views.upload_payment_proof, name='upload_payment_proof'),
 
     # Hồ sơ
     path('profile/', views.profile, name='profile'),

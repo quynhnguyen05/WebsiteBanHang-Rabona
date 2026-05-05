@@ -64,13 +64,8 @@ def main():
     # ── Danh mục ──
     print("2. Tạo danh mục...")
     cats = {}
-    danh_muc = [
-        ('Giày bóng đá', 'giay-bong-da'),
-        ('Áo đấu',       'ao-dau'),
-        ('Phụ kiện',     'phu-kien'),
-        ('Bóng thi đấu', 'bong-thi-dau'),
-    ]
-    for name, slug in danh_muc:
+    for name in ['Giày bóng đá','Áo đấu','Phụ kiện', 'Bóng thi đấu']:
+        slug = slugify_vn(name) + f'-{int(time.time()) % 10000}'
         cats[name] = Category.objects.create(name=name, slug=slug)
 
     # ── Sản phẩm (Mở rộng thành 30 sản phẩm) ──

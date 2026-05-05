@@ -248,22 +248,6 @@
                             <div class="ret-info-row"><span class="ret-info-label">Lý do KH:</span> <span class="ret-info-value" style="font-weight: 600;">{{ phieu.get_reason_display }}</span></div>
                             <div class="ret-info-row"><span class="ret-info-label">Ghi chú KH:</span> <span class="ret-info-value">{{ phieu.note|default:"Không có" }}</span></div>
                         </div>
-                        <!-- BẰNG CHỨNG KHÁCH HÀNG CUNG CẤP -->
-                        {% if phieu.customer_return_proof %}
-                        <div class="ret-info-section">
-                            <div class="ret-info-title">Bằng chứng khách hàng cung cấp</div>
-                            <div style="text-align: center; margin-top: 10px;">
-                                <a href="{{ phieu.customer_return_proof.url }}" target="_blank">
-                                    {% if phieu.customer_return_proof.url|lower|slice:"-4:" == ".mp4" or phieu.customer_return_proof.url|lower|slice:"-4:" == ".mov" %}
-                                        <video src="{{ phieu.customer_return_proof.url }}" controls style="max-width: 100%; max-height: 250px; border-radius: 6px; border: 1px solid #e5e7eb;"></video>
-                                    {% else %}
-                                        <img src="{{ phieu.customer_return_proof.url }}" alt="Bằng chứng trả hàng" style="max-width: 100%; max-height: 250px; border-radius: 6px; border: 1px solid #e5e7eb;">
-                                    {% endif %}
-                                </a>
-                                <p style="font-size:11px; color:#6b7280; text-align:center; margin-top:10px; font-weight:500;">(Nhấp vào để xem kích thước đầy đủ)</p>
-                            </div>
-                        </div>
-                        {% endif %}
                     </div>
 
                     <div class="return-col-right">

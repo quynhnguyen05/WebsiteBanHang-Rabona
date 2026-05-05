@@ -2,17 +2,17 @@
   {
     "model": "store.category",
     "pk": 1,
-    "fields": { "name": "Giày bóng đá", "slug": "giay-bong-da" }
+    "fields": { "name": "Giày bóng đá", "slug": "giay-bong-a-3927" }
   },
   {
     "model": "store.category",
     "pk": 2,
-    "fields": { "name": "Quần áo", "slug": "quan-ao" }
+    "fields": { "name": "Quần áo", "slug": "ao-au-3927" }
   },
   {
     "model": "store.category",
     "pk": 3,
-    "fields": { "name": "Phụ kiện", "slug": "phu-kien" }
+    "fields": { "name": "Phụ kiện", "slug": "phu-kien-3927" }
   },
   {
     "model": "store.product",

@@ -387,7 +387,7 @@ body{background:var(--bg);}
       <span class="modal-hd-title">Yêu cầu trả hàng & hoàn tiền</span>
       <button class="modal-close" onclick="closeReturn()">&#x2715;</button>
     </div>
-    <form method="post" id="returnForm" action="" enctype="multipart/form-data">
+    <form method="post" id="returnForm" action="">
       {% csrf_token %}
       <div class="modal-body">
         <div class="stepper">
@@ -430,13 +430,6 @@ body{background:var(--bg);}
             <option value="other">Khác</option>
           </select>
           <textarea class="mf-input" name="note" placeholder="Ghi chú chi tiết thêm cho cửa hàng..." rows="3" style="height:auto;"></textarea>
-        </div>
-
-        <div style="background:#f0fdf4; padding:15px; border-radius:6px; border:1px dashed #22c55e; margin:15px 0;">
-            <span class="mf-label" style="color:#166534; margin-bottom:10px;"><i class="fas fa-images"></i> UPLOAD ẢNH/VIDEO BẰNG CHỨNG</span>
-            <p style="color:#166534; font-size:12px; margin-bottom:10px;">* Bắt buộc upload ảnh hoặc video sản phẩm trả hàng để chứng minh tình trạng</p>
-            <input type="file" class="mf-input" name="customer_return_proof" accept="image/*,video/*" required style="cursor:pointer; padding:12px;">
-            <small style="color:#166534; font-size:11px; margin-top:5px; display:block;">Hỗ trợ: ảnh (JPG, PNG, WebP) và video (MP4, MOV). Tối đa 50MB.</small>
         </div>
       </div>
       <div class="modal-ft">

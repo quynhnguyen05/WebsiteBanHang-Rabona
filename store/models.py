@@ -285,8 +285,6 @@ class ReturnRequest(models.Model):
     
     # Trường ảnh biên lai hoàn tiền
     refund_proof = models.ImageField(upload_to='refund_proofs/', blank=True, null=True, verbose_name='Biên lai hoàn tiền')
-    # Trường mới để khách hàng tải lên ảnh/video sản phẩm trả
-    customer_return_proof = models.FileField(upload_to='customer_return_proofs/', blank=True, null=True, verbose_name='Ảnh/Video sản phẩm trả')
 
 
     class Meta:

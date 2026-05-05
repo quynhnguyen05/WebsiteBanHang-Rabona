@@ -1,9 +1,11 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 
 from .models import (
     Product, ProductVariant, Category,
@@ -126,18 +128,9 @@ def product_detail(request, slug):
 # ─────────────────────────────────────────
 
 @login_required
-def cart_redirect(request):
-    """Giỏ hàng dùng modal popup — redirect về trang chủ."""
-    return redirect('store:home')
-
-
-@login_required
 def cart_detail(request):
-    """Hiển thị trang chi tiết giỏ hàng."""
-    if not request.user.is_authenticated:
-        return redirect('login')
-    cart, _ = Cart.objects.get_or_create(user=request.user)
-    return render(request, 'store/cart.html', {'cart': cart})
+    # Trang /cart/ không dùng nữa, redirect về trang chủ
+    return redirect('store:home')
 
 
 @login_required
@@ -480,29 +473,6 @@ def order_detail(request, order_code):
 
 @login_required
 @require_POST
-def upload_payment_proof(request, order_code):
-    order = get_object_or_404(Order, order_code=order_code, user=request.user)
-
-    if order.payment_method != 'bank':
-        messages.error(request, 'Chỉ có thể tải biên lai cho đơn hàng thanh toán bằng chuyển khoản.')
-        return redirect('store:order_detail', order_code=order_code)
-
-    if order.payment_proof:
-        messages.warning(request, 'Biên lai đã được tải lên trước đó.')
-        return redirect('store:order_detail', order_code=order_code)
-
-    if request.method == 'POST' and 'payment_proof' in request.FILES:
-        order.payment_proof = request.FILES['payment_proof']
-        order.save()
-        messages.success(request, 'Biên lai chuyển khoản đã được tải lên thành công!')
-    else:
-        messages.error(request, 'Vui lòng chọn một file biên lai để tải lên.')
-    
-    return redirect('store:order_detail', order_code=order_code)
-
-
-@login_required
-@require_POST
 def return_request(request, order_code):
     order = get_object_or_404(Order, order_code=order_code, user=request.user)
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
@@ -513,30 +483,21 @@ def return_request(request, order_code):
         messages.warning(request, 'Đơn hàng này đã có yêu cầu trả hàng.')
         return redirect('store:order_detail', order_code=order_code)
 
-    # Bắt buộc phải upload ảnh/video
-    if 'customer_return_proof' not in request.FILES:
-        if is_ajax:
-            return JsonResponse({'success': False, 'error': 'Vui lòng upload ảnh hoặc video bằng chứng sản phẩm trả hàng.'})
-        messages.error(request, 'Vui lòng upload ảnh hoặc video bằng chứng sản phẩm trả hàng.')
-        return redirect('store:order_detail', order_code=order_code)
-
-    return_req = ReturnRequest.objects.create(
+    ReturnRequest.objects.create(
         order=order,
         reason=request.POST.get('reason', 'other'),
         bank_name=request.POST.get('bank_name', ''),
         bank_account_number=request.POST.get('bank_account_number', ''),
         bank_account_holder=request.POST.get('bank_account_holder', ''),
         note=request.POST.get('note', ''),
-        customer_return_proof=request.FILES['customer_return_proof'],
     )
-
     order.status = 'returning'
     order.save()
 
     if is_ajax:
         return JsonResponse({'success': True})
     messages.success(request, 'Gửi yêu cầu trả hàng thành công!')
-    return redirect('store:order_detail', order_code=order_code)
+    return redirect('store:order_list')
 
 
 # ─────────────────────────────────────────

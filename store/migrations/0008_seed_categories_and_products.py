@@ -8,15 +8,15 @@ def seed_data(apps, schema_editor):
 
     # ── Danh mục ──────────────────────────────────────────────────────────────
     cat_giay, _ = Category.objects.get_or_create(
-        slug='giay-bong-da',
+        slug='giay-bong-a-3927',
         defaults={'name': 'Giày bóng đá'},
     )
     Category.objects.get_or_create(
-        slug='quan-ao',
+        slug='ao-au-3927',
         defaults={'name': 'Quần áo'},
     )
     Category.objects.get_or_create(
-        slug='phu-kien',
+        slug='phu-kien-3927',
         defaults={'name': 'Phụ kiện'},
     )
 
@@ -111,7 +111,7 @@ def unseed_data(apps, schema_editor):
     """Reverse: xóa dữ liệu seed (chỉ xóa nếu không có đơn hàng liên quan)."""
     Category = apps.get_model('store', 'Category')
     Category.objects.filter(
-        slug__in=['giay-bong-da', 'quan-ao', 'phu-kien']
+        slug__in=['giay-bong-a-3927', 'ao-au-3927', 'phu-kien-3927']
     ).delete()
 
 

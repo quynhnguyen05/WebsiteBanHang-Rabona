@@ -71,7 +71,8 @@
 {% block content %}
 <div class="breadcrumb">
   <a href="{% url 'store:home' %}">Trang chủ</a><span>›</span>
-  <span style="color:var(--brand-dark);">Thanh toán</span>
+  <a href="{% url 'store:cart_detail' %}">Giỏ hàng</a><span>›</span>
+  Thanh toán
 </div>
 
 <div class="steps">

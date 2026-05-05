@@ -11,24 +11,17 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Inter, sans-serif; background: #fff; color: #0f172a; }
     .site-header { background: var(--brand-dark); position: sticky; top: 0; z-index: 50; }
-    .container { max-width: 1440px; margin: 0 auto; padding: 0 16px; }
-    @media (min-width: 768px) { .container { padding: 0 32px; } }
-    @media (min-width: 1024px) { .container { padding: 0 40px; } }
-    .header-inner { height: 73px; display: flex; align-items: center; justify-content: space-between; }
-    .logo { text-decoration: none; display: inline-flex; flex-direction: column; font-family: Montserrat, sans-serif; font-weight: 800; color: var(--brand-green); font-size: 20px; line-height: 1.1; white-space: nowrap; margin-right: 18px; letter-spacing: 0.5px; }
-    @media (min-width: 768px) { .logo { font-size: 22px; } }
-    .nav-desktop { display: none; align-items: center; height: 73px; gap: 0; }
-    @media (min-width: 1024px) { .nav-desktop { display: flex; } }
-    .nav-link { height: 73px; display: flex; align-items: center; padding: 0 18px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; text-decoration: none; color: #fff; white-space: nowrap; transition: color 160ms ease, background-color 160ms ease; }
+    .header-inner { max-width: 1440px; margin: 0 auto; padding: 0 40px; height: 73px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 800; color: var(--brand-green); font-size: 20px; line-height: 1.1; }
+    .nav-desktop { display: flex; align-items: center; height: 73px; gap: 0; }
+    .nav-link { height: 73px; display: flex; align-items: center; padding: 0 18px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; text-decoration: none; color: #fff; white-space: nowrap; }
     .nav-link:hover { color: var(--brand-green); }
     .spacer { flex: 1; }
-    .header-actions { display: flex; align-items: center; gap: 8px; }
-    .search { display: none; align-items: center; border-radius: 10px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.12); width: 160px; gap: 6px; }
-    @media (min-width: 768px) { .search { display: flex; } }
-    .search input { width: 100%; border: none; outline: none; background: transparent; color: #fff; font-size: 12px; font-family: Inter, sans-serif; }
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+    .search { display: flex; align-items: center; border-radius: 10px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.12); width: 160px; gap: 6px; }
+    .search input { width: 100%; border: none; outline: none; background: transparent; color: #fff; font-size: 12px; }
     .search input::placeholder { color: rgba(156,163,175,0.8); }
-    .icon-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; padding: 0; cursor: pointer; }
-    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: transparent; display: flex; align-items: center; justify-content: center; border: 2px solid rgb(241,239,239); }
+    .icon-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; }
     .auth-link { font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #fff; text-decoration: none; white-space: nowrap; }
     .auth-link:hover { color: var(--brand-green); }
     .page { min-height: calc(100vh - 73px); display: flex; align-items: center; justify-content: center; padding: 40px 16px; }
@@ -70,13 +63,13 @@
 
 <!-- Header -->
 <header class="site-header">
-  <div class="container header-inner">
-    <a class="logo" href="{% url 'store:home' %}"><span>RABONA</span><span>SPORT</span></a>
+  <div class="header-inner">
+    <a class="logo" href="{% url 'store:home' %}"><span>RABONA</span><br/><span>SPORT</span></a>
     <nav class="nav-desktop">
       <a class="nav-link" href="{% url 'store:home' %}">TRANG CHỦ</a>
-      <a class="nav-link" href="{% url 'store:product_list' %}?category=giay-bong-da">GIÀY BÓNG ĐÁ</a>
-      <a class="nav-link" href="{% url 'store:product_list' %}?category=ao-dau">ÁO ĐẤU</a>
-      <a class="nav-link" href="{% url 'store:product_list' %}?category=phu-kien">PHỤ KIỆN</a>
+      <a class="nav-link" href="{% url 'store:product_list' %}">GIÀY BÓNG ĐÁ</a>
+      <a class="nav-link" href="#">QUẦN ÁO</a>
+      <a class="nav-link" href="#">PHỤ KIỆN</a>
     </nav>
     <div class="spacer"></div>
     <div class="header-actions">
@@ -85,11 +78,9 @@
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M14.35 13.65L11.22 10.52A6 6 0 1 0 10.52 11.22l3.13 3.13a.5.5 0 0 0 .7-.7z" stroke="white" stroke-opacity="0.9" stroke-width="1.4" stroke-linecap="round"/></svg>
       </div>
       <button class="icon-btn" aria-label="Giỏ hàng">
-        <svg width="28" height="28" viewBox="0 0 35 35" fill="none"><path d="M5.83 13.13H29.17L27.95 26.51C27.88 27.24 27.55 27.91 27.01 28.4C26.47 28.89 25.77 29.17 25.05 29.17H9.95C9.23 29.17 8.53 28.89 7.99 28.4C7.45 27.91 7.12 27.24 7.05 26.51L5.83 13.13Z" stroke="white" stroke-width="1.7" stroke-linejoin="round"/><path d="M11.67 16.04V11.67C11.67 10.12 12.28 8.64 13.38 7.54C14.47 6.45 15.95 5.83 17.5 5.83C19.05 5.83 20.53 6.45 21.62 7.54C22.72 8.64 23.33 10.12 23.33 11.67V16.04" stroke="white" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <svg width="26" height="26" viewBox="0 0 35 35" fill="none"><path d="M5.83 13.13H29.17L27.95 26.51C27.88 27.24 27.55 27.91 27.01 28.4C26.47 28.89 25.77 29.17 25.05 29.17H9.95C9.23 29.17 8.53 28.89 7.99 28.4C7.45 27.91 7.12 27.24 7.05 26.51L5.83 13.13Z" stroke="white" stroke-width="1.7" stroke-linejoin="round"/><path d="M11.67 16.04V11.67C11.67 10.12 12.28 8.64 13.38 7.54C14.47 6.45 15.95 5.83 17.5 5.83C19.05 5.83 20.53 6.45 21.62 7.54C22.72 8.64 23.33 10.12 23.33 11.67V16.04" stroke="white" stroke-width="1.7" stroke-linecap="round"/></svg>
       </button>
-      <div class="user-avatar">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" stroke="white" stroke-width="1.5"/><path d="M5.5 21C5.5 17.134 8.634 14 12.5 14C16.366 14 19.5 17.134 19.5 21" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-      </div>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" stroke="white" stroke-width="1.5"/><path d="M5.5 21C5.5 17.134 8.634 14 12.5 14C16.366 14 19.5 17.134 19.5 21" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
       <a class="auth-link" href="{% url 'login' %}">Đăng nhập</a>
       <span style="color:rgba(255,255,255,0.4)">|</span>
       <a class="auth-link" href="{% url 'login' %}?mode=register">Đăng ký</a>
