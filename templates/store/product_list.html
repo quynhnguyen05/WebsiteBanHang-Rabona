@@ -121,6 +121,7 @@
 
 {% block extra_js %}
 <script>
+  // @ts-nocheck
   const CART_ADD_BASE = "{% url 'store:cart_add' 0 %}".replace('/0/', '/');
   const IS_AUTH = {{ user.is_authenticated|yesno:"true,false" }};
   const LOGIN_URL = "{% url 'login' %}";
@@ -133,21 +134,46 @@
       method: 'POST',
       headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'quantity=1'
-    }).then(r => r.json()).then data => {
-      if (data.success) showToast(name, img, data.cart_count);
-    }).catch(() => showToast(name, img, null));
+    }).then(r => r.json()).then(data => {
+      if (data.success) {
+        showToast(name, img);
+        const badge = document.getElementById('cartBadge');
+        if (badge) { badge.textContent = data.cart_count; badge.style.display = 'flex'; }
+      }
+    }).catch(() => showToast(name, img));
   }
 
-  function showToast(name, img, count) {
+  function showToast(name, img) {
     const container = document.getElementById('toastContainer');
     const el = document.createElement('div');
     el.className = 'toast';
-    el.innerHTML = `<img class="toast-img" src="${img}" alt="${name}" onerror="this.style.display='none'" />
-      <div class="toast-body"><div class="toast-msg">Đã thêm vào giỏ hàng!</div></div>
-      <a href="{% url 'store:cart_detail' %}" class="toast-btn">Xem giỏ</a>`;
+
+    const imgEl = document.createElement('img');
+    imgEl.className = 'toast-img';
+    imgEl.src = img;
+    imgEl.alt = name;
+    imgEl.onerror = function() { this.style.display = 'none'; };
+
+    const body = document.createElement('div');
+    body.className = 'toast-body';
+    body.innerHTML = '<div class="toast-msg">Đã thêm sản phẩm<br/>vào giỏ hàng!</div>';
+
+    const btn = document.createElement('button');
+    btn.className = 'toast-btn';
+    btn.textContent = 'Xem giỏ hàng';
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openCart();
+    });
+
+    el.appendChild(imgEl);
+    el.appendChild(body);
+    el.appendChild(btn);
     container.appendChild(el);
+
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
-    setTimeout(() => { el.classList.remove('show'); el.classList.add('hide'); setTimeout(() => el.remove(), 350); }, 3000);
+    setTimeout(() => { el.classList.remove('show'); el.classList.add('hide'); setTimeout(() => el.remove(), 350); }, 3500);
   }
 </script>
 {% endblock %}

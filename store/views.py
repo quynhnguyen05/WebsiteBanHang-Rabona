@@ -589,6 +589,20 @@ def address_manage(request):
             messages.success(request, 'Đã cập nhật địa chỉ mặc định.')
             return redirect(redirect_url)
 
+        # 2b. Chỉnh sửa địa chỉ hiện có
+        edit_id = request.POST.get('edit_id')
+        if edit_id:
+            full_name = request.POST.get('full_name', '').strip()
+            phone = request.POST.get('phone', '').strip()
+            detail = request.POST.get('detail', '').strip()
+            city = request.POST.get('city', '').strip()
+            if full_name and phone and detail and city:
+                Address.objects.filter(id=edit_id, user=request.user).update(
+                    full_name=full_name, phone=phone, detail=detail, city=city
+                )
+                messages.success(request, 'Đã cập nhật địa chỉ.')
+            return redirect(redirect_url)
+
         # 3. Thêm địa chỉ mới
         full_name = request.POST.get('full_name', '').strip()
         phone = request.POST.get('phone', '').strip()
