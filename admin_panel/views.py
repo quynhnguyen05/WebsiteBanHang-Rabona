@@ -158,11 +158,11 @@ def xuat_hoa_don(request, order_code):
 
 @admin_required
 def tra_hang(request):
-   if request.method == 'POST':
-       try:
-           data = json.loads(request.body)
-           rr = ReturnRequest.objects.select_related('order').get(id=data.get('id'))
-           new_status = data.get('status')
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            rr = ReturnRequest.objects.select_related('order').get(id=data.get('id'))
+            new_status = data.get('status')
 
             if new_status == 'approved':
                 order = rr.order
@@ -185,33 +185,11 @@ def tra_hang(request):
                 rr.order.status = 'delivered'
                 rr.order.save()
 
-               # Ưu tiên lấy số tiền Admin tự điều chỉnh trên giao diện
-               refund_val = data.get('refund_amount')
-               if refund_val and str(refund_val).strip() != '':
-                   rr.refund_amount = float(refund_val)
-               else:
-                   # Nếu Admin không chỉnh, lấy theo logic hệ thống mặc định (2 chiều)
-                   if rr.reason in shop_faults:
-                       rr.refund_amount = order.total
-                   else:
-                       calculated_refund = order.subtotal - order.shipping_fee
-                       rr.refund_amount = max(0, calculated_refund)  # Giới hạn mức thấp nhất là 0
-
-
-               order.status = 'returning'
-               order.save()
-               rr.save()
-           elif new_status == 'rejected':
-               rr.admin_note = f"Lý do từ chối: {data.get('ly_do_tu_choi', '').strip()}"
-               rr.order.status = 'delivered'
-               rr.order.save()
-
-
-           rr.status = new_status
-           rr.save()
-           return JsonResponse({'status': 'success'})
-       except Exception as e:
-           return JsonResponse({'status': 'error', 'message': str(e)})
+            rr.status = new_status
+            rr.save()
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
 
 
     status_filter = request.GET.get('status', 'pending')
