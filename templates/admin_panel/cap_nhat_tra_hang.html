@@ -1,7 +1,7 @@
 {% extends 'admin_panel/base_admin.html' %}
-{% block title %}Cap nhat trang thai tra hang - Rabona Sport{% endblock %}
-{% block page_title %}CAP NHAT TRANG THAI TRA HANG{% endblock %}
-{% block breadcrumb %}Admin > <span>Cap nhat trang thai tra hang</span>{% endblock %}
+{% block title %}Cập nhật trạng thái trả hàng - Rabona Sport{% endblock %}
+{% block page_title %}CẬP NHẬT TRẠNG THÁI TRẢ HÀNG{% endblock %}
+{% block breadcrumb %}Admin > <span>Cập nhật trạng thái trả hàng</span>{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -46,47 +46,47 @@
 <div class="stats-cards">
   <div class="stat-card">
     <i class="fas fa-truck-loading stat-icon orange"></i>
-    <div class="stat-info"><span class="stat-title">Dang xu ly (Kho)</span><span class="stat-value">{{ stats.dang_xu_ly }}</span></div>
+    <div class="stat-info"><span class="stat-title">Đang xử lý (Kho)</span><span class="stat-value">{{ stats.dang_xu_ly }}</span></div>
   </div>
   <div class="stat-card">
     <i class="fas fa-money-check-alt stat-icon green"></i>
-    <div class="stat-info"><span class="stat-title">Da hoan tien</span><span class="stat-value">{{ stats.da_hoan_tien }}</span></div>
+    <div class="stat-info"><span class="stat-title">Đã hoàn tiền</span><span class="stat-value">{{ stats.da_hoan_tien }}</span></div>
   </div>
 </div>
 
 <form method="get" style="margin-bottom:20px;display:flex;gap:10px;align-items:center;">
   <input type="hidden" name="status" value="{{ current_status }}">
-  <input type="text" name="q" value="{{ search }}" placeholder="Ma phieu, ma don, khach hang..."
+  <input type="text" name="q" value="{{ search }}" placeholder="Mã phiếu, mã đơn, khách hàng..."
     style="padding:8px 14px;border:1px solid #d1d5db;border-radius:4px;font-size:14px;flex:1;max-width:300px;">
   {% if current_status != 'completed' %}
   <select name="sub_status" style="padding:8px 14px;border:1px solid #d1d5db;border-radius:4px;font-size:14px;background:white;cursor:pointer;">
-    <option value="">-- Tat ca trang thai --</option>
+    <option value="">-- Tất cả trạng thái --</option>
     {% for val, label in sub_status_choices %}
     <option value="{{ val }}" {% if current_sub_status == val %}selected{% endif %}>{{ label }}</option>
     {% endfor %}
   </select>
   {% endif %}
-  <button type="submit" style="padding:8px 20px;background:var(--primary-green);color:white;border:none;border-radius:4px;cursor:pointer;font-weight:600;"><i class="fas fa-filter"></i> Loc ket qua</button>
+  <button type="submit" style="padding:8px 20px;background:var(--primary-green);color:white;border:none;border-radius:4px;cursor:pointer;font-weight:600;"><i class="fas fa-filter"></i> Lọc kết quả</button>
   {% if search or current_sub_status %}
-  <a href="?status={{ current_status }}" style="font-size:13px;color:#6b7280;text-decoration:none;">Xoa loc</a>
+  <a href="?status={{ current_status }}" style="font-size:13px;color:#6b7280;text-decoration:none;">Xóa lọc</a>
   {% endif %}
 </form>
 
 <div class="tabs">
-  <a href="?status=processing_all&q={{ search|default:'' }}" class="tab-item {% if current_status == 'processing_all' or not current_status %}active{% endif %}">Dang xu ly ({{ stats.dang_xu_ly }})</a>
-  <a href="?status=completed&q={{ search|default:'' }}" class="tab-item {% if current_status == 'completed' %}active{% endif %}">Da hoan tien ({{ stats.da_hoan_tien }})</a>
+  <a href="?status=processing_all&q={{ search|default:'' }}" class="tab-item {% if current_status == 'processing_all' or not current_status %}active{% endif %}">Đang xử lý ({{ stats.dang_xu_ly }})</a>
+  <a href="?status=completed&q={{ search|default:'' }}" class="tab-item {% if current_status == 'completed' %}active{% endif %}">Đã hoàn tiền ({{ stats.da_hoan_tien }})</a>
 </div>
 
 <div class="table-container">
   <table>
     <thead>
       <tr>
-        <th>Ma phieu</th>
-        <th style="text-align:center;">Ma don</th>
-        <th>Khach hang</th>
-        <th>Ngay yeu cau</th>
-        <th>Trang thai</th>
-        <th>Thao tac</th>
+        <th>Mã phiếu</th>
+        <th style="text-align:center;">Mã đơn</th>
+        <th>Khách hàng</th>
+        <th>Ngày yêu cầu</th>
+        <th>Trạng thái</th>
+        <th>Thao tác</th>
       </tr>
     </thead>
     <tbody>
@@ -97,7 +97,7 @@
         <td>{{ phieu.order.user.last_name }} {{ phieu.order.user.first_name }}</td>
         <td>{{ phieu.created_at|date:"d/m/Y H:i" }}</td>
         <td>
-          {% if phieu.status == 'completed' %}<span class="status-refunded">Da hoan tien</span>
+          {% if phieu.status == 'completed' %}<span class="status-refunded">Đã hoàn tiền</span>
           {% else %}<span class="status-processing">{{ phieu.get_status_display }}</span>
           {% endif %}
         </td>
@@ -105,15 +105,15 @@
           {% if phieu.status == 'completed' %}
           <button class="btn-action btn-view" onclick="openReturnModal({{ phieu.id }})" style="background-color:var(--primary-green);"><i class="fas fa-eye"></i> Xem</button>
           {% else %}
-          <button class="btn-action btn-edit" style="background-color:#f59e0b;" onclick="openReturnModal({{ phieu.id }})"><i class="fas fa-edit"></i> Cap nhat</button>
+          <button class="btn-action btn-edit" style="background-color:#f59e0b;" onclick="openReturnModal({{ phieu.id }})"><i class="fas fa-edit"></i> Cập nhật</button>
           {% endif %}
         </td>
       </tr>
       {% empty %}
       <tr>
         <td colspan="6" style="text-align:center;padding:40px;color:#666;">
-          {% if search %}Khong tim thay ket qua nao cho "<strong>{{ search }}</strong>".
-          {% else %}Khong co don hang tra nao can xu ly.{% endif %}
+          {% if search %}Không tìm thấy kết quả nào cho "<strong>{{ search }}</strong>".
+          {% else %}Không có đơn hàng trả nào cần xử lý.{% endif %}
         </td>
       </tr>
       {% endfor %}
@@ -123,7 +123,7 @@
 
 {% if phieu_list.paginator.count > 0 %}
 <div class="pagination-bar">
-  <div>Hien thi tu {{ phieu_list.start_index }}-{{ phieu_list.end_index }} cua {{ phieu_list.paginator.count }} yeu cau</div>
+  <div>Hiển thị từ {{ phieu_list.start_index }}-{{ phieu_list.end_index }} của {{ phieu_list.paginator.count }} yêu cầu</div>
   <ul class="pagination">
     {% if phieu_list.has_previous %}
     <li class="page-item"><a href="?page={{ phieu_list.previous_page_number }}&status={{ current_status }}&sub_status={{ current_sub_status }}&q={{ search }}"><i class="fas fa-chevron-left"></i></a></li>
@@ -150,58 +150,58 @@
 <div class="modal-overlay" id="modalReturnDetail_{{ phieu.id }}">
   <div class="modal-content modal-lg">
     <div class="modal-header">
-      <div class="modal-title">CAP NHAT TIEN DO TRA HANG #{{ phieu.id }}</div>
+      <div class="modal-title">CẬP NHẬT TIẾN ĐỘ TRẢ HÀNG #{{ phieu.id }}</div>
       <button class="btn-close" onclick="closeModal('modalReturnDetail_{{ phieu.id }}')"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body">
       <div class="return-stepper">
         <div class="return-step completed">
           <div class="return-step-dot">1</div>
-          <div class="return-step-label">Da duyet</div>
+          <div class="return-step-label">Đã duyệt</div>
         </div>
         <div class="return-step {% if phieu.status == 'picking' %}active{% elif phieu.status in 'returning_to_warehouse,received,processing,completed' %}completed{% endif %}"
           data-status="picking" data-id="{{ phieu.id }}" data-done="{% if phieu.status == 'completed' %}1{% else %}0{% endif %}" onclick="handleStepClick(this)">
           <div class="return-step-dot">2</div>
-          <div class="return-step-label">Cho lay hang</div>
+          <div class="return-step-label">Chờ lấy hàng</div>
         </div>
         <div class="return-step {% if phieu.status == 'returning_to_warehouse' %}active{% elif phieu.status in 'received,processing,completed' %}completed{% endif %}"
           data-status="returning_to_warehouse" data-id="{{ phieu.id }}" data-done="{% if phieu.status == 'completed' %}1{% else %}0{% endif %}" onclick="handleStepClick(this)">
           <div class="return-step-dot">3</div>
-          <div class="return-step-label">Dang ve kho</div>
+          <div class="return-step-label">Đang về kho</div>
         </div>
         <div class="return-step {% if phieu.status == 'received' %}active{% elif phieu.status in 'processing,completed' %}completed{% endif %}"
           data-status="received" data-id="{{ phieu.id }}" data-done="{% if phieu.status == 'completed' %}1{% else %}0{% endif %}" onclick="handleStepClick(this)">
           <div class="return-step-dot">4</div>
-          <div class="return-step-label">Da nhan hang</div>
+          <div class="return-step-label">Đã nhận hàng</div>
         </div>
         <div class="return-step {% if phieu.status == 'processing' %}active{% elif phieu.status == 'completed' %}completed{% endif %}"
           data-status="processing" data-id="{{ phieu.id }}" data-done="{% if phieu.status == 'completed' %}1{% else %}0{% endif %}" onclick="handleStepClick(this)">
           <div class="return-step-dot">5</div>
-          <div class="return-step-label">Dang xu ly</div>
+          <div class="return-step-label">Đang xử lý</div>
         </div>
         <div class="return-step {% if phieu.status == 'completed' %}completed active{% endif %}"
           data-action="refund" data-id="{{ phieu.id }}" data-done="{% if phieu.status == 'completed' %}1{% else %}0{% endif %}" onclick="handleStepClick(this)">
           <div class="return-step-dot">6</div>
-          <div class="return-step-label">Da hoan tien</div>
+          <div class="return-step-label">Đã hoàn tiền</div>
         </div>
       </div>
 
       <div class="return-grid">
         <div class="return-col-left">
           <div class="ret-info-section bank-info-highlight">
-            <div class="ret-info-title"><i class="fas fa-university"></i> THONG TIN CHUYEN KHOAN HOAN TIEN</div>
-            <div class="ret-info-row"><span class="ret-info-label">Ngan hang:</span><span class="ret-info-value" style="font-weight:800;color:#047857;">{{ phieu.bank_name|default:"(Chua co)"|upper }}</span></div>
-            <div class="ret-info-row"><span class="ret-info-label">So tai khoan:</span><span class="ret-info-value" style="font-weight:800;color:#047857;">{{ phieu.bank_account_number|default:"(Chua co)" }}</span></div>
-            <div class="ret-info-row"><span class="ret-info-label">Chu tai khoan:</span><span class="ret-info-value" style="font-weight:800;color:#047857;">{{ phieu.bank_account_holder|default:"(Chua co)"|upper }}</span></div>
+            <div class="ret-info-title"><i class="fas fa-university"></i> THÔNG TIN CHUYỂN KHOẢN HOÀN TIỀN</div>
+            <div class="ret-info-row"><span class="ret-info-label">Ngân hàng:</span><span class="ret-info-value" style="font-weight:800;color:#047857;">{{ phieu.bank_name|default:"(Chưa có)"|upper }}</span></div>
+            <div class="ret-info-row"><span class="ret-info-label">Số tài khoản:</span><span class="ret-info-value" style="font-weight:800;color:#047857;">{{ phieu.bank_account_number|default:"(Chưa có)" }}</span></div>
+            <div class="ret-info-row"><span class="ret-info-label">Chủ tài khoản:</span><span class="ret-info-value" style="font-weight:800;color:#047857;">{{ phieu.bank_account_holder|default:"(Chưa có)"|upper }}</span></div>
           </div>
         </div>
         <div class="return-col-right">
           <div class="proof-box">
-            <div class="ret-info-title">Don hang goc</div>
-            <div class="ret-info-row"><span class="ret-info-label">So tien hoan:</span><span class="ret-info-value" style="color:#ef4444;font-weight:700;">{{ phieu.refund_amount|floatformat:0 }} d</span></div>
+            <div class="ret-info-title">Đơn hàng gốc</div>
+            <div class="ret-info-row"><span class="ret-info-label">Số tiền hoàn:</span><span class="ret-info-value" style="color:#ef4444;font-weight:700;">{{ phieu.refund_amount|floatformat:0 }} đ</span></div>
             {% if phieu.refund_proof %}
             <div style="margin-top:15px;border-top:1px solid #e5e7eb;padding-top:10px;">
-              <div class="ret-info-title"><i class="fas fa-file-invoice"></i> BIEN LAI HOAN TIEN</div>
+              <div class="ret-info-title"><i class="fas fa-file-invoice"></i> BIÊN LAI HOÀN TIỀN</div>
               <a href="{{ phieu.refund_proof.url }}" target="_blank">
                 <img src="{{ phieu.refund_proof.url }}" style="width:100%;height:80px;object-fit:cover;border-radius:4px;border:1px solid #ddd;">
               </a>
@@ -211,9 +211,9 @@
         </div>
       </div>
 
-      <div class="section-title" style="font-weight:600;margin-bottom:10px;">San pham tra lai</div>
+      <div class="section-title" style="font-weight:600;margin-bottom:10px;">Sản phẩm trả lại</div>
       <table class="modal-table">
-        <thead><tr><th>San pham</th><th>Kich thuoc</th><th>Mau</th><th>SL</th><th>Don gia</th></tr></thead>
+        <thead><tr><th>Sản phẩm</th><th>Kích thước</th><th>Màu</th><th>SL</th><th>Đơn giá</th></tr></thead>
         <tbody>
           {% for item in phieu.order.items.all %}
           <tr>
@@ -221,65 +221,63 @@
             <td>{{ item.size }}</td>
             <td>{{ item.color }}</td>
             <td>{{ item.quantity }}</td>
-            <td style="font-weight:600;">{{ item.price|floatformat:0 }} d</td>
+            <td style="font-weight:600;">{{ item.price|floatformat:0 }} đ</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
     <div class="modal-footer">
-      <button class="btn-cancel" style="background-color:#e5e7eb;color:#374151;border:none;padding:10px 25px;border-radius:4px;font-weight:600;cursor:pointer;" onclick="closeModal('modalReturnDetail_{{ phieu.id }}')">Dong</button>
+      <button class="btn-cancel" style="background-color:#e5e7eb;color:#374151;border:none;padding:10px 25px;border-radius:4px;font-weight:600;cursor:pointer;" onclick="closeModal('modalReturnDetail_{{ phieu.id }}')">Đóng</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL HOAN TIEN -->
 <div class="modal-overlay" id="modalRefund_{{ phieu.id }}" style="z-index:10000;">
   <div class="modal-content" style="max-width:500px;">
     <div class="modal-header">
-      <div class="modal-title">XAC NHAN HOAN TIEN KHACH HANG</div>
+      <div class="modal-title">XÁC NHẬN HOÀN TIỀN KHÁCH HÀNG</div>
       <button class="btn-close" onclick="closeModal('modalRefund_{{ phieu.id }}')"><i class="fas fa-times"></i></button>
     </div>
     <form onsubmit="submitRefundForm(event, {{ phieu.id }})">
       <div class="modal-body" style="padding:25px;">
         <div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:15px;margin-bottom:20px;">
-          <div style="font-size:13px;color:#64748b;font-weight:600;margin-bottom:8px;">THONG TIN THU HUONG:</div>
+          <div style="font-size:13px;color:#64748b;font-weight:600;margin-bottom:8px;">THÔNG TIN THỤ HƯỞNG:</div>
           <div style="background:#fff;padding:15px;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:15px;">
-            <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">So tien CHOT hoan lai (d) <span style="color:red">*</span></label>
+            <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Số tiền CHỐT hoàn lại (đ) <span style="color:red">*</span></label>
             <input type="number" id="final_refund_{{ phieu.id }}" value="{{ phieu.refund_amount|floatformat:0 }}" class="form-textarea" style="font-weight:800;color:#ef4444;font-size:16px;margin-bottom:10px;" required>
-            <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Ghi chu kiem kho / Ly do dieu chinh</label>
-            <textarea id="final_note_{{ phieu.id }}" class="form-textarea" rows="2" placeholder="Vi du: Giay bi tray mui, tru khau hao 50.000d..."></textarea>
+            <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Ghi chú kiểm kho / Lý do điều chỉnh</label>
+            <textarea id="final_note_{{ phieu.id }}" class="form-textarea" rows="2" placeholder="Ví dụ: Giày bị trầy mũi, trừ khấu hao 50.000đ..."></textarea>
           </div>
-          <div style="font-size:14px;color:#333;">Ngan hang: <strong>{{ phieu.bank_name|default:"Lien he KH" }}</strong></div>
-          <div style="font-size:14px;color:#333;">So TK: <strong>{{ phieu.bank_account_number|default:"Lien he KH" }}</strong></div>
+          <div style="font-size:14px;color:#333;">Ngân hàng: <strong>{{ phieu.bank_name|default:"Liên hệ KH" }}</strong></div>
+          <div style="font-size:14px;color:#333;">Số TK: <strong>{{ phieu.bank_account_number|default:"Liên hệ KH" }}</strong></div>
         </div>
-        <p style="margin-bottom:8px;font-size:14px;font-weight:500;color:#374151;">Ma giao dich ngan hang <span style="color:red;">*</span>:</p>
+        <p style="margin-bottom:8px;font-size:14px;font-weight:500;color:#374151;">Mã giao dịch ngân hàng <span style="color:red;">*</span>:</p>
         <input type="text" id="maGiaoDich_{{ phieu.id }}" class="form-textarea" style="margin-bottom:15px;" placeholder="VD: FT203495832049" required>
-        <p style="margin-bottom:8px;font-size:14px;font-weight:500;color:#374151;">Tai len anh bien lai <span style="color:red;">*</span>:</p>
+        <p style="margin-bottom:8px;font-size:14px;font-weight:500;color:#374151;">Tải lên ảnh biên lai <span style="color:red;">*</span>:</p>
         <input type="file" id="bienLai_{{ phieu.id }}" class="form-textarea" style="padding:8px;" accept="image/*" required>
       </div>
       <div class="modal-footer" style="justify-content:flex-end;gap:10px;">
-        <button type="button" class="btn-cancel" style="background-color:#9ca3af;color:white;border:none;padding:10px 25px;border-radius:4px;font-weight:600;cursor:pointer;" onclick="closeModal('modalRefund_{{ phieu.id }}')">Huy</button>
-        <button type="submit" class="btn-confirm">Hoan tat hoan tien</button>
+        <button type="button" class="btn-cancel" style="background-color:#9ca3af;color:white;border:none;padding:10px 25px;border-radius:4px;font-weight:600;cursor:pointer;" onclick="closeModal('modalRefund_{{ phieu.id }}')">Hủy</button>
+        <button type="submit" class="btn-confirm">Hoàn tất hoàn tiền</button>
       </div>
     </form>
   </div>
 </div>
 {% endfor %}
 
-<!-- MODAL XAC NHAN CHUNG -->
 <div class="modal-overlay" id="modalConfirmStatus" style="z-index:10000;">
   <div class="modal-content" style="max-width:400px;">
     <div class="modal-header">
-      <div class="modal-title" style="color:#333;font-size:16px;">CAP NHAT TIEN DO</div>
+      <div class="modal-title" style="color:#333;font-size:16px;">CẬP NHẬT TIẾN ĐỘ</div>
       <button class="btn-close" onclick="closeModal('modalConfirmStatus')"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body" style="text-align:center;padding:30px 20px;">
-      Cap nhat phieu tra sang trang thai: <b id="targetStatusText" style="color:var(--primary-green);"></b>?
+      Cập nhật phiếu trả sang trạng thái: <b id="targetStatusText" style="color:var(--primary-green);"></b>?
     </div>
     <div class="modal-footer" style="justify-content:center;gap:15px;">
-      <button class="btn-cancel" style="background-color:#9ca3af;color:white;border:none;padding:10px 25px;border-radius:4px;font-weight:600;cursor:pointer;" onclick="closeModal('modalConfirmStatus')">Huy</button>
-      <button class="btn-confirm" onclick="submitStatusUpdate()">Xac nhan</button>
+      <button class="btn-cancel" style="background-color:#9ca3af;color:white;border:none;padding:10px 25px;border-radius:4px;font-weight:600;cursor:pointer;" onclick="closeModal('modalConfirmStatus')">Hủy</button>
+      <button class="btn-confirm" onclick="submitStatusUpdate()">Xác nhận</button>
     </div>
   </div>
 </div>
@@ -313,10 +311,10 @@ function openConfirmStatusUpdate(targetStatus, id) {
   currentPhieuId = id;
   pendingTargetStatus = targetStatus;
   const statusNames = {
-    'picking': 'Cho lay hang',
-    'returning_to_warehouse': 'Dang ve kho',
-    'received': 'Da nhan hang',
-    'processing': 'Dang xu ly'
+    'picking': 'Chờ lấy hàng',
+    'returning_to_warehouse': 'Đang về kho',
+    'received': 'Đã nhận hàng',
+    'processing': 'Đang xử lý'
   };
   document.getElementById('targetStatusText').innerText = statusNames[targetStatus] || targetStatus;
   openModal('modalConfirmStatus');
@@ -331,8 +329,8 @@ function submitStatusUpdate() {
     }).then(res => res.json()).then(data => {
       if (data.status === 'success') {
         closeModal('modalConfirmStatus');
-        showSuccessPopup("Cap nhat tien do thanh cong!");
-      } else { alert("Loi: " + data.message); }
+        showSuccessPopup("Cập nhật tiến độ thành công!");
+      } else { alert("Lỗi: " + data.message); }
     });
   }
 }
@@ -357,8 +355,8 @@ function submitRefundForm(event, id) {
   }).then(r => r.json()).then(data => {
     if (data.status === 'success') {
       closeModal('modalRefund_' + id);
-      showSuccessPopup("Ghi nhan hoan tien thanh cong!");
-    } else { alert("Loi: " + data.message); }
+      showSuccessPopup("Ghi nhận hoàn tiền thành công!");
+    } else { alert("Lỗi: " + data.message); }
   });
 }
 </script>
