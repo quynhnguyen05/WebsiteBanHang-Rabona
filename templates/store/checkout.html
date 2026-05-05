@@ -107,8 +107,37 @@ body { background: #f3f4f6; }
             <input type="hidden" name="address_id" value="{{ default_address.id }}" />
             {% endif %}
           </div>
-          <a href="{% url 'store:profile' %}?tab=address&next=checkout" class="change-btn">Thay đổi</a>
+          <a href="{% url 'store:profile' %}?tab=address&edit=default" class="change-btn">Thay đổi</a>
         </div>
+
+        {% if default_address %}
+        <!-- Form chỉnh sửa địa chỉ (ẩn mặc định) -->
+        <div id="editAddrForm" style="display:none;margin-top:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;">
+          <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">Chỉnh sửa địa chỉ giao hàng</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div>
+              <label class="form-label">Họ và tên</label>
+              <input type="text" id="edit-fullname" class="form-input" value="{{ default_address.full_name }}" style="margin-bottom:0;" />
+            </div>
+            <div>
+              <label class="form-label">Số điện thoại</label>
+              <input type="tel" id="edit-phone" class="form-input" value="{{ default_address.phone }}" style="margin-bottom:0;" />
+            </div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <label class="form-label">Địa chỉ chi tiết</label>
+            <input type="text" id="edit-detail" class="form-input" value="{{ default_address.detail }}" style="margin-bottom:0;" />
+          </div>
+          <div style="margin-bottom:14px;">
+            <label class="form-label">Tỉnh / Thành phố</label>
+            <input type="text" id="edit-city" class="form-input" value="{{ default_address.city }}" style="margin-bottom:0;" />
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button type="button" onclick="saveEditAddr()" style="padding:9px 20px;background:#14ae5c;color:#fff;border:none;border-radius:6px;font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Lưu</button>
+            <button type="button" onclick="toggleEditAddr()" style="padding:9px 20px;background:#fff;border:1px solid #d1d5db;border-radius:6px;font-size:13px;cursor:pointer;">Hủy</button>
+          </div>
+        </div>
+        {% endif %}
 
         {% if not default_address %}
         <div style="margin-top:14px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:14px;">
@@ -246,6 +275,8 @@ body { background: #f3f4f6; }
     </div>
   </div>
 </form>
+
+</form>
 {% endblock %}
 
 {% block extra_js %}
@@ -281,6 +312,41 @@ function previewUpload(e) {
     img.style.display = 'block';
   };
   reader.readAsDataURL(file);
+}
+
+function toggleEditAddr(e) {
+  if (e) e.preventDefault();
+  const form = document.getElementById('editAddrForm');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveEditAddr() {
+  const name = document.getElementById('edit-fullname').value.trim();
+  const phone = document.getElementById('edit-phone').value.trim();
+  const detail = document.getElementById('edit-detail').value.trim();
+  const city = document.getElementById('edit-city').value.trim();
+
+  if (!name || !phone || !detail || !city) {
+    alert('Vui lòng điền đầy đủ thông tin.');
+    return;
+  }
+
+  // Cập nhật hiển thị
+  document.querySelector('.addr-name').textContent = name;
+  document.querySelector('.addr-phone').textContent = phone;
+  document.querySelector('.addr-detail').textContent = detail + ', ' + city;
+
+  // Thêm hidden inputs để gửi lên server
+  ['full_name','phone','detail','city'].forEach(f => {
+    let el = document.querySelector('input[name="' + f + '"]');
+    if (!el) { el = document.createElement('input'); el.type = 'hidden'; el.name = f; document.getElementById('checkoutForm').appendChild(el); }
+    el.value = f === 'full_name' ? name : f === 'phone' ? phone : f === 'detail' ? detail : city;
+  });
+  // Xóa address_id để server tạo địa chỉ mới từ form
+  const addrIdInput = document.querySelector('input[name="address_id"]');
+  if (addrIdInput) addrIdInput.remove();
+
+  document.getElementById('editAddrForm').style.display = 'none';
 }
 
 function placeOrder() {
