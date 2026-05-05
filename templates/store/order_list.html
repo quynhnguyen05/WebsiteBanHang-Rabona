@@ -122,8 +122,8 @@ body{background:var(--bg);}
     </div>
     <div class="sb-group-title">Tài khoản của tôi</div>
     <a class="sb-link" href="{% url 'store:profile' %}">Hồ sơ</a>
-    <a class="sb-link" href="#">Đổi mật khẩu</a>
-    <a class="sb-link" href="{% url 'store:address_manage' %}">Địa chỉ</a>
+    <a class="sb-link" href="{% url 'store:profile' %}?tab=password">Đổi mật khẩu</a>
+    <a class="sb-link" href="{% url 'store:profile' %}?tab=address">Địa chỉ</a>
     <div class="sb-divider"></div>
     <div class="sb-group-title">Đơn hàng</div>
     <a class="sb-link {% if not active_status %}active{% endif %}" href="{% url 'store:order_list' %}">Tất cả</a>
