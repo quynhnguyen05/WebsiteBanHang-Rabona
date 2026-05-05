@@ -1,11 +1,10 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.utils import timezone
+from django.urls import reverse
 
 from .models import (
     Product, ProductVariant, Category,
@@ -38,7 +37,6 @@ def custom_login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            # Phân luồng
             if user.is_staff or user.is_superuser:
                 return JsonResponse({'success': True, 'redirect': '/admin-panel/'})
             if next_url and next_url.startswith('/'):
@@ -47,7 +45,6 @@ def custom_login(request):
         else:
             return JsonResponse({'success': False, 'error': 'Tên đăng nhập hoặc mật khẩu không đúng.'})
 
-    # GET — hiển thị trang login
     next_url = request.GET.get('next', '')
     return render(request, 'registration/login.html', {'next': next_url})
 
@@ -80,15 +77,21 @@ def register(request):
 def product_list(request):
     from django.db.models import Q
 
-    category_slug = request.GET.get('category')
-    query = request.GET.get('q', '').strip()
     products = Product.objects.filter(is_active=True)
     categories = Category.objects.all()
+    category_slug = request.GET.get('category')
+    query = request.GET.get('q', '').strip()
     active_category = None
 
     if category_slug:
-        active_category = get_object_or_404(Category, slug=category_slug)
-        products = products.filter(category=active_category)
+        if category_slug == 'quan-ao':
+            products = products.filter(category__slug__in=['quan-ao', 'ao-dau', 'quan-the-thao'])
+        else:
+            active_category = Category.objects.filter(slug=category_slug).first()
+            if active_category:
+                products = products.filter(category=active_category)
+            else:
+                products = products.none()
 
     if query:
         products = products.filter(
@@ -101,6 +104,7 @@ def product_list(request):
         'products': products,
         'categories': categories,
         'active_category': active_category,
+        'category_selected': category_slug,
         'query': query,
     })
 
@@ -110,7 +114,6 @@ def product_detail(request, slug):
     variants = product.variants.all()
     images = product.images.all()
 
-    # Nhóm màu sắc
     colors = variants.values('color_name', 'color_hex').distinct()
     sizes  = variants.values_list('size', flat=True).distinct()
 
@@ -128,9 +131,13 @@ def product_detail(request, slug):
 # ─────────────────────────────────────────
 
 @login_required
-def cart_detail(request):
-    # Trang /cart/ không dùng nữa, redirect về trang chủ
+def cart_redirect(request):
+    """Giỏ hàng dùng modal popup — redirect về trang chủ."""
     return redirect('store:home')
+
+
+# Giữ cart_detail trỏ về cart_redirect để không lỗi URL reverse
+cart_detail = cart_redirect
 
 
 @login_required
@@ -173,7 +180,7 @@ def cart_add(request, variant_id):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({'success': True, 'cart_count': cart.total_items})
     messages.success(request, f'Đã thêm "{variant.product.name}" vào giỏ hàng.')
-    return redirect('store:cart_detail')
+    return redirect('store:home')
 
 
 @require_POST
@@ -226,9 +233,7 @@ def checkout(request):
         messages.warning(request, 'Giỏ hàng trống.')
         return redirect('store:product_list')
 
-    # Lấy danh sách item ID đã chọn từ session
     selected_ids = request.session.get('checkout_selected_ids', [])
-
     all_items = cart.items.select_related('variant__product')
     if selected_ids:
         checkout_items = all_items.filter(id__in=selected_ids)
@@ -245,24 +250,30 @@ def checkout(request):
     addresses = Address.objects.filter(user=request.user)
     default_address = addresses.filter(is_default=True).first() or addresses.exclude(full_name='').first()
 
-    # Tính phí vận chuyển
+    from .models import PhiVanChuyen
     FREE_SHIP_THRESHOLD = 500000
-    if selected_total >= FREE_SHIP_THRESHOLD:
-        shipping_fee = 0
-        is_free_ship = True
-        ship_note = 'Miễn phí vận chuyển cho đơn hàng từ 500.000đ'
-    else:
-        from .models import PhiVanChuyen
-        phi_ship = None
-        if default_address:
-            phi_ship = PhiVanChuyen.objects.filter(
-                tenKhuVuc__icontains=default_address.city
-            ).first()
+    shipping_fee = 0
+    is_free_ship = False
+    is_supported_city = True
+    ship_note = ""
+
+    if default_address and default_address.city:
+        phi_ship = PhiVanChuyen.objects.filter(
+            tenKhuVuc__icontains=default_address.city
+        ).first()
         if not phi_ship:
-            phi_ship = PhiVanChuyen.objects.first()
-        shipping_fee = int(phi_ship.phiShip) if phi_ship else 30000
-        is_free_ship = False
-        ship_note = f'Phí vận chuyển đến {default_address.city if default_address else "khu vực của bạn"}'
+            is_supported_city = False
+            ship_note = 'Khu vực này chưa hỗ trợ vận chuyển, vui lòng chọn địa chỉ khác để giao hàng.'
+        else:
+            if selected_total >= FREE_SHIP_THRESHOLD:
+                shipping_fee = 0
+                is_free_ship = True
+                ship_note = 'Miễn phí vận chuyển cho đơn hàng từ 500.000đ'
+            else:
+                shipping_fee = int(phi_ship.phiShip)
+                ship_note = f'Phí vận chuyển đến {default_address.city}'
+    else:
+        ship_note = 'Vui lòng nhập địa chỉ giao hàng'
 
     total_payment = int(selected_total) + shipping_fee
 
@@ -273,6 +284,7 @@ def checkout(request):
         'total_quantity': total_quantity,
         'shipping_fee': shipping_fee,
         'is_free_ship': is_free_ship,
+        'is_supported_city': is_supported_city,
         'ship_note': ship_note,
         'total_payment': total_payment,
         'addresses': addresses,
@@ -285,9 +297,8 @@ def checkout(request):
 def place_order(request):
     cart = get_object_or_404(Cart, user=request.user)
     if not cart.items.exists():
-        return redirect('store:cart_detail')
+        return redirect('store:home')
 
-    # Lấy danh sách item đã chọn từ session
     selected_ids = request.session.get('checkout_selected_ids', [])
     all_items = cart.items.select_related('variant__product')
     if selected_ids:
@@ -296,15 +307,13 @@ def place_order(request):
         order_items_qs = all_items
 
     if not order_items_qs.exists():
-        return redirect('store:cart_detail')
+        return redirect('store:home')
 
-    # Lấy địa chỉ
     address_id = request.POST.get('address_id')
     if address_id:
         address = get_object_or_404(Address, id=address_id, user=request.user)
     else:
-        # Tạo địa chỉ mới từ form
-        address = Address.objects.create(
+        address = Address(
             user=request.user,
             full_name=request.POST.get('full_name', ''),
             phone=request.POST.get('phone', ''),
@@ -312,24 +321,29 @@ def place_order(request):
             city=request.POST.get('city', ''),
         )
 
-    from decimal import Decimal
+    from .models import PhiVanChuyen
+    phi_ship = PhiVanChuyen.objects.filter(
+        tenKhuVuc__icontains=address.city
+    ).first()
+
+    if not phi_ship:
+        error_msg = 'Khu vực này chưa hỗ trợ vận chuyển, vui lòng chọn địa chỉ khác để giao hàng.'
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': error_msg})
+        messages.error(request, error_msg)
+        return redirect('store:checkout')
+
+    if not address_id:
+        address.save()
+
+    FREE_SHIP_THRESHOLD = 500000
     subtotal = sum(item.subtotal for item in order_items_qs)
     discount = 0
 
-    # Nhận phí ship từ form (đã tính sẵn ở checkout view)
-    try:
-        shipping_fee = int(request.POST.get('shipping_fee_amount', 0))
-    except (ValueError, TypeError):
-        # Fallback: tính lại
-        FREE_SHIP_THRESHOLD = 500000
-        if subtotal >= FREE_SHIP_THRESHOLD:
-            shipping_fee = 0
-        else:
-            from .models import PhiVanChuyen
-            phi_ship = PhiVanChuyen.objects.filter(
-                tenKhuVuc__icontains=address.city
-            ).first() or PhiVanChuyen.objects.first()
-            shipping_fee = int(phi_ship.phiShip) if phi_ship else 30000
+    if subtotal >= FREE_SHIP_THRESHOLD:
+        shipping_fee = 0
+    else:
+        shipping_fee = int(phi_ship.phiShip)
 
     order = Order.objects.create(
         user=request.user,
@@ -345,7 +359,6 @@ def place_order(request):
         note=request.POST.get('note', ''),
     )
 
-    # Tạo OrderItem chỉ từ các CartItem đã chọn
     for item in order_items_qs:
         OrderItem.objects.create(
             order=order,
@@ -356,25 +369,20 @@ def place_order(request):
             price=item.variant.product.price,
             quantity=item.quantity,
         )
-        # Trừ tồn kho
         item.variant.stock = max(0, item.variant.stock - item.quantity)
         item.variant.save()
         item.variant.product.sold += item.quantity
         item.variant.product.save()
 
-    # Xử lý biên lai chuyển khoản
     if 'payment_proof' in request.FILES:
         order.payment_proof = request.FILES['payment_proof']
         order.save()
 
-    # Xóa chỉ các item đã đặt khỏi giỏ hàng
     order_items_qs.delete()
 
-    # Xóa session
     if 'checkout_selected_ids' in request.session:
         del request.session['checkout_selected_ids']
 
-    # Trả về JSON nếu AJAX, redirect nếu thường
     first_item = order.items.first()
     img_url = ''
     if first_item and first_item.variant:
@@ -402,7 +410,6 @@ def cancel_order(request, order_code):
         messages.error(request, 'Chỉ có thể hủy đơn hàng đang chờ xác nhận.')
         return redirect('store:order_list')
 
-    # Hoàn lại tồn kho
     for item in order.items.select_related('variant'):
         if item.variant:
             item.variant.stock += item.quantity
@@ -427,7 +434,11 @@ def cancel_order(request, order_code):
 def order_list(request):
     status = request.GET.get('status', '')
     orders = Order.objects.filter(user=request.user)
-    if status:
+    if status == 'completed':
+        orders = orders.filter(status__in=['delivered', 'completed'])
+    elif status == 'returning':
+        orders = orders.filter(status__in=['returning', 'returned'])
+    elif status:
         orders = orders.filter(status=status)
     return render(request, 'store/order_list.html', {
         'orders': orders,
@@ -473,6 +484,29 @@ def order_detail(request, order_code):
 
 @login_required
 @require_POST
+def upload_payment_proof(request, order_code):
+    order = get_object_or_404(Order, order_code=order_code, user=request.user)
+
+    if order.payment_method != 'bank':
+        messages.error(request, 'Chỉ có thể tải biên lai cho đơn hàng thanh toán bằng chuyển khoản.')
+        return redirect('store:order_detail', order_code=order_code)
+
+    if order.payment_proof:
+        messages.warning(request, 'Biên lai đã được tải lên trước đó.')
+        return redirect('store:order_detail', order_code=order_code)
+
+    if request.method == 'POST' and 'payment_proof' in request.FILES:
+        order.payment_proof = request.FILES['payment_proof']
+        order.save()
+        messages.success(request, 'Biên lai chuyển khoản đã được tải lên thành công!')
+    else:
+        messages.error(request, 'Vui lòng chọn một file biên lai để tải lên.')
+
+    return redirect('store:order_detail', order_code=order_code)
+
+
+@login_required
+@require_POST
 def return_request(request, order_code):
     order = get_object_or_404(Order, order_code=order_code, user=request.user)
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
@@ -483,6 +517,12 @@ def return_request(request, order_code):
         messages.warning(request, 'Đơn hàng này đã có yêu cầu trả hàng.')
         return redirect('store:order_detail', order_code=order_code)
 
+    if 'customer_return_proof' not in request.FILES:
+        if is_ajax:
+            return JsonResponse({'success': False, 'error': 'Vui lòng upload ảnh hoặc video bằng chứng sản phẩm trả hàng.'})
+        messages.error(request, 'Vui lòng upload ảnh hoặc video bằng chứng sản phẩm trả hàng.')
+        return redirect('store:order_detail', order_code=order_code)
+
     ReturnRequest.objects.create(
         order=order,
         reason=request.POST.get('reason', 'other'),
@@ -490,14 +530,16 @@ def return_request(request, order_code):
         bank_account_number=request.POST.get('bank_account_number', ''),
         bank_account_holder=request.POST.get('bank_account_holder', ''),
         note=request.POST.get('note', ''),
+        customer_return_proof=request.FILES['customer_return_proof'],
     )
+
     order.status = 'returning'
     order.save()
 
     if is_ajax:
         return JsonResponse({'success': True})
     messages.success(request, 'Gửi yêu cầu trả hàng thành công!')
-    return redirect('store:order_list')
+    return redirect('store:order_detail', order_code=order_code)
 
 
 # ─────────────────────────────────────────
@@ -526,35 +568,37 @@ def profile(request):
 
 @login_required
 def address_manage(request):
-    addresses = Address.objects.filter(user=request.user)
+    redirect_url = f"{reverse('store:profile')}?tab=address"
+
     if request.method == 'GET':
-        return redirect('store:profile')
+        return redirect(redirect_url)
+
     if request.method == 'POST':
-        # Xóa địa chỉ
+        # 1. Xóa địa chỉ
         delete_id = request.POST.get('delete_id')
         if delete_id:
             Address.objects.filter(id=delete_id, user=request.user).delete()
             messages.success(request, 'Đã xóa địa chỉ.')
-            return redirect('store:profile')
+            return redirect(redirect_url)
 
-        # Đặt mặc định
+        # 2. Đặt mặc định
         set_default = request.POST.get('set_default')
         if set_default:
             Address.objects.filter(user=request.user).update(is_default=False)
             Address.objects.filter(id=set_default, user=request.user).update(is_default=True)
-            messages.success(request, 'Đã đặt địa chỉ mặc định.')
-            return redirect('store:profile')
+            messages.success(request, 'Đã cập nhật địa chỉ mặc định.')
+            return redirect(redirect_url)
 
-        # Thêm mới
+        # 3. Thêm địa chỉ mới
         full_name = request.POST.get('full_name', '').strip()
         phone = request.POST.get('phone', '').strip()
         detail = request.POST.get('detail', '').strip()
         city = request.POST.get('city', '').strip()
-        
+
         if not full_name or not phone or not detail or not city:
             messages.error(request, 'Vui lòng điền đầy đủ thông tin địa chỉ.')
-            return redirect('store:profile')
-        
+            return redirect(redirect_url)
+
         is_default = request.POST.get('is_default') == 'on'
         if is_default:
             Address.objects.filter(user=request.user).update(is_default=False)
@@ -567,5 +611,7 @@ def address_manage(request):
             is_default=is_default,
         )
         messages.success(request, 'Thêm địa chỉ thành công!')
-        return redirect('store:profile')
+        return redirect(redirect_url)
+
+    addresses = Address.objects.filter(user=request.user)
     return render(request, 'store/address.html', {'addresses': addresses})

@@ -121,9 +121,9 @@
     <a class="logo" href="{% url 'store:home' %}"><span>RABONA</span><span>SPORT</span></a>
     <nav class="nav-desktop">
       <a class="nav-link {% block nav_home %}{% endblock %}" href="{% url 'store:home' %}">TRANG CHỦ</a>
-      <a class="nav-link {% block nav_giay %}{% endblock %}" href="{% url 'store:product_list' %}?category=giay-bong-a-3927">GIÀY BÓNG ĐÁ</a>
-      <a class="nav-link {% block nav_quan_ao %}{% endblock %}" href="{% url 'store:product_list' %}?category=ao-au-3927">QUẦN ÁO</a>
-      <a class="nav-link {% block nav_phu_kien %}{% endblock %}" href="{% url 'store:product_list' %}?category=phu-kien-3927">PHỤ KIỆN</a>
+      <a class="nav-link {% block nav_giay %}{% endblock %}" href="{% url 'store:product_list' %}?category=giay-bong-da">GIÀY BÓNG ĐÁ</a>
+      <a class="nav-link {% block nav_quan_ao %}{% endblock %}" href="{% url 'store:product_list' %}?category=ao-dau">ÁO ĐẤU</a>
+      <a class="nav-link {% block nav_phu_kien %}{% endblock %}" href="{% url 'store:product_list' %}?category=phu-kien">PHỤ KIỆN</a>
     </nav>
     <div class="spacer"></div>
     <div class="header-actions">
@@ -223,9 +223,9 @@
       <nav class="mobile-nav">
         <div class="mobile-nav-dropdown">
           <a class="mobile-nav-link {% block mobile_nav_home %}{% endblock %}" href="{% url 'store:home' %}">TRANG CHỦ</a>
-          <a class="mobile-nav-link {% block mobile_nav_giay %}{% endblock %}" href="{% url 'store:product_list' %}?category=giay-bong-a-3927">GIÀY BÓNG ĐÁ</a>
-          <a class="mobile-nav-link {% block mobile_nav_quan_ao %}{% endblock %}" href="{% url 'store:product_list' %}?category=ao-au-3927">QUẦN ÁO</a>
-          <a class="mobile-nav-link {% block mobile_nav_phu_kien %}{% endblock %}" href="{% url 'store:product_list' %}?category=phu-kien-3927">PHỤ KIỆN</a>
+          <a class="mobile-nav-link {% block mobile_nav_giay %}{% endblock %}" href="{% url 'store:product_list' %}?category=giay-bong-da">GIÀY BÓNG ĐÁ</a>
+          <a class="mobile-nav-link {% block mobile_nav_quan_ao %}{% endblock %}" href="{% url 'store:product_list' %}?category=ao-dau">ÁO ĐẤU</a>
+          <a class="mobile-nav-link {% block mobile_nav_phu_kien %}{% endblock %}" href="{% url 'store:product_list' %}?category=phu-kien">PHỤ KIỆN</a>
           {% if user.is_authenticated %}
           <a class="mobile-nav-link" href="{% url 'store:order_list' %}">ĐƠN HÀNG</a>
           <form method="post" action="{% url 'logout' %}" style="margin:0;">
