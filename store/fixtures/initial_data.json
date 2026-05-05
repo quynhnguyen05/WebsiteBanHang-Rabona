@@ -1,0 +1,115 @@
+[
+  {
+    "model": "store.category",
+    "pk": 1,
+    "fields": { "name": "Giày bóng đá", "slug": "giay-bong-da" }
+  },
+  {
+    "model": "store.category",
+    "pk": 2,
+    "fields": { "name": "Quần áo", "slug": "quan-ao" }
+  },
+  {
+    "model": "store.category",
+    "pk": 3,
+    "fields": { "name": "Phụ kiện", "slug": "phu-kien" }
+  },
+  {
+    "model": "store.product",
+    "pk": 1,
+    "fields": {
+      "category": 1, "name": "Giày bóng đá Lingy UST083", "slug": "giay-bong-da-lingy-ust083",
+      "description": "Giày đá bóng Lingy UST083 được thiết kế với đế cao su giảm chấn, mang lại cảm giác thoải mái khi di chuyển.",
+      "price": "1120000", "sold": 2000, "image": "", "origin": "Việt Nam",
+      "gender": "unisex", "is_active": true, "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 2,
+    "fields": {
+      "category": 1, "name": "Giày bóng đá Nike Mercurial Vapor 13 Pro", "slug": "nike-mercurial-vapor-13-pro",
+      "description": "Nike Mercurial Vapor 13 Pro Hard Ground - tốc độ và kiểm soát tuyệt vời.",
+      "price": "799000", "sold": 1500, "image": "", "origin": "Việt Nam",
+      "gender": "unisex", "is_active": true, "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 3,
+    "fields": {
+      "category": 1, "name": "Giày bóng đá Adidas F5E Elite Lawn", "slug": "adidas-f5e-elite-lawn",
+      "description": "Adidas F5E Elite Lawn - thiết kế nhẹ, phù hợp sân cỏ nhân tạo.",
+      "price": "270000", "sold": 800, "image": "", "origin": "Việt Nam",
+      "gender": "unisex", "is_active": true, "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 4,
+    "fields": {
+      "category": 1, "name": "Giày bóng đá Nike Mercurial Vapor 16 Elite", "slug": "nike-mercurial-vapor-16-elite",
+      "description": "Nike Mercurial Vapor 16 Elite - công nghệ mới nhất từ Nike.",
+      "price": "750000", "sold": 600, "image": "", "origin": "Việt Nam",
+      "gender": "unisex", "is_active": true, "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 5,
+    "fields": {
+      "category": 1, "name": "Giày bóng đá Mizuno Neo 4", "slug": "mizuno-neo-4",
+      "description": "Mizuno Neo 4 - chất lượng Nhật Bản, bền bỉ và thoải mái.",
+      "price": "365000", "sold": 400, "image": "", "origin": "Việt Nam",
+      "gender": "unisex", "is_active": true, "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "store.productvariant", "pk": 1,
+    "fields": { "product": 1, "color_name": "Cam", "color_hex": "#F04B3A", "size": "40", "stock": 10 }
+  },
+  {
+    "model": "store.productvariant", "pk": 2,
+    "fields": { "product": 1, "color_name": "Trắng", "color_hex": "#F2F2F2", "size": "40", "stock": 8 }
+  },
+  {
+    "model": "store.productvariant", "pk": 3,
+    "fields": { "product": 1, "color_name": "Vàng", "color_hex": "#FFE27A", "size": "41", "stock": 5 }
+  },
+  {
+    "model": "store.productvariant", "pk": 4,
+    "fields": { "product": 2, "color_name": "Vàng", "color_hex": "#F5E65E", "size": "40", "stock": 7 }
+  },
+  {
+    "model": "store.productvariant", "pk": 5,
+    "fields": { "product": 2, "color_name": "Trắng", "color_hex": "#EFEFEF", "size": "40", "stock": 6 }
+  },
+  {
+    "model": "store.productvariant", "pk": 6,
+    "fields": { "product": 2, "color_name": "Hồng", "color_hex": "#FF5A86", "size": "39", "stock": 4 }
+  },
+  {
+    "model": "store.productvariant", "pk": 7,
+    "fields": { "product": 3, "color_name": "Đỏ", "color_hex": "#D14B63", "size": "38", "stock": 12 }
+  },
+  {
+    "model": "store.productvariant", "pk": 8,
+    "fields": { "product": 3, "color_name": "Trắng", "color_hex": "#F6F6F6", "size": "39", "stock": 9 }
+  },
+  {
+    "model": "store.productvariant", "pk": 9,
+    "fields": { "product": 4, "color_name": "Xanh", "color_hex": "#2C6CF6", "size": "40", "stock": 5 }
+  },
+  {
+    "model": "store.productvariant", "pk": 10,
+    "fields": { "product": 4, "color_name": "Cam", "color_hex": "#FF7A18", "size": "41", "stock": 3 }
+  },
+  {
+    "model": "store.productvariant", "pk": 11,
+    "fields": { "product": 5, "color_name": "Đen", "color_hex": "#111111", "size": "40", "stock": 8 }
+  },
+  {
+    "model": "store.productvariant", "pk": 12,
+    "fields": { "product": 5, "color_name": "Đỏ", "color_hex": "#FF4D4D", "size": "42", "stock": 6 }
+  }
+]

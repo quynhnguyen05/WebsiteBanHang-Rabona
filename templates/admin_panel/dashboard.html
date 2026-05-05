@@ -1,0 +1,159 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Tổng quan Quản trị - Rabona Sport{% endblock %}
+{% block page_title %}TỔNG QUAN HỆ THỐNG{% endblock %}
+{% block breadcrumb %}Admin > <span>Trang chủ</span>{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* CSS đồng bộ cho Modal Chi tiết đơn hàng */
+    .address-box { display: flex; gap: 15px; border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; margin-bottom: 20px; }
+    .address-box i { font-size: 20px; color: #4b5563; margin-top: 2px; }
+    .address-text { font-size: 13px; color: #6b7280; line-height: 1.5; text-align: left; }
+    .info-box { border: 1px solid var(--border-color); border-radius: 6px; padding: 15px 20px; margin-bottom: 20px; background-color: #fafafa; }
+    .info-row { display: flex; margin-bottom: 12px; font-size: 14px; align-items: flex-start; }
+    .info-label { font-weight: 600; color: #374151; width: 140px; flex-shrink: 0; }
+    .info-value { color: #111; font-weight: 500; flex: 1; text-align: left; }
+    
+    .modal-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid var(--border-color);}
+    .modal-table th { background-color: #f1f5f9; padding: 12px; font-size: 13px; font-weight: 600; color: #475569; text-align: center;}
+    .modal-table td { padding: 12px; font-size: 13px; color: #374151; border-bottom: 1px solid var(--border-color); text-align: center; }
+    .modal-table td:first-child, .modal-table th:first-child { text-align: left; }
+
+    .totals-box { border: 1px solid var(--border-color); border-radius: 6px; padding: 15px 20px; }
+    .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: #4b5563; }
+    .total-row.divider { border-top: 1px solid var(--border-color); margin-top: 12px; padding-top: 12px; }
+    .total-final { font-size: 16px; font-weight: 700; color: #dc2626; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="stats-cards">
+        <div class="stat-card">
+            <i class="fas fa-shopping-bag stat-icon blue"></i>
+            <div class="stat-info">
+                <span class="stat-title">Tổng đơn hàng</span>
+                <span class="stat-value">{{ tong_don_hang }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-hand-holding-usd stat-icon green"></i>
+            <div class="stat-info">
+                <span class="stat-title">Tổng doanh thu (Đã giao)</span>
+                <span class="stat-value">{{ doanh_thu|floatformat:0 }} đ</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-truck stat-icon orange"></i>
+            <div class="stat-info">
+                <span class="stat-title">Đơn đang giao</span>
+                <span class="stat-value">{{ don_dang_giao }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-users stat-icon blue"></i>
+            <div class="stat-info">
+                <span class="stat-title">Tổng khách hàng</span>
+                <span class="stat-value">{{ tong_kh }}</span>
+            </div>
+        </div>
+    </div>
+
+    <h4 style="margin-bottom: 15px; color: #333;">Đơn hàng mới nhất</h4>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Tên khách hàng</th>
+                    <th>Ngày đặt</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for don in don_hang_moi %}
+                <tr>
+                    <td><span class="order-id">#{{ don.order_code }}</span></td>
+                    <td>{{ don.recipient_name }}</td>
+                    <td>{{ don.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="price">{{ don.total|floatformat:0 }} đ</td>
+                    <td>
+                        {% if don.status == 'pending' %}<span style="color: #f59e0b; font-weight: 600;">Chờ xác nhận</span>
+                        {% elif don.status == 'confirmed' %}<span style="color: #8b5cf6; font-weight: 600;">Đang chuẩn bị</span>
+                        {% elif don.status == 'shipping' %}<span style="color: #3b82f6; font-weight: 600;">Đang giao</span>
+                        {% elif don.status == 'delivered' %}<span style="color: #10b981; font-weight: 600;">Đã giao</span>
+                        {% elif don.status == 'returning' %}<span style="color: #ef4444; font-weight: 600;">Trả hàng</span>
+                        {% elif don.status == 'returned' %}<span style="color: #6b7280; font-weight: 600;">Đã trả hàng</span>
+                        {% else %}<span style="color: #6b7280; font-weight: 600;">{{ don.get_status_display }}</span>{% endif %}
+                    </td>
+                    <td><button class="btn-action btn-view" onclick="openModal('modalView_{{ don.order_code }}')"><i class="fas fa-eye"></i> Xem</button></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" style="text-align: center; padding: 30px;">Chưa có đơn hàng nào.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block modals %}
+    {% for don in don_hang_moi %}
+    <div class="modal-overlay" id="modalView_{{ don.order_code }}">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">CHI TIẾT ĐƠN HÀNG #{{ don.order_code }}</div>
+                <button class="btn-close" onclick="closeModal('modalView_{{ don.order_code }}')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="address-box">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div class="address-text">{{ don.shipping_address }}, {{ don.shipping_city }}</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-row"><span class="info-label">Khách hàng:</span> <span class="info-value">{{ don.recipient_name }}</span></div>
+                    <div class="info-row"><span class="info-label">SĐT:</span> <span class="info-value">{{ don.recipient_phone }}</span></div>
+                    <div class="info-row"><span class="info-label">Trạng thái:</span> <span class="info-value" style="color: var(--primary-green); font-weight: 600;">{{ don.get_status_display }}</span></div>
+                </div>
+
+                <table class="modal-table">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Kích thước</th>
+                            <th>Màu</th>
+                            <th>SL</th>
+                            <th>Đơn giá</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in don.items.all %}
+                        <tr>
+                            <td>{{ item.product_name }}</td>
+                            <td>{{ item.size }}</td>
+                            <td>{{ item.color }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td style="font-weight: 600;">{{ item.price|floatformat:0 }} đ</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" style="text-align:center;">Không có sản phẩm</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="totals-box">
+                    <div class="total-row"><span>Phí vận chuyển</span> <span>{{ don.shipping_fee|floatformat:0 }} đ</span></div>
+                    <div class="total-row divider">
+                        <span style="font-weight: bold;">Tổng thanh toán</span>
+                        <span class="total-final">{{ don.total|floatformat:0 }} đ</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-exit" onclick="closeModal('modalView_{{ don.order_code }}')">Thoát</button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}

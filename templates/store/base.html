@@ -1,0 +1,620 @@
+{% load static %}
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Rabona Sport{% endblock %}</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap");
+    :root { --brand-dark: #333f48; --brand-green: #14ae5c; --brand-red: #fa0c0c; --footer-bg: #333f48; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #ffffff; color: #0f172a; }
+    .container { max-width: 1440px; margin: 0 auto; padding: 0 16px; }
+    @media (min-width: 768px) { .container { padding: 0 32px; } }
+    @media (min-width: 1024px) { .container { padding: 0 40px; } }
+    .site-header { position: sticky; top: 0; z-index: 50; background: var(--brand-dark); }
+    .header-inner { height: 73px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { text-decoration: none; display: inline-flex; flex-direction: column; font-family: Montserrat, sans-serif; font-weight: 800; color: var(--brand-green); font-size: 20px; line-height: 1.1; white-space: nowrap; margin-right: 18px; letter-spacing: 0.5px; }
+    @media (min-width: 768px) { .logo { font-size: 22px; } }
+    .nav-desktop { display: none; align-items: center; height: 73px; gap: 0; }
+    @media (min-width: 1024px) { .nav-desktop { display: flex; } }
+    .nav-link { height: 73px; display: flex; align-items: center; padding: 0 18px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; text-decoration: none; color: #ffffff; white-space: nowrap; transition: color 160ms ease, background-color 160ms ease; }
+    .nav-link:hover { color: var(--brand-green); }
+    .nav-link.active { background: rgba(20,174,92,0.5); color: #000; }
+    .spacer { flex: 1; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .search { display: none; align-items: center; border-radius: 10px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.12); width: 160px; gap: 6px; }
+    @media (min-width: 768px) { .search { display: flex; } }
+    .search input { width: 100%; border: none; outline: none; background: transparent; color: #fff; font-size: 12px; font-family: Inter, sans-serif; }
+    .search input::placeholder { color: rgba(156,163,175,0.8); }
+    .icon-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; padding: 0; cursor: pointer; }
+    .user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: transparent; display: flex; align-items: center; justify-content: center; border: 2px solid rgb(241,239,239); transition: all 0.2s ease; }
+    .user-avatar:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
+    .user-name { font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: white; display: none; }
+    @media (min-width: 768px) { .user-name { display: block; } }
+    .mobile-toggle { position: absolute; opacity: 0; pointer-events: none; }
+    .nav-toggle { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+    @media (min-width: 1024px) { .nav-toggle { display: none; } }
+    .mobile-nav { display: none; }
+    .mobile-toggle:checked ~ .mobile-nav { display: block; }
+    .mobile-nav-dropdown { border-top: 1px solid rgba(255,255,255,0.1); padding: 14px 16px 18px; background: var(--brand-dark); }
+    .mobile-nav-link { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); text-decoration: none; color: #fff; }
+    .mobile-nav-link.active { color: var(--brand-green); }
+    .site-footer { background: var(--footer-bg); color: rgba(255,255,255,0.92); }
+    .footer-wrap { max-width: 1440px; margin: 0 auto; padding: 44px 16px 22px; }
+    @media (min-width: 768px) { .footer-wrap { padding: 48px 32px 22px; } }
+    @media (min-width: 1024px) { .footer-wrap { padding: 48px 40px 22px; } }
+    .footer-row1 { display: grid; grid-template-columns: 1fr; gap: 26px; }
+    @media (min-width: 768px) { .footer-row1 { grid-template-columns: 1.2fr 1fr 1fr; } }
+    .footer-title { font-family: Montserrat, sans-serif; font-weight: 800; font-size: 16px; color: var(--brand-green); }
+    .footer-desc { margin: 12px 0 0; font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.7); max-width: 420px; }
+    .footer-contact { display: flex; align-items: flex-start; gap: 12px; }
+    .footer-contact .label { font-family: Montserrat, sans-serif; font-weight: 700; font-size: 13px; color: rgba(255,255,255,0.9); }
+    .footer-contact .value { font-size: 13px; color: rgba(255,255,255,0.8); }
+    .footer-row2 { margin-top: 40px; display: grid; grid-template-columns: 1fr; gap: 34px; }
+    @media (min-width: 768px) { .footer-row2 { grid-template-columns: 1fr 1fr; } }
+    .footer-menu-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
+    .footer-menu-item span { font-family: Montserrat, sans-serif; font-weight: 800; font-size: 13px; text-transform: uppercase; color: rgba(255,255,255,0.95); }
+    .footer-follow { justify-self: end; }
+    .footer-follow-title { font-family: Montserrat, sans-serif; font-weight: 800; font-size: 13px; text-transform: uppercase; color: rgba(255,255,255,0.95); }
+    .social-row { margin-top: 16px; display: flex; align-items: center; gap: 12px; }
+    .social-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .footer-row3 { margin-top: 36px; font-size: 12px; color: rgba(255,255,255,0.7); }
+    .cart-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+    .cart-overlay.open { opacity: 1; pointer-events: all; }
+    .cart-modal { background: #fff; width: 440px; max-width: calc(100vw - 24px); border-radius: 4px; overflow: hidden; transform: translateY(20px); transition: transform 0.25s ease; max-height: 90vh; display: flex; flex-direction: column; }
+    .cart-overlay.open .cart-modal { transform: translateY(0); }
+    .cm-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 14px; }
+    .cm-title { font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; color: #0f172a; }
+    .cm-close { width: 28px; height: 28px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; color: #6b7280; font-size: 20px; line-height: 1; }
+    .cm-close:hover { color: #111; }
+    .cm-select-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; }
+    .cm-select-bar label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
+    .cm-select-bar input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--brand-dark); cursor: pointer; }
+    .cm-edit-info { font-size: 12px; color: #6b7280; text-align: right; }
+    .cm-edit-info a { color: var(--brand-dark); text-decoration: none; font-weight: 600; }
+    .cm-items { overflow-y: auto; flex: 1; }
+    .cm-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #f3f4f6; }
+    .cm-item-check { width: 16px; height: 16px; accent-color: var(--brand-dark); cursor: pointer; flex-shrink: 0; }
+    .cm-item-img { width: 72px; height: 72px; object-fit: contain; border: 1px solid #e5e7eb; border-radius: 4px; flex-shrink: 0; background: #f9fafb; }
+    .cm-item-body { flex: 1; min-width: 0; }
+    .cm-item-name { font-size: 12px; font-weight: 500; color: #0f172a; line-height: 1.4; }
+    .cm-item-meta { margin-top: 4px; font-size: 11px; color: #9ca3af; }
+    .cm-item-price { margin-top: 6px; font-size: 13px; font-weight: 700; color: #0f172a; }
+    .cm-item-qty { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+    .qty-btn { width: 24px; height: 24px; border: none; border-radius: 3px; background: transparent; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; color: #374151; }
+    .qty-btn:hover { background: #f3f4f6; }
+    .qty-val { font-size: 13px; min-width: 20px; text-align: center; background: var(--brand-dark); border-radius: 4px; color: #fff; padding: 2px 6px; }
+    .cm-suggest { padding: 12px 20px 6px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; color: #6b7280; text-transform: uppercase; }
+    .cm-footer { padding: 14px 20px 18px; border-top: 1px solid #e5e7eb; }
+    .cm-discount-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
+    .cm-discount-label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #374151; }
+    .cm-discount-label svg { flex-shrink: 0; }
+    .cm-discount-cta { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #9ca3af; }
+    .cm-total-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0 14px; }
+    .cm-total-label { font-size: 13px; color: #374151; }
+    .cm-total-val { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .cm-order-btn { width: 100%; padding: 14px; background: var(--brand-green); color: #fff; border: none; border-radius: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; letter-spacing: 0.5px; transition: background 0.18s ease; }
+    .cm-order-btn:hover { background: #0f9a4e; }
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 300; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+    .toast { background: #fff; border: 1px solid #e5e7eb; border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); display: flex; align-items: center; gap: 14px; padding: 12px 16px; min-width: 280px; max-width: 380px; transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease; opacity: 0; }
+    .toast.show { transform: translateX(0); opacity: 1; }
+    .toast.hide { transform: translateX(120%); opacity: 0; }
+    .toast-img { width: 56px; height: 56px; object-fit: contain; border: 1px solid #e5e7eb; border-radius: 3px; flex-shrink: 0; background: #f9fafb; }
+    .toast-body { flex: 1; }
+    .toast-msg { font-size: 12px; color: #374151; line-height: 1.4; }
+    .toast-btn { padding: 8px 14px; border: 1.5px solid #0f172a; background: transparent; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; border-radius: 2px; transition: background 0.15s ease, color 0.15s ease; }
+    .toast-btn:hover { background: #0f172a; color: #fff; }
+    .toast-btn.green { border-color: var(--brand-green); color: var(--brand-green); }
+    .toast-btn.green:hover { background: var(--brand-green); color: #fff; }
+    .user-dropdown-arrow { display:inline-block; margin-left:4px; transition:transform 0.2s; }
+    .user-dropdown-arrow.open { transform:rotate(180deg); }
+    {% block extra_css %}{% endblock %}
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="{% url 'store:home' %}"><span>RABONA</span><span>SPORT</span></a>
+    <nav class="nav-desktop">
+      <a class="nav-link {% block nav_home %}{% endblock %}" href="{% url 'store:home' %}">TRANG CHỦ</a>
+      <a class="nav-link {% block nav_giay %}{% endblock %}" href="{% url 'store:product_list' %}?category=giay-bong-da">GIÀY BÓNG ĐÁ</a>
+      <a class="nav-link {% block nav_quan_ao %}{% endblock %}" href="{% url 'store:product_list' %}?category=ao-dau">ÁO ĐẤU</a>
+      <a class="nav-link {% block nav_phu_kien %}{% endblock %}" href="{% url 'store:product_list' %}?category=phu-kien">PHỤ KIỆN</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="header-actions">
+      <form class="search" method="get" action="{% url 'store:product_list' %}">
+        <input type="text" name="q" placeholder="Tìm sản phẩm..." value="{{ request.GET.q }}" />
+        <button type="submit" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;padding:0;">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M14.35 13.65L11.22 10.52A6 6 0 1 0 10.52 11.22l3.13 3.13a.5.5 0 0 0 .7-.7z" stroke="white" stroke-opacity="0.9" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+      </form>
+      {% if user.is_authenticated %}
+      <button class="icon-btn" aria-label="Giỏ hàng" onclick="openCart()" style="position:relative;">
+        <svg width="28" height="28" viewBox="0 0 35 35" fill="none"><path d="M5.83 13.13H29.17L27.95 26.51C27.88 27.24 27.55 27.91 27.01 28.4C26.47 28.89 25.77 29.17 25.05 29.17H9.95C9.23 29.17 8.53 28.89 7.99 28.4C7.45 27.91 7.12 27.24 7.05 26.51L5.83 13.13Z" stroke="white" stroke-width="1.7" stroke-linejoin="round"/><path d="M11.67 16.04V11.67C11.67 10.12 12.28 8.64 13.38 7.54C14.47 6.45 15.95 5.83 17.5 5.83C19.05 5.83 20.53 6.45 21.62 7.54C22.72 8.64 23.33 10.12 23.33 11.67V16.04" stroke="white" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span id="cartBadge" style="position:absolute;top:4px;right:4px;background:var(--brand-red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;"></span>
+      </button>
+      <!-- User dropdown -->
+      <div class="user-info" style="position:relative;" id="userDropdownWrap">
+        <div class="user-avatar" onclick="toggleUserDropdown()" style="cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" stroke="white" stroke-width="1.5"/><path d="M5.5 21C5.5 17.134 8.634 14 12.5 14C16.366 14 19.5 17.134 19.5 21" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <span class="user-name" onclick="toggleUserDropdown()" style="cursor:pointer;">{{ user.username }}</span>
+        <!-- Dropdown menu -->
+        <div id="userDropdown" style="display:none;position:absolute;top:calc(100% + 12px);right:0;background:#fff;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.15);min-width:220px;z-index:200;overflow:hidden;border:1px solid #e5e7eb;">
+          <!-- Header user -->
+          <div style="padding:14px 16px 10px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#9ca3af" stroke-width="1.5"/><path d="M5 20c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;color:#0f172a;">{{ user.username }}</div>
+              <a href="{% url 'store:profile' %}" style="font-size:11px;color:#14ae5c;text-decoration:none;display:flex;align-items:center;gap:3px;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="#14ae5c" stroke-width="2" stroke-linecap="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#14ae5c" stroke-width="2" stroke-linecap="round"/></svg>
+                Sửa hồ sơ
+              </a>
+            </div>
+          </div>
+          <!-- Tài khoản -->
+          <div style="padding:8px 0 4px;">
+            <div style="padding:4px 16px 6px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;">Tài khoản của tôi</div>
+            <a href="{% url 'store:profile' %}" style="display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:#374151;text-decoration:none;transition:background 0.12s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#6b7280" stroke-width="1.5"/><path d="M5 20c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Hồ sơ
+            </a>
+            <a href="{% url 'store:profile' %}?tab=password" style="display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:#374151;text-decoration:none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="#6b7280" stroke-width="1.5"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Đổi mật khẩu
+            </a>
+            <a href="{% url 'store:profile' %}?tab=address" style="display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:#374151;text-decoration:none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4.5 8-12a8 8 0 10-16 0c0 7.5 8 12 8 12z" stroke="#6b7280" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke="#6b7280" stroke-width="1.5"/></svg>
+              Địa chỉ
+            </a>
+          </div>
+          <!-- Đơn hàng -->
+          <div style="border-top:1px solid #f3f4f6;padding:8px 0 4px;">
+            <div style="padding:4px 16px 6px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;">Đơn hàng</div>
+            <a href="{% url 'store:order_list' %}" style="display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:#374151;text-decoration:none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="9" y="3" width="6" height="4" rx="1" stroke="#6b7280" stroke-width="1.5"/></svg>
+              Tất cả đơn hàng
+            </a>
+            <a href="{% url 'store:order_list' %}?status=shipping" style="display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:#374151;text-decoration:none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="1" y="8" width="15" height="10" rx="1" stroke="#6b7280" stroke-width="1.5"/><path d="M16 11h4l3 4v3h-7V11z" stroke="#6b7280" stroke-width="1.5" stroke-linejoin="round"/><circle cx="5.5" cy="18.5" r="1.5" stroke="#6b7280" stroke-width="1.5"/><circle cx="18.5" cy="18.5" r="1.5" stroke="#6b7280" stroke-width="1.5"/></svg>
+              Vận chuyển
+            </a>
+            <a href="{% url 'store:order_list' %}?status=completed" style="display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:#374151;text-decoration:none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Hoàn thành
+            </a>
+            <a href="{% url 'store:order_list' %}?status=returning" style="display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:#374151;text-decoration:none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 10h10a8 8 0 018 8v2M3 10l6 6M3 10l6-6" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Trả hàng/hoàn tiền
+            </a>
+          </div>
+          <!-- Đăng xuất -->
+          <div style="border-top:1px solid #f3f4f6;padding:4px 0 6px;">
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit" style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:#ef4444;background:none;border:none;cursor:pointer;text-align:left;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="16 17 21 12 16 7" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="21" y1="12" x2="9" y2="12" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Đăng xuất
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <button class="icon-btn" aria-label="Giỏ hàng" onclick="window.location.href='{% url 'login' %}'">
+        <svg width="28" height="28" viewBox="0 0 35 35" fill="none"><path d="M5.83 13.13H29.17L27.95 26.51C27.88 27.24 27.55 27.91 27.01 28.4C26.47 28.89 25.77 29.17 25.05 29.17H9.95C9.23 29.17 8.53 28.89 7.99 28.4C7.45 27.91 7.12 27.24 7.05 26.51L5.83 13.13Z" stroke="white" stroke-width="1.7" stroke-linejoin="round"/><path d="M11.67 16.04V11.67C11.67 10.12 12.28 8.64 13.38 7.54C14.47 6.45 15.95 5.83 17.5 5.83C19.05 5.83 20.53 6.45 21.62 7.54C22.72 8.64 23.33 10.12 23.33 11.67V16.04" stroke="white" stroke-width="1.7" stroke-linecap="round"/></svg>
+      </button>
+      <div class="user-info">
+        <div class="user-avatar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" stroke="white" stroke-width="1.5"/><path d="M5.5 21C5.5 17.134 8.634 14 12.5 14C16.366 14 19.5 17.134 19.5 21" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <a href="{% url 'login' %}" class="user-name" style="text-decoration:none;color:white;">Đăng nhập</a>
+        <span style="color:rgba(255,255,255,0.4);font-size:13px;font-family:Montserrat,sans-serif;font-weight:600;">|</span>
+        <a href="{% url 'login' %}?mode=register" class="user-name" style="text-decoration:none;color:white;">Đăng ký</a>
+      </div>
+      {% endif %}
+      <input class="mobile-toggle" type="checkbox" id="mobile-toggle" />
+      <label class="nav-toggle" for="mobile-toggle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 12H21M3 6H21M3 18H21" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></label>
+      <nav class="mobile-nav">
+        <div class="mobile-nav-dropdown">
+          <a class="mobile-nav-link {% block mobile_nav_home %}{% endblock %}" href="{% url 'store:home' %}">TRANG CHỦ</a>
+          <a class="mobile-nav-link {% block mobile_nav_giay %}{% endblock %}" href="{% url 'store:product_list' %}?category=giay-bong-da">GIÀY BÓNG ĐÁ</a>
+          <a class="mobile-nav-link {% block mobile_nav_quan_ao %}{% endblock %}" href="{% url 'store:product_list' %}?category=ao-dau">ÁO ĐẤU</a>
+          <a class="mobile-nav-link {% block mobile_nav_phu_kien %}{% endblock %}" href="{% url 'store:product_list' %}?category=phu-kien">PHỤ KIỆN</a>
+          {% if user.is_authenticated %}
+          <a class="mobile-nav-link" href="{% url 'store:order_list' %}">ĐƠN HÀNG</a>
+          <form method="post" action="{% url 'logout' %}" style="margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="mobile-nav-link" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;color:#fff;padding:14px 0;">ĐĂNG XUẤT</button>
+          </form>
+          {% else %}
+          <a class="mobile-nav-link" href="{% url 'login' %}">ĐĂNG NHẬP</a>
+          {% endif %}
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+{% if messages %}
+<div style="max-width:1440px;margin:0 auto;padding:8px 40px;">
+  {% for msg in messages %}
+  <div style="padding:10px 16px;border-radius:4px;margin-bottom:6px;font-size:13px;{% if msg.tags == 'success' %}background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;{% elif msg.tags == 'error' %}background:#fef2f2;color:#991b1b;border:1px solid #fecaca;{% else %}background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;{% endif %}">{{ msg }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<footer class="site-footer">
+  <div class="footer-wrap">
+    <div class="footer-row1">
+      <div>
+        <div class="footer-title">RABONA XIN CHÀO!</div>
+        <p class="footer-desc">Chúng tôi luôn quý trọng và tiếp thu mọi ý kiến đóng góp từ khách hàng, nhằm không ngừng cải thiện và nâng tầm trải nghiệm dịch vụ cũng như chất lượng sản phẩm.</p>
+      </div>
+      <div class="footer-contact">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4.5 8-12a8 8 0 10-16 0c0 7.5 8 12 8 12z" stroke="rgba(255,255,255,0.8)" stroke-width="1.8"/><circle cx="12" cy="10" r="3" stroke="rgba(255,255,255,0.8)" stroke-width="1.8"/></svg>
+        <div><div class="label">Email</div><div class="value">cskh.rabona@gmail.com</div></div>
+      </div>
+      <div class="footer-contact">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="rgba(255,255,255,0.8)" stroke-width="1.8"/><path d="M3 7l9 6 9-6" stroke="rgba(255,255,255,0.8)" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <div><div class="label">Địa chỉ</div><div class="value">18 Hồ Đắc Di, An Cựu, TP Huế</div></div>
+      </div>
+    </div>
+    <div class="footer-row2">
+      <div>
+        <div class="footer-menu-item"><span>VỀ CHÚNG TÔI</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="footer-menu-item"><span>MUA SẮM</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="footer-menu-item"><span>TIN TỨC</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="footer-menu-item"><span>DỊCH VỤ KHÁCH HÀNG</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="footer-follow">
+        <div class="footer-follow-title">THEO DÕI CHÚNG TÔI</div>
+        <div class="social-row">
+          <div class="social-btn" style="background:#0866FF;"><svg width="20" height="20" viewBox="0 0 24 24"><text x="1" y="17" font-family="Arial" font-weight="bold" font-size="11" fill="white">Zalo</text></svg></div>
+          <div class="social-btn" style="background:#0866FF;"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></div>
+          <div class="social-btn" style="background:#0866FF;"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12c0 2.76 1.12 5.26 2.93 7.07L4 22l2.93-.93C8.74 22.88 10.29 23 12 23c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg></div>
+          <div class="social-btn" style="background:#FF0069;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="white" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke="white" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5" fill="white"/></svg></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-row3">© 2026 Rabona Sport</div>
+  </div>
+</footer>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Confirm Modal -->
+<div id="confirmModal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:28px 24px;width:320px;max-width:calc(100vw - 32px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+    <div style="width:48px;height:48px;background:#fef2f2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#ef4444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:15px;color:#0f172a;margin-bottom:8px;">Xóa sản phẩm?</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:20px;">Bạn có chắc chắn muốn bỏ sản phẩm này khỏi giỏ hàng?</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button id="confirmNo" style="flex:1;padding:10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;">Hủy</button>
+      <button id="confirmYes" style="flex:1;padding:10px;border:none;border-radius:6px;background:#ef4444;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Xóa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cart Modal Popup -->
+<div class="cart-overlay" id="cartOverlay" onclick="if(event.target===this)closeCart()">
+  <div class="cart-modal">
+    <div class="cm-header">
+      <div class="cm-title" id="cartTitle">Giỏ hàng (0)</div>
+      <button class="cm-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="cm-select-bar">
+      <label><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" /> Chọn tất cả</label>
+      <div class="cm-edit-info" id="selectedInfo">Bạn đã chọn 0 sản phẩm</div>
+    </div>
+    <div class="cm-items" id="cartItems">
+      <div style="padding:40px 20px;text-align:center;color:#9ca3af;font-size:13px;">Giỏ hàng trống. Hãy thêm sản phẩm!</div>
+    </div>
+    <div class="cm-suggest">GỢI Ý CHO BẠN</div>
+    <div class="cm-footer">
+      <div class="cm-discount-row" onclick="toggleDiscountInput()">
+        <div class="cm-discount-label">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" stroke="#6b7280" stroke-width="1.5"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="#6b7280" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          Mã ưu đãi
+        </div>
+        <div class="cm-discount-cta" id="discountCta">Chọn hoặc nhập mã <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div id="discountInputWrap" style="display:none;padding:8px 0;">
+        <div style="display:flex;gap:8px;">
+          <input id="discountCode" type="text" placeholder="Nhập mã giảm giá..." style="flex:1;padding:8px 12px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;outline:none;" />
+          <button onclick="applyDiscount()" style="padding:8px 14px;background:var(--brand-green);color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer;">Áp dụng</button>
+        </div>
+        <div id="discountMsg" style="font-size:12px;margin-top:6px;display:none;"></div>
+      </div>
+      <div class="cm-total-row">
+        <div class="cm-total-label">Tạm tính</div>
+        <div class="cm-total-val" id="cartTotal">0đ</div>
+      </div>
+      <button class="cm-order-btn" onclick="goToCheckout()">ĐẶT HÀNG</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Cart state
+let cartData = [];
+
+function openCart() {
+  loadCartFromServer();
+  document.getElementById('cartOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCart() {
+  document.getElementById('cartOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function loadCartFromServer() {
+  {% if user.is_authenticated %}
+  fetch('{% url "store:cart_json" %}')
+    .then(r => r.json())
+    .then(data => {
+      cartData = data.items.map((item, idx) => ({ ...item, checked: false }));
+      renderCartModal();
+    });
+  {% endif %}
+}
+
+// Cart edit mode
+let editMode = false;
+
+function renderCartModal() {
+  const checkedItems = cartData.filter(i => i.checked);
+  const total = checkedItems.reduce((s, i) => s + (i.qty * parseFloat(i.price)), 0);
+  const checkedCount = checkedItems.length;
+  const allChecked = cartData.length > 0 && cartData.every(i => i.checked);
+
+  document.getElementById('cartTitle').textContent = `Giỏ hàng (${cartData.length})`;
+  document.getElementById('cartTotal').textContent = total.toLocaleString('vi-VN') + 'đ';
+  document.getElementById('selectAll').checked = allChecked;
+  document.getElementById('selectedInfo').innerHTML =
+    `Bạn đã chọn ${checkedCount} sản phẩm &nbsp;<a href="#" onclick="toggleEditMode();return false;" style="color:var(--brand-dark);text-decoration:none;font-weight:600;">${editMode ? 'Xong' : 'Sửa'}</a>`;
+
+  const badge = document.getElementById('cartBadge');
+  if (cartData.length > 0) {
+    badge.textContent = cartData.length;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  const container = document.getElementById('cartItems');
+  if (cartData.length === 0) {
+    container.innerHTML = '<div style="padding:40px 20px;text-align:center;color:#9ca3af;font-size:13px;">Giỏ hàng trống. Hãy thêm sản phẩm!</div>';
+    return;
+  }
+
+  container.innerHTML = cartData.map((item, idx) => `
+    <div class="cm-item">
+      ${editMode
+        ? `<input type="checkbox" class="cm-item-check" id="del-check-${idx}" style="accent-color:#ef4444;" />`
+        : `<input type="checkbox" class="cm-item-check" ${item.checked ? 'checked' : ''} onchange="toggleItem(${idx})" />`
+      }
+      <img class="cm-item-img" src="${item.img}" alt="${item.name}" onerror="this.style.display='none'" />
+      <div class="cm-item-body">
+        <div class="cm-item-name">${item.name}</div>
+        <div class="cm-item-meta">${item.color} | ${item.size}</div>
+        <div class="cm-item-price">${parseFloat(item.price).toLocaleString('vi-VN')}đ</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        ${editMode
+          ? `<button onclick="removeItem(${idx})" style="padding:4px 10px;background:#ef4444;color:#fff;border:none;border-radius:4px;font-size:12px;cursor:pointer;">Xóa</button>`
+          : `<div class="cm-item-qty">
+              <button class="qty-btn" onclick="changeQty(${idx}, -1)">−</button>
+              <span class="qty-val">${item.qty}</span>
+              <button class="qty-btn" onclick="changeQty(${idx}, +1)">+</button>
+            </div>`
+        }
+      </div>
+    </div>
+  `).join('');
+
+  // Nút xóa hàng loạt khi edit mode
+  const bulkDelBtn = document.getElementById('bulkDeleteBtn');
+  if (bulkDelBtn) bulkDelBtn.style.display = editMode ? 'block' : 'none';
+}
+
+function toggleEditMode() {
+  editMode = !editMode;
+  renderCartModal();
+}
+
+function toggleSelectAll(cb) {
+  cartData.forEach(i => i.checked = cb.checked);
+  renderCartModal();
+}
+
+function toggleItem(idx) {
+  cartData[idx].checked = !cartData[idx].checked;
+  renderCartModal();
+}
+
+// URL helpers
+const CART_UPDATE_URL = '{% url "store:cart_update" 0 %}';
+const CART_REMOVE_URL = '{% url "store:cart_remove" 0 %}';
+const CSRF_TOKEN = '{{ csrf_token }}';
+
+function getUpdateUrl(itemId) {
+  return CART_UPDATE_URL.replace(/\/0\/$/, '/' + itemId + '/');
+}
+function getRemoveUrl(itemId) {
+  return CART_REMOVE_URL.replace(/\/0\/$/, '/' + itemId + '/');
+}
+
+// Custom confirm modal
+function showConfirm(onYes) {
+  const modal = document.getElementById('confirmModal');
+  modal.style.display = 'flex';
+  document.getElementById('confirmYes').onclick = function() {
+    modal.style.display = 'none';
+    onYes();
+  };
+  document.getElementById('confirmNo').onclick = function() {
+    modal.style.display = 'none';
+  };
+}
+
+function changeQty(idx, delta) {
+  const newQty = cartData[idx].qty + delta;
+  if (newQty <= 0) {
+    showConfirm(() => doRemoveItem(idx));
+    return;
+  }
+  fetch(getUpdateUrl(cartData[idx].id), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': CSRF_TOKEN,
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+    body: `quantity=${newQty}`,
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      cartData[idx].qty = newQty;
+      cartData[idx].subtotal = newQty * parseFloat(cartData[idx].price);
+      renderCartModal();
+    }
+  })
+  .catch(err => console.error('cart_update error:', err));
+}
+
+function removeItem(idx) {
+  showConfirm(() => doRemoveItem(idx));
+}
+
+function doRemoveItem(idx) {
+  fetch(getRemoveUrl(cartData[idx].id), {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': CSRF_TOKEN,
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      cartData.splice(idx, 1);
+      if (cartData.length === 0) editMode = false;
+      renderCartModal();
+    }
+  })
+  .catch(err => console.error('cart_remove error:', err));
+}
+
+function goToCheckout() {
+  const checked = cartData.filter(i => i.checked);
+  if (checked.length === 0) {
+    alert('Vui lòng chọn ít nhất một sản phẩm để đặt hàng.');
+    return;
+  }
+  const selectedIds = checked.map(i => i.id);
+  // Trước khi checkout, đảm bảo tất cả qty đã được lưu lên server
+  const updatePromises = checked.map(item =>
+    fetch(getUpdateUrl(item.id), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': CSRF_TOKEN,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: `quantity=${item.qty}`,
+    }).then(r => r.json())
+  );
+
+  Promise.all(updatePromises).then(() => {
+    fetch('{% url "store:set_checkout_items" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': CSRF_TOKEN,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: JSON.stringify({ ids: selectedIds }),
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        closeCart();
+        window.location.href = '{% url "store:checkout" %}';
+      }
+    });
+  });
+}
+
+function toggleDiscountInput() {
+  const wrap = document.getElementById('discountInputWrap');
+  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+}
+
+function applyDiscount() {
+  const code = document.getElementById('discountCode').value.trim();
+  const msg = document.getElementById('discountMsg');
+  if (!code) {
+    msg.style.display = 'block';
+    msg.style.color = '#ef4444';
+    msg.textContent = 'Vui lòng nhập mã giảm giá.';
+    return;
+  }
+  // Hiện tại chưa có backend xử lý mã giảm giá
+  msg.style.display = 'block';
+  msg.style.color = '#ef4444';
+  msg.textContent = 'Mã giảm giá không hợp lệ hoặc đã hết hạn.';
+}
+
+// Load cart badge on page load
+{% if user.is_authenticated %}
+document.addEventListener('DOMContentLoaded', function() {
+  fetch('{% url "store:cart_json" %}')
+    .then(r => r.json())
+    .then(data => {
+      const badge = document.getElementById('cartBadge');
+      if (data.count > 0) {
+        badge.textContent = data.count;
+        badge.style.display = 'flex';
+      }
+    });
+});
+{% endif %}
+</script>
+
+<script>
+// User dropdown toggle
+function toggleUserDropdown() {
+  const dropdown = document.getElementById('userDropdown');
+  if (dropdown.style.display === 'none' || !dropdown.style.display) {
+    dropdown.style.display = 'block';
+  } else {
+    dropdown.style.display = 'none';
+  }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('userDropdownWrap');
+  const dropdown = document.getElementById('userDropdown');
+  if (wrap && dropdown && !wrap.contains(e.target)) {
+    dropdown.style.display = 'none';
+  }
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

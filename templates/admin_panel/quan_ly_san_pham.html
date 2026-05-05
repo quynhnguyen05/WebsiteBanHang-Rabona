@@ -1,0 +1,523 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load humanize %}
+
+{% block title %}Quản lý sản phẩm - Rabona Sport{% endblock %}
+{% block page_title %}QUẢN LÝ SẢN PHẨM & TỒN KHO{% endblock %}
+{% block breadcrumb %}Admin > <span>Quản lý sản phẩm</span>{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* BỘ LỌC VÀ NÚT BẤM */
+    .filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
+    .filter-left { display: flex; gap: 15px; align-items: center; }
+    .select-category { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: 'Inter', sans-serif; font-weight: 500; color: #333; outline: none; transition: 0.2s; }
+    .select-category:focus { border-color: var(--primary-green); box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1); }
+
+    .btn-add-inline { background-color: var(--primary-green); color: #ffffff; padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer; transition: 0.2s; }
+    .btn-add-inline:hover { background-color: #15803d; transform: translateY(-1px); }
+
+    /* THIẾT KẾ SIÊU MODAL 2 NỬA */
+    .modal-xl { max-width: 950px; }
+    .modal-xl .modal-body { max-height: calc(90vh - 140px); overflow-y: auto; }
+    .modal-split { display: grid; grid-template-columns: 1fr 1.2fr; gap: 25px; padding-top: 10px; }
+    .split-left { border-right: 1px solid #e2e8f0; padding-right: 25px; }
+    .split-right { padding-left: 5px; }
+
+    .section-label { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.5px; }
+
+    /* BẢNG BIẾN THỂ TRONG MODAL */
+    .variant-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    .variant-table th { background-color: #f8fafc; padding: 10px; text-align: left; font-weight: 600; color: #475569; border-bottom: 2px solid #e2e8f0; }
+    .variant-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .variant-input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: 'Inter', sans-serif; text-align: left; transition: 0.2s; }
+    .variant-input:focus { border-color: var(--primary-green); outline: none; }
+    .input-error { border-color: #ef4444 !important; background-color: #fef2f2; color: #ef4444; font-weight: bold; }
+
+    .variant-tag { display: inline-block; padding: 3px 8px; background: #f1f5f9; color: #475569; border-radius: 12px; font-size: 11px; font-weight: 600; margin-top: 6px; border: 1px solid #e2e8f0; }
+    .form-label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #334155; }
+    .form-input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 15px; font-family: 'Inter', sans-serif; transition: 0.2s; }
+    .form-input:focus { border-color: var(--primary-green); outline: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stats-cards">
+    <div class="stat-card">
+        <i class="fas fa-boxes stat-icon blue"></i>
+        <div class="stat-info"><span class="stat-title">Tổng sản phẩm</span><span class="stat-value">{{ tong_san_pham }}</span></div>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-check-circle stat-icon green"></i>
+        <div class="stat-info"><span class="stat-title">Đang kinh doanh</span><span class="stat-value">{{ dang_kinh_doanh }}</span></div>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-exclamation-triangle stat-icon orange"></i>
+        <div class="stat-info"><span class="stat-title">Hết hàng</span><span class="stat-value">{{ het_hang }}</span></div>
+    </div>
+</div>
+
+<form method="get" style="margin-bottom: 20px; display: flex; gap: 10px;">
+    <input type="text" name="q" value="{{ search }}" placeholder="Tìm theo tên sản phẩm..."
+           style="padding: 8px 14px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; flex: 1; max-width: 400px;">
+    <button type="submit" style="padding: 8px 20px; background: var(--primary-green); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Tìm kiếm</button>
+</form>
+
+<div class="filter-bar">
+    <div class="filter-left">
+        <div class="tabs" style="margin-bottom: 0;">
+            <a href="?status=all&category={{ filter_category }}{% if search %}&q={{ search }}{% endif %}" class="tab-item {% if filter_status == 'all' or not filter_status %}active{% endif %}">Tất cả</a>
+            <a href="?status=in_stock&category={{ filter_category }}{% if search %}&q={{ search }}{% endif %}" class="tab-item {% if filter_status == 'in_stock' %}active{% endif %}">Còn hàng</a>
+            <a href="?status=out_of_stock&category={{ filter_category }}{% if search %}&q={{ search }}{% endif %}" class="tab-item {% if filter_status == 'out_of_stock' %}active{% endif %}">Hết hàng</a>
+        </div>
+
+        <select id="categoryFilter" class="select-category" onchange="window.location.href='?status={{ filter_status }}&category=' + this.value + '{% if search %}&q={{ search }}{% endif %}'">
+            <option value="all">Tất cả danh mục</option>
+            {% for cat in categories %}
+            <option value="{{ cat.slug }}">{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+
+        <script>
+            document.getElementById('categoryFilter').value = "{{ filter_category|default:'all' }}";
+        </script>
+    </div>
+
+    <button class="btn-add-inline" onclick="openModal('addProductModal')">
+        <i class="fas fa-plus"></i> Thêm sản phẩm
+    </button>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Mã SP</th>
+                <th>Hình ảnh</th>
+                <th>Tên sản phẩm</th>
+                <th>Phân loại</th>
+                <th>Tồn kho</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sp in danh_sach_san_pham %}
+            {% with bv=sp.variants.first %}
+            <tr>
+                <td><span class="order-id" style="font-weight: 700; color: #475569;">#{{ sp.id }}</span></td>
+                <td>
+                    {% if bv and bv.product.display_image %}
+                        <img src="{{ bv.product.display_image }}" alt="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    {% else %}
+                        <div style="width: 50px; height: 50px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <i class="fas fa-box" style="color: #cbd5e1; font-size: 20px;"></i>
+                        </div>
+                    {% endif %}
+                </td>
+                <td style="text-align: left; max-width: 250px;">
+                    <div style="font-weight: 600; color: #1e293b; line-height: 1.4;">{{ sp.name }}</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 4px;"><i class="fas fa-tag" style="margin-right: 4px;"></i>{{ sp.category.name|default:"Chưa phân loại" }}</div>
+                </td>
+                <td>
+                    <div style="font-weight: 600; color: var(--primary-green);">{{ sp.price|floatformat:0 }} đ</div>
+                    <span class="variant-tag">{{ sp.variants.count }} biến thể</span>
+                </td>
+                <td>
+                    <div style="font-weight: 700; font-size: 15px;">{{ sp.total_stock }}</div>
+                </td>
+                <td>
+                    {% if sp.total_stock > 0 %}
+                        <span style="color: #10b981; font-weight: 600; background: #d1fae5; padding: 5px 12px; border-radius: 20px; font-size: 12px;">Còn hàng</span>
+                    {% else %}
+                        <span style="color: #ef4444; font-weight: 600; background: #fee2e2; padding: 5px 12px; border-radius: 20px; font-size: 12px;">Hết hàng</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button class="btn-action btn-view" onclick="openModal('editProductModal_{{ sp.id }}')" style="background-color: #3b82f6;">
+                        <i class="fas fa-sliders-h"></i> Quản lý
+                    </button>
+                    <button class="btn-action btn-edit" onclick="openDeleteModal('{{ sp.id }}', '{{ sp.name|escapejs }}')" style="background-color: #ef4444; margin-left: 5px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endwith %}
+            {% empty %}
+            <tr><td colspan="7" style="text-align: center; padding: 50px; color: #64748b; font-size: 15px;">Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if danh_sach_san_pham.paginator.count > 0 %}
+<div class="pagination-bar">
+    <div>Hiển thị {{ danh_sach_san_pham.start_index }}-{{ danh_sach_san_pham.end_index }} của {{ danh_sach_san_pham.paginator.count }} sản phẩm</div>
+    <ul class="pagination">
+        {% if danh_sach_san_pham.has_previous %}
+            <li class="page-item">
+                <a href="?page={{ danh_sach_san_pham.previous_page_number }}&status={{ filter_status }}&category={{ filter_category }}{% if search %}&q={{ search }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item" style="opacity: 0.5; pointer-events: none;">
+                <i class="fas fa-chevron-left"></i>
+            </li>
+        {% endif %}
+
+        {% for num in danh_sach_san_pham.paginator.page_range %}
+            {% if danh_sach_san_pham.number == num %}
+                <li class="page-item active">{{ num }}</li>
+            {% elif num > danh_sach_san_pham.number|add:'-3' and num < danh_sach_san_pham.number|add:'3' %}
+                <li class="page-item">
+                    <a href="?page={{ num }}&status={{ filter_status }}&category={{ filter_category }}{% if search %}&q={{ search }}{% endif %}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if danh_sach_san_pham.has_next %}
+            <li class="page-item">
+                <a href="?page={{ danh_sach_san_pham.next_page_number }}&status={{ filter_status }}&category={{ filter_category }}{% if search %}&q={{ search }}{% endif %}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item" style="opacity: 0.5; pointer-events: none;">
+                <i class="fas fa-chevron-right"></i>
+            </li>
+        {% endif %}
+    </ul>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block modals %}
+<div class="modal-overlay" id="addProductModal">
+    <div class="modal-content modal-xl">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fas fa-plus-circle"></i> THÊM SẢN PHẨM ĐA PHÂN LOẠI</div>
+            <button class="btn-close" onclick="closeModal('addProductModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="addProductForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="modal-body modal-split">
+                <div class="split-left">
+                    <label class="form-label">Tên sản phẩm *</label>
+                    <input type="text" name="tenSP" required class="form-input" placeholder="Tên sản phẩm...">
+
+                    <label class="form-label">Danh mục sản phẩm *</label>
+                    <select id="categorySelect" class="form-input" onchange="checkCategory(this)">
+                        <option value="">-- Chọn danh mục --</option>
+                        <option value="Giày bóng đá">Giày bóng đá</option>
+                        <option value="Áo quần bóng đá">Áo quần bóng đá</option>
+                        <option value="Phụ kiện thể thao">Phụ kiện thể thao</option>
+                        <option value="Other">Khác (Nhập mới...)</option>
+                    </select>
+                    <div id="newCategoryContainer" style="display: none; margin-top: 10px;">
+                        <input type="text" id="newCategoryInput" class="form-input" placeholder="Tên danh mục mới...">
+                    </div>
+                    <input type="hidden" name="danhMuc" id="finalCategory">
+
+                    <label class="form-label">Ảnh sản phẩm</label>
+                    <div style="border: 2px dashed #cbd5e1; border-radius: 8px; padding: 16px; text-align: center; margin-bottom: 15px; cursor: pointer; transition: 0.2s;"
+                         onclick="document.getElementById('addProductImage').click()"
+                         id="imageDropZone">
+                        <div id="imagePreviewAdd" style="display:none; margin-bottom: 8px;">
+                            <img id="previewImgAdd" src="" alt="Preview" style="max-height: 100px; max-width: 100%; border-radius: 6px; object-fit: contain;">
+                        </div>
+                        <div id="imagePlaceholder">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 24px; color: #94a3b8; margin-bottom: 6px; display: block;"></i>
+                            <span style="font-size: 13px; color: #64748b;">Nhấn để chọn ảnh</span>
+                        </div>
+                    </div>
+                    <input type="file" id="addProductImage" name="image" accept="image/*" style="display:none;"
+                           onchange="previewAddImage(this)">
+
+                    <label class="form-label">Mô tả</label>
+                    <textarea name="moTa" class="form-input" style="height: 80px;"></textarea>
+                </div>
+
+                <div class="split-right">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <span class="section-label">Phân loại hàng (Size/Màu)</span>
+                        <button type="button" onclick="addVariantRow()" class="btn-add-inline" style="padding:4px 8px; font-size:12px;">+ Thêm dòng</button>
+                    </div>
+                    <div style="max-height:300px; overflow-y:auto; border:1px solid #ddd; border-radius:6px;">
+                        <table class="variant-table" id="newVariantTable">
+                            <thead>
+                                <tr><th>Size</th><th>Màu</th><th>Giá</th><th>Kho</th><th></th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="text" name="kichCo[]" value="39" class="variant-input"></td>
+                                    <td><input type="text" name="mauSac[]" value="Mặc định" class="variant-input"></td>
+                                    <td><input type="number" name="giaBan[]" value="0" class="variant-input"></td>
+                                    <td><input type="number" name="soLuongTon[]" value="0" class="variant-input"></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-exit" onclick="closeModal('addProductModal')">Hủy</button>
+                <button type="submit" class="btn-submit">Lưu sản phẩm</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% for sp in danh_sach_san_pham %}
+<div class="modal-overlay" id="editProductModal_{{ sp.id }}">
+    <div class="modal-content modal-xl">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fas fa-box-open" style="margin-right: 8px;"></i> QUẢN LÝ SẢN PHẨM #{{ sp.id }}</div>
+            <button class="btn-close" onclick="closeModal('editProductModal_{{ sp.id }}')"><i class="fas fa-times"></i></button>
+        </div>
+
+        <form id="formUpdate_{{ sp.id }}" onsubmit="submitSuperForm(event, {{ sp.id }})" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="maSP" value="{{ sp.id }}">
+
+            <div class="modal-body modal-split">
+                <div class="split-left">
+                    <div class="section-label">Thông tin cơ bản</div>
+
+                    <label class="form-label">Tên sản phẩm *</label>
+                    <input type="text" name="tenSP" value="{{ sp.name }}" required class="form-input">
+
+                    <label class="form-label">Danh mục</label>
+                    <input type="text" name="danhMuc" value="{{ sp.category.name|default:'' }}" class="form-input">
+
+                    <label class="form-label">Mô tả sản phẩm</label>
+                    <textarea name="moTa" class="form-input" style="height: 100px; resize: vertical;">{{ sp.description }}</textarea>
+
+                    <label class="form-label">Giá bán</label>
+                    <input type="number" name="price" value="{{ sp.price|floatformat:0 }}" class="form-input">
+
+                    <label class="form-label">Ảnh sản phẩm</label>
+                    <div style="display: flex; align-items: center; gap: 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 15px; background: #f9fafb;">
+                        <div style="flex-shrink: 0; width: 72px; height: 72px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <img id="editImgThumb_{{ sp.id }}" src="{{ sp.display_image }}" alt="Ảnh sản phẩm" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">Ảnh hiện tại. Nhấn nút bên dưới để thay đổi.</div>
+                            <button type="button" onclick="document.getElementById('editImg_{{ sp.id }}').click()" style="padding: 6px 14px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                <i class="fas fa-camera"></i> Đổi ảnh
+                            </button>
+                        </div>
+                        <input type="file" id="editImg_{{ sp.id }}" name="image" accept="image/*" style="display:none;" onchange="previewEditImage(this, {{ sp.id }})">
+                    </div>
+                </div>
+
+                <div class="split-right">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div class="section-label" style="margin-bottom: 0;">Biến thể & Tồn kho</div>
+                        <button type="button" onclick="addEditVariantRow({{ sp.id }})" class="btn-add-inline" style="padding:4px 8px; font-size:12px;">+ Thêm biến thể</button>
+                    </div>
+
+                    <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+                        <table class="variant-table">
+                            <thead style="position: sticky; top: 0; z-index: 10;">
+                                <tr>
+                                    <th>Kích cỡ</th>
+                                    <th>Màu sắc</th>
+                                    <th style="text-align: right; width: 90px;">Tồn kho</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="editVariantTableBody_{{ sp.id }}">
+                                {% for bt in sp.variants.all %}
+                                <tr id="variantRow_{{ bt.id }}">
+                                    <td>
+                                        <input type="hidden" name="variant_id[]" value="{{ bt.id }}">
+                                        <input type="text" name="kichCo_{{ bt.id }}" value="{{ bt.size }}" class="variant-input">
+                                    </td>
+                                    <td><input type="text" name="mauSac_{{ bt.id }}" value="{{ bt.color_name }}" class="variant-input"></td>
+                                    <td>
+                                        <input type="number" name="soLuongTon_{{ bt.id }}" value="{{ bt.stock }}" class="variant-input {% if bt.stock == 0 %}input-error{% endif %}">
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <button type="button" onclick="removeVariantRowUI('variantRow_{{ bt.id }}')" style="color: #ef4444; border: none; background: none; cursor: pointer;">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-exit" onclick="closeModal('editProductModal_{{ sp.id }}')">Hủy bỏ</button>
+                <button type="submit" class="btn-submit"><i class="fas fa-save" style="margin-right: 5px;"></i> Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+<div class="modal-overlay" id="deleteProductModal" style="z-index: 10000;">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <div class="modal-title">XÁC NHẬN XÓA</div>
+            <button class="btn-close" onclick="closeModal('deleteProductModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body" style="text-align: center; padding: 30px 20px;">
+            Bạn có chắc chắn muốn xóa sản phẩm <br><strong id="delete_tenSP" style="color: #1e293b; display: block; margin: 10px 0; font-size: 16px;"></strong>
+            <span style="color: #ef4444; font-size: 13px;">Hành động này sẽ xóa toàn bộ biến thể. Không thể hoàn tác!</span>
+        </div>
+        <div class="modal-footer" style="justify-content: center; gap: 10px;">
+            <button type="button" class="btn-exit" style="background: #f1f5f9; color: #475569;" onclick="closeModal('deleteProductModal')">Hủy</button>
+            <button type="button" class="btn-submit" id="btnConfirmDelete" style="background-color: #ef4444;">Đồng ý xóa</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // AJAX THÊM SẢN PHẨM MỚI
+    document.getElementById('addProductForm').onsubmit = function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const categorySelect = document.getElementById('categorySelect');
+        if (categorySelect.value === 'Other') {
+            formData.set('danhMuc', document.getElementById('newCategoryInput').value);
+        } else {
+            formData.set('danhMuc', categorySelect.value);
+        }
+        
+        fetch("{% url 'admin_panel:them_san_pham' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {'X-CSRFToken': '{{ csrf_token }}'}
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                closeModal('addProductModal');
+                showSuccessPopup("Thêm sản phẩm mới thành công!");
+                setTimeout(() => location.reload(), 1000);
+            } else { alert("Lỗi: " + data.message); }
+        });
+    };
+
+    // AJAX CẬP NHẬT SP & BIẾN THỂ
+    function submitSuperForm(event, maSP) {
+        event.preventDefault();
+        const form = document.getElementById('formUpdate_' + maSP);
+        const formData = new FormData(form);
+
+        fetch(`/admin-panel/san-pham/sua/${maSP}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {'X-CSRFToken': '{{ csrf_token }}'}
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                closeModal('editProductModal_' + maSP);
+                showSuccessPopup("Đã lưu thông tin sản phẩm và biến thể!");
+                setTimeout(() => location.reload(), 1000);
+            } else { alert("Lỗi: " + data.message); }
+        });
+    }
+
+    // XÓA SẢN PHẨM
+    let pendingDeleteId = null;
+    function openDeleteModal(ma, ten) {
+        pendingDeleteId = ma;
+        document.getElementById('delete_tenSP').textContent = ten;
+        openModal('deleteProductModal');
+    }
+
+    document.getElementById('btnConfirmDelete').onclick = function() {
+        if(!pendingDeleteId) return;
+        fetch(`/admin-panel/san-pham/xoa/${pendingDeleteId}/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': '{{ csrf_token }}'}
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                closeModal('deleteProductModal');
+                showSuccessPopup("Sản phẩm đã được xóa!");
+                setTimeout(() => location.reload(), 1000);
+            } else { alert("Lỗi: " + data.message); }
+        });
+    };
+
+    // HÀM BỔ TRỢ UI
+    function addVariantRow() {
+        const table = document.getElementById('newVariantTable').getElementsByTagName('tbody')[0];
+        const newRow = table.insertRow();
+        newRow.innerHTML = `
+            <td><input type="text" name="kichCo[]" class="variant-input"></td>
+            <td><input type="text" name="mauSac[]" class="variant-input"></td>
+            <td><input type="number" name="giaBan[]" value="0" class="variant-input"></td>
+            <td><input type="number" name="soLuongTon[]" value="0" class="variant-input"></td>
+            <td style="text-align: center;"><button type="button" onclick="this.parentElement.parentElement.remove()" style="color:red; border:none; background:none; cursor:pointer;"><i class="fas fa-times"></i></button></td>
+        `;
+    }
+
+    function addEditVariantRow(spId) {
+        const tbody = document.getElementById('editVariantTableBody_' + spId);
+        const uniqueId = Date.now();
+        const newRow = tbody.insertRow();
+        newRow.id = 'newRow_' + uniqueId;
+        newRow.innerHTML = `
+            <td><input type="text" name="new_kichCo[]" class="variant-input" placeholder="Size..."></td>
+            <td><input type="text" name="new_mauSac[]" class="variant-input" placeholder="Màu..."></td>
+            <td><input type="number" name="new_soLuongTon[]" value="0" class="variant-input"></td>
+            <td style="text-align: center;"><button type="button" onclick="removeVariantRowUI('newRow_${uniqueId}')" style="color:red; border:none; background:none; cursor:pointer;"><i class="fas fa-times"></i></button></td>
+        `;
+    }
+
+    function removeVariantRowUI(rowId) {
+        document.getElementById(rowId).remove();
+    }
+
+    function checkCategory(select) {
+        const container = document.getElementById('newCategoryContainer');
+        const finalInput = document.getElementById('finalCategory');
+        if (select.value === 'Other') {
+            container.style.display = 'block';
+            finalInput.value = document.getElementById('newCategoryInput').value;
+        } else {
+            container.style.display = 'none';
+            finalInput.value = select.value;
+        }
+    }
+
+    document.getElementById('newCategoryInput')?.addEventListener('input', function() {
+        document.getElementById('finalCategory').value = this.value;
+    });
+
+    function previewAddImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImgAdd').src = e.target.result;
+            document.getElementById('imagePreviewAdd').style.display = 'block';
+            document.getElementById('imagePlaceholder').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function previewEditImage(input, spId) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('editImgThumb_' + spId).src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+</script>
+{% endblock %}

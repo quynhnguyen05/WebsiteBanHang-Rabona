@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hóa đơn #{{ order.order_code }}</title>
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; margin: 0; }
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 40px auto; padding: 20px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+        .header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--primary-green, #16a34a); padding-bottom: 20px; margin-bottom: 30px; }
+        .logo { font-size: 28px; font-weight: 800; color: #16a34a; text-decoration: none; }
+        .invoice-title { text-align: right; }
+        .invoice-title h1 { margin: 0; color: #111; font-size: 24px; }
+        .invoice-details { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+        .section-title { font-weight: 700; text-transform: uppercase; font-size: 13px; color: #666; border-bottom: 1px solid #eee; margin-bottom: 10px; padding-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th { background: #f9fafb; text-align: left; padding: 12px; font-size: 14px; border-bottom: 2px solid #eee; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .totals { float: right; width: 300px; }
+        .total-row { display: flex; justify-content: space-between; padding: 8px 0; }
+        .total-row.grand-total { border-top: 2px solid #eee; margin-top: 10px; padding-top: 15px; font-weight: 700; font-size: 18px; color: #dc2626; }
+        .footer { margin-top: 100px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; }
+        .btn-print { background: #16a34a; color: white; border: none; padding: 10px 25px; border-radius: 4px; font-weight: 600; cursor: pointer; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="text-align: right;">
+        <button class="btn-print" onclick="window.print()">In hóa đơn</button>
+        <a href="{% url 'admin_panel:don_hang' %}" style="text-decoration: none; color: #666; font-size: 14px; margin-left: 15px;">Quay lại</a>
+    </div>
+
+    <div class="header">
+        <div>
+            <div class="logo">RABONA SPORT</div>
+            <div style="font-size: 13px; color: #666; margin-top: 5px;">Số 18, Đường Hồ Đắc Di, Phường An Cựu, TP. Huế<br>Hotline: 0900.123.456 | Email: contact@rabona.vn</div>
+        </div>
+        <div class="invoice-title">
+            <h1>HÓA ĐƠN BÁN HÀNG</h1>
+            <div style="color: #666;">Mã đơn: <strong>#{{ order.order_code }}</strong></div>
+            <div style="color: #666;">Ngày xuất: {{ today|date:"d/m/Y H:i" }}</div>
+        </div>
+    </div>
+
+    <div class="invoice-details">
+        <div>
+            <div class="section-title">Khách hàng</div>
+            <div style="font-weight: 600;">{{ order.recipient_name }}</div>
+            <div style="font-size: 14px;">{{ order.recipient_phone }}</div>
+            <div style="font-size: 14px; margin-top: 5px;">{{ order.shipping_address }}<br>{{ order.shipping_city }}</div>
+        </div>
+        <div>
+            <div class="section-title">Thông tin thanh toán</div>
+            <div style="font-size: 14px;">Phương thức: <strong>{{ order.get_payment_method_display }}</strong></div>
+            <div style="font-size: 14px;">Vận chuyển: {{ order.get_shipping_method_display }}</div>
+            <div style="font-size: 14px;">Ngày đặt: {{ order.created_at|date:"d/m/Y" }}</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Sản phẩm</th>
+                <th style="text-align: center;">Số lượng</th>
+                <th style="text-align: right;">Đơn giá</th>
+                <th style="text-align: right;">Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items.all %}
+            <tr>
+                <td>
+                    <div style="font-weight: 600;">{{ item.product_name }}</div>
+                    <div style="font-size: 12px; color: #666;">Phân loại: {{ item.size }} / {{ item.color }}</div>
+                </td>
+                <td style="text-align: center;">{{ item.quantity }}</td>
+                <td style="text-align: right;">{{ item.price|floatformat:0 }} đ</td>
+                <td style="text-align: right; font-weight: 600;">{{ item.subtotal|floatformat:0 }} đ</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <div class="total-row">
+            <span>Tổng tiền hàng:</span>
+            <span>{{ order.subtotal|floatformat:0 }} đ</span>
+        </div>
+        <div class="total-row">
+            <span>Phí vận chuyển:</span>
+            <span>+ {{ order.shipping_fee|floatformat:0 }} đ</span>
+        </div>
+        {% if order.discount_amount > 0 %}
+        <div class="total-row">
+            <span>Giảm giá:</span>
+            <span>- {{ order.discount_amount|floatformat:0 }} đ</span>
+        </div>
+        {% endif %}
+        <div class="total-row grand-total">
+            <span>TỔNG CỘNG:</span>
+            <span>{{ order.total|floatformat:0 }} đ</span>
+        </div>
+    </div>
+
+    <div style="clear: both;"></div>
+
+    <div class="footer">
+        Cảm ơn bạn đã tin tưởng và mua hàng tại Rabona Sport!<br>
+        Quý khách vui lòng kiểm tra kỹ hàng hóa khi nhận.
+    </div>
+</body>
+</html>

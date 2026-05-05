@@ -1,0 +1,395 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Quản lý đơn hàng - Rabona Sport{% endblock %}
+{% block page_title %}QUẢN LÝ ĐƠN HÀNG{% endblock %}
+{% block breadcrumb %}Admin > <span>Quản lý đơn hàng</span>{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* CSS GỘP CHO CẢ XEM VÀ SỬA */
+    .address-box { display: flex; gap: 15px; border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; margin-bottom: 20px; }
+    .address-box i { font-size: 20px; color: #4b5563; margin-top: 2px; }
+    .address-text { font-size: 13px; color: #6b7280; line-height: 1.5; }
+    .info-box { border: 1px solid var(--border-color); border-radius: 6px; padding: 15px 20px; margin-bottom: 20px; background-color: #fafafa; }
+    .info-row { display: flex; margin-bottom: 12px; font-size: 14px; align-items: flex-start; }
+    .info-row:last-child { margin-bottom: 0; }
+    .info-label { font-weight: 600; color: #374151; width: 140px; flex-shrink: 0; }
+    .info-value { color: #111; font-weight: 500; flex: 1; text-align: left; }
+    .status-text { color: var(--primary-green); font-weight: 600; }
+
+    .modal-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid var(--border-color);}
+    .modal-table th { background-color: #f1f5f9; padding: 12px; font-size: 13px; font-weight: 600; color: #475569; text-align: center;}
+    .modal-table td { padding: 12px; font-size: 13px; color: #374151; border-bottom: 1px solid var(--border-color); text-align: center; vertical-align: middle;}
+    .modal-table td:first-child, .modal-table th:first-child { text-align: left; }
+
+    .totals-box { border: 1px solid var(--border-color); border-radius: 6px; padding: 15px 20px; }
+    .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: #4b5563; }
+    .total-row.divider { border-top: 1px solid var(--border-color); margin-top: 12px; padding-top: 12px; }
+    .total-final { font-size: 16px; font-weight: 700; color: #111; }
+    .vat-note { font-size: 11px; color: #9ca3af; margin-top: -5px;}
+
+    /* STEPPER ĐƠN HÀNG */
+    .stepper { display: flex; justify-content: space-between; position: relative; margin: 30px 10px; }
+    .stepper::before { content: ''; position: absolute; top: 12px; left: 5%; right: 5%; height: 2px; background-color: #d1d5db; z-index: 1; }
+    .step { display: flex; flex-direction: column; align-items: center; z-index: 2; position: relative; width: 70px; text-align: center; cursor: pointer; transition: 0.2s; }
+    .step-dot { width: 24px; height: 24px; border-radius: 50%; background-color: #9ca3af; margin-bottom: 8px; border: 4px solid #fff; box-shadow: 0 0 0 1px #9ca3af; transition: 0.2s; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; }
+    .step-label { font-size: 10px; color: #6b7280; line-height: 1.2; font-weight: 500;}
+
+    .step.completed .step-dot, .step.active .step-dot { background-color: var(--primary-green); box-shadow: 0 0 0 1px var(--primary-green); }
+    .step.active .step-label { color: #111; font-weight: 700; }
+    .step.disabled { cursor: not-allowed; opacity: 0.7; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="stats-cards">
+        <div class="stat-card">
+            <i class="fas fa-shopping-bag stat-icon blue"></i>
+            <div class="stat-info"><span class="stat-title">Tổng đơn hàng</span><span class="stat-value">{{ tong_don_hang }}</span></div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-hand-holding-usd stat-icon green"></i>
+            <div class="stat-info"><span class="stat-title">Tổng doanh thu (Đã giao)</span><span class="stat-value">{{ doanh_thu }} đ</span></div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-truck stat-icon orange"></i>
+            <div class="stat-info"><span class="stat-title">Đơn đang giao</span><span class="stat-value">{{ don_dang_giao }}</span></div>
+        </div>
+    </div>
+
+    <form method="get" style="margin-bottom: 20px; display: flex; gap: 10px;">
+        <input type="text" name="q" value="{{ search }}" placeholder="Tìm theo mã đơn hoặc tên khách hàng..."
+               style="padding: 8px 14px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; flex: 1; max-width: 400px;">
+        <button type="submit" style="padding: 8px 20px; background: var(--primary-green); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Tìm kiếm</button>
+    </form>
+
+
+    <div class="tabs">
+        <a href="?trang_thai=Tat_ca{% if search %}&q={{ search }}{% endif %}" class="tab-item {% if trang_thai_hien_tai == 'Tat_ca' %}active{% endif %}">Tất cả</a>
+        <a href="?trang_thai=Chờ xác nhận{% if search %}&q={{ search }}{% endif %}" class="tab-item {% if trang_thai_hien_tai == 'Chờ xác nhận' %}active{% endif %}">Chờ xác nhận</a>
+        <a href="?trang_thai=Đang chuẩn bị{% if search %}&q={{ search }}{% endif %}" class="tab-item {% if trang_thai_hien_tai == 'Đang chuẩn bị' %}active{% endif %}">Đang chuẩn bị</a>
+        <a href="?trang_thai=Đang giao{% if search %}&q={{ search }}{% endif %}" class="tab-item {% if trang_thai_hien_tai == 'Đang giao' %}active{% endif %}">Đang giao</a>
+        <a href="?trang_thai=Đã giao{% if search %}&q={{ search }}{% endif %}" class="tab-item {% if trang_thai_hien_tai == 'Đã giao' %}active{% endif %}">Đã giao</a>
+        <a href="?trang_thai=Trả hàng{% if search %}&q={{ search }}{% endif %}" class="tab-item {% if trang_thai_hien_tai == 'Trả hàng' %}active{% endif %}">Trả hàng</a>
+        <a href="?trang_thai=Đã trả hàng{% if search %}&q={{ search }}{% endif %}" class="tab-item {% if trang_thai_hien_tai == 'Đã trả hàng' %}active{% endif %}">Đã trả hàng</a>
+        <a href="?trang_thai=Đã hủy{% if search %}&q={{ search }}{% endif %}" class="tab-item {% if trang_thai_hien_tai == 'Đã hủy' %}active{% endif %}">Đã hủy</a>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã đơn</th>
+                    <!-- CHỈ HIỆN CỘT MÃ PHIẾU NẾU ĐANG Ở TAB "TRẢ HÀNG" -->
+                    {% if trang_thai_hien_tai == 'Trả hàng' %}
+                        <th>Mã phiếu trả</th>
+                    {% endif %}
+                    <th>Khách hàng</th>
+                    <th>Ngày đặt</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái hiện tại</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for don in danh_sach_don %}
+                <tr>
+                    <td><span class="order-id">#{{ don.order_code }}</span></td>
+
+                    <!-- CHỈ HIỆN DỮ LIỆU CỘT NÀY NẾU ĐANG Ở TAB "TRẢ HÀNG" -->
+                    {% if trang_thai_hien_tai == 'Trả hàng' %}
+                        <td style="text-align: center; font-weight: 600;">
+                            {% if don.return_request %}
+                                <span style="color: #ef4444;">#{{ don.return_request.id }}</span>
+                            {% else %}
+                                <span style="color: #9ca3af;" title="Chưa tạo phiếu trả">-</span>
+                            {% endif %}
+                        </td>
+                    {% endif %}
+
+                    <td>{{ don.recipient_name }}</td>
+                    <td>{{ don.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="price">{{ don.total }} đ</td>
+                    <td>
+                        {% if don.status == 'pending' %}<span style="color: #f59e0b; font-weight: 600;">Chờ xác nhận</span>
+                        {% elif don.status == 'confirmed' %}<span style="color: #8b5cf6; font-weight: 600;">Đang chuẩn bị</span>
+                        {% elif don.status == 'shipping' %}<span style="color: #3b82f6; font-weight: 600;">Đang giao</span>
+                        {% elif don.status == 'delivered' %}<span style="color: #10b981; font-weight: 600;">Đã giao</span>
+                        {% elif don.status == 'completed' %}<span style="color: #10b981; font-weight: 600;">Hoàn thành</span>
+                        {% elif don.status == 'returning' %}<span style="color: #ef4444; font-weight: 600;">Yêu cầu trả hàng</span>
+                        {% elif don.status == 'returned' %}<span style="color: #10b981; font-weight: 600;">Đã trả hàng</span>
+                        {% elif don.status == 'cancelled' %}<span style="color: #6b7280; font-weight: 600;">Đã hủy</span>
+                        {% else %}<span style="color: #6b7280; font-weight: 600;">{{ don.get_status_display }}</span>{% endif %}
+                    </td>
+                    <td>
+                        <!-- LOGIC NÚT BẤM CHUẨN XÁC DỰA VÀO MODELS.PY -->
+                        {% if don.status == 'returning' or don.status == 'returned' %}
+                            {% if don.return_request %}
+                                {% if don.return_request.status == 'pending' %}
+                                    <a href="{% url 'admin_panel:tra_hang' %}?status=pending" class="btn-action" style="background-color: #f59e0b; color: white; text-decoration: none; display: inline-block; padding: 6px 14px;">
+                                        <i class="fas fa-external-link-alt"></i> Xử lý yêu cầu
+                                    </a>
+                                {% elif don.return_request.status == 'rejected' %}
+                                    <a href="{% url 'admin_panel:tra_hang' %}?status=rejected" class="btn-action" style="background-color: #ef4444; color: white; text-decoration: none; display: inline-block; padding: 6px 14px;">
+                                        <i class="fas fa-external-link-alt"></i> Xem từ chối
+                                    </a>
+                                {% elif don.return_request.status == 'completed' or don.status == 'returned' %}
+                                    <a href="{% url 'admin_panel:cap_nhat_trang_thai_tra' %}?status=completed" class="btn-action" style="background-color: #10b981; color: white; text-decoration: none; display: inline-block; padding: 6px 14px;">
+                                        <i class="fas fa-check-circle"></i> Xem hoàn tiền
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'admin_panel:cap_nhat_trang_thai_tra' %}?status=processing_all" class="btn-action" style="background-color: #3b82f6; color: white; text-decoration: none; display: inline-block; padding: 6px 14px;">
+                                        <i class="fas fa-truck-loading"></i> Cập nhật kho
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <!-- Nếu lỡ đổi tay trạng thái mà chưa có phiếu thì mặc định đẩy qua trang CSKH -->
+                                <a href="{% url 'admin_panel:tra_hang' %}?status=pending" class="btn-action" style="background-color: #f59e0b; color: white; text-decoration: none; display: inline-block; padding: 6px 14px;">
+                                    <i class="fas fa-external-link-alt"></i> Xử lý yêu cầu
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <!-- CÁC ĐƠN BÌNH THƯỜNG: Vẫn giữ nút Xem và Sửa -->
+                            <button class="btn-action btn-view" onclick="openModal('modalView_{{ don.order_code }}')" style="background-color: var(--primary-green);"><i class="fas fa-eye"></i> Xem</button>
+                            {% if don.status != 'delivered' and don.status != 'completed' and don.status != 'cancelled' %}
+                            <button class="btn-action btn-edit" onclick="openModal('modalEdit_{{ don.order_code }}')" style="background-color: #ef4444; margin-left: 5px;"><i class="fas fa-edit"></i> Sửa</button>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <!-- Điều chỉnh colspan tự động khớp với số cột đang hiển thị -->
+                <tr><td colspan="{% if trang_thai_hien_tai == 'Trả hàng' %}7{% else %}6{% endif %}" style="text-align: center; padding: 40px; color: #666;">Không có đơn hàng nào khớp với trạng thái này.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if danh_sach_don.paginator.count > 0 %}
+    <div class="pagination-bar">
+        <div>Hiển thị từ {{ danh_sach_don.start_index }}-{{ danh_sach_don.end_index }} của {{ danh_sach_don.paginator.count }} đơn hàng</div>
+        <ul class="pagination">
+            {% if danh_sach_don.has_previous %}
+                <li class="page-item"><a href="?page={{ danh_sach_don.previous_page_number }}&trang_thai={{ trang_thai_hien_tai }}&q={{ search }}"><i class="fas fa-chevron-left"></i></a></li>
+            {% endif %}
+
+            {% for page_num in custom_page_range %}
+                {% if page_num == danh_sach_don.paginator.ELLIPSIS %}
+                    <li class="page-item disabled"><span class="page-link">{{ page_num }}</span></li>
+                {% elif page_num == danh_sach_don.number %}
+                    <li class="page-item active"><a href="#">{{ page_num }}</a></li>
+                {% else %}
+                    <li class="page-item"><a href="?page={{ page_num }}&trang_thai={{ trang_thai_hien_tai }}&q={{ search }}">{{ page_num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if danh_sach_don.has_next %}
+                <li class="page-item"><a href="?page={{ danh_sach_don.next_page_number }}&trang_thai={{ trang_thai_hien_tai }}&q={{ search }}"><i class="fas fa-chevron-right"></i></a></li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block modals %}
+    {% for don in danh_sach_don %}
+
+    <!-- Popup Xem Chi Tiết -->
+    <div class="modal-overlay" id="modalView_{{ don.order_code }}">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">CHI TIẾT ĐƠN HÀNG #{{ don.order_code }}</div>
+                <button class="btn-close" onclick="closeModal('modalView_{{ don.order_code }}')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="address-box">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div class="address-text">{{ don.shipping_address }}, {{ don.shipping_city }}</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-row"><span class="info-label">Khách hàng:</span> <span class="info-value">{{ don.recipient_name }}</span></div>
+                    <div class="info-row"><span class="info-label">SĐT:</span> <span class="info-value">{{ don.recipient_phone }}</span></div>
+                    <div class="info-row"><span class="info-label">Trạng thái:</span> <span class="info-value status-text">{{ don.get_status_display }}</span></div>
+                    <div class="info-row">
+                        <span class="info-label">Phương thức thanh toán:</span>
+                        <span class="info-value">
+                            {% if don.payment_method == 'bank' %}
+                                <span style="color: #3b82f6; font-weight: 600;">Chuyển khoản ngân hàng</span>
+                            {% elif don.payment_method == 'cod' %}
+                                <span style="color: #10b981; font-weight: 600;">Thanh toán khi nhận hàng</span>
+                            {% else %}
+                                {{ don.get_payment_method_display|default:"Chưa xác định" }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% if don.payment_method == 'bank' and don.payment_proof %}
+                    <div class="info-row" style="flex-direction: column; align-items: flex-start;">
+                        <span class="info-label" style="margin-bottom: 10px;">📎 Biên lai chuyển khoản:</span>
+                        <a href="{{ don.payment_proof.url }}" target="_blank" style="display: inline-block;">
+                            <img src="{{ don.payment_proof.url }}" alt="Biên lai chuyển khoản" style="max-width: 200px; height: auto; border-radius: 6px; border: 2px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s;" />
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <table class="modal-table">
+                    <thead><tr><th>Sản phẩm</th><th>Kích thước</th><th>Màu</th><th>SL</th><th>Đơn giá</th></tr></thead>
+                    <tbody>
+                        {% for item in don.items.all %}
+                        <tr>
+                            <td>{{ item.product_name }}</td>
+                            <td>{{ item.size }}</td>
+                            <td>{{ item.color }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td style="font-weight: 600;">{{ item.price }} đ</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" style="text-align: center;">Không có sản phẩm</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="totals-box">
+                    <div class="total-row"><span>Phí vận chuyển</span> <span>{{ don.shipping_fee }} đ</span></div>
+                    <div class="total-row divider">
+                        <div>
+                            <div style="color: #374151; font-weight: bold;">Tổng thanh toán</div>
+                            <div class="vat-note"style="margin-top: 4px;">(Đã bao gồm thuế VAT)</div>
+                        </div>
+                        <span class="total-final" style="color: #dc2626;">{{ don.total }} đ</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {% if don.status != 'pending' and don.status != 'cancelled' %}
+                <a href="{% url 'admin_panel:xuat_hoa_don' don.order_code %}" target="_blank" class="btn-submit" style="background-color: var(--primary-green); text-decoration: none; padding: 10px 25px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px; color: white;">
+                    <i class="fas fa-print"></i> Xem hóa đơn
+                </a>
+                {% endif %}
+
+                <button class="btn-exit" style="background-color: #e5e7eb; color: #374151; border: none; padding: 10px 25px; border-radius: 4px; font-weight: 600; cursor: pointer;" onclick="closeModal('modalView_{{ don.order_code }}')">Thoát</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup Sửa: KHÔNG hiển thị cho đơn Trả hàng, Đã giao, Hủy -->
+    {% if don.status != 'delivered' and don.status != 'completed' and don.status != 'cancelled' and don.status != 'returning' and don.status != 'returned' %}
+    <div class="modal-overlay" id="modalEdit_{{ don.order_code }}">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">CẬP NHẬT TRẠNG THÁI #{{ don.order_code }}</div>
+                <button class="btn-close" onclick="closeModal('modalEdit_{{ don.order_code }}')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="info-box">
+                    <div class="info-row"><span class="info-label">Khách hàng:</span> <span class="info-value">{{ don.recipient_name }}</span></div>
+                    <div class="info-row"><span class="info-label">Trạng thái:</span> <span class="info-value status-text">{{ don.get_status_display }}</span></div>
+                </div>
+
+                <div class="stepper" id="stepper_{{ don.order_code }}">
+                    <div class="step {% if don.status == 'pending' %}active{% elif don.status != 'pending' %}completed{% endif %}">
+                        <div class="step-dot">1</div><div class="step-label">Chờ xác nhận</div>
+                    </div>
+
+                    <div class="step {% if don.status == 'confirmed' %}active{% elif don.status == 'shipping' or don.status == 'delivered' or don.status == 'completed' %}completed{% endif %}"
+                         onclick="{% if don.status == 'pending' %}openConfirmModal(this, 'confirmed', '{{ don.order_code }}'){% endif %}">
+                        <div class="step-dot">2</div><div class="step-label">Đang chuẩn bị</div>
+                    </div>
+
+                    <div class="step {% if don.status == 'shipping' %}active{% elif don.status == 'delivered' or don.status == 'completed' %}completed{% endif %}"
+                         onclick="{% if don.status == 'confirmed' %}openConfirmModal(this, 'shipping', '{{ don.order_code }}'){% endif %}">
+                        <div class="step-dot">3</div><div class="step-label">Đang giao hàng</div>
+                    </div>
+
+                    <div class="step {% if don.status == 'delivered' %}active{% elif don.status == 'completed' %}completed{% endif %}"
+                         onclick="{% if don.status == 'shipping' %}openConfirmModal(this, 'delivered', '{{ don.order_code }}'){% endif %}">
+                        <div class="step-dot">4</div><div class="step-label">Đã giao hàng</div>
+                    </div>
+                </div>
+
+                {% if don.status == 'pending' %}
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn-action" style="background-color: #6b7280; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: 600;"
+                            onclick="openConfirmModal(this, 'cancelled', '{{ don.order_code }}')">
+                        <i class="fas fa-times-circle"></i> Hủy đơn hàng
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button class="btn-exit" style="background-color: #e5e7eb; color: #374151; border: none; padding: 10px 25px; border-radius: 4px; font-weight: 600; cursor: pointer;" onclick="closeModal('modalEdit_{{ don.order_code }}')">Thoát</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <div class="modal-overlay" id="modalConfirm" style="z-index: 10000;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <div class="modal-title" style="color: #333; font-size: 16px;">THÔNG BÁO</div>
+                <button class="btn-close" onclick="closeModal('modalConfirm')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 30px 20px; font-size: 15px; color: #374151;">
+                Bạn có chắc chắn muốn chuyển trạng thái đơn hàng này?
+            </div>
+            <div class="modal-footer" style="justify-content: center; gap: 15px;">
+                <button class="btn-cancel" style="background-color: #9ca3af; color: white; border: none; padding: 10px 25px; border-radius: 4px; font-weight: 600; cursor: pointer;" onclick="closeModal('modalConfirm')">Hủy</button>
+                <button class="btn-submit" style="background-color: var(--primary-green); color: white; border: none; padding: 10px 25px; border-radius: 4px; font-weight: 600; cursor: pointer;" onclick="confirmStatusUpdate()">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalSuccess" style="z-index: 10001;">
+        <div class="modal-content" style="max-width: 320px; padding: 40px 20px 30px; text-align: center; border-radius: 12px;">
+            <div style="font-size: 60px; color: var(--primary-green); margin-bottom: 15px;"><i class="fas fa-check-circle"></i></div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 25px;">Cập nhật trạng thái thành công!</p>
+            <button class="btn-submit" style="background-color: var(--primary-green); color: white; border: none; width: 100%; padding: 12px; font-weight: 600; cursor: pointer; border-radius: 4px;" onclick="closeSuccessModal()">OK</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        const csrfToken = "{{ csrf_token }}";
+        let pendingStep = null;
+        let pendingMaDon = null;
+        let pendingTrangThaiMoi = null;
+        let currentActiveModalId = null;
+
+        function openConfirmModal(stepElement, trangThaiMoi, maDon) {
+            currentActiveModalId = 'modalEdit_' + maDon;
+            pendingStep = stepElement;
+            pendingMaDon = maDon;
+            pendingTrangThaiMoi = trangThaiMoi;
+            openModal('modalConfirm');
+        }
+
+        function confirmStatusUpdate() {
+            if (pendingMaDon && pendingTrangThaiMoi) {
+                fetch("{% url 'admin_panel:don_hang' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                    body: JSON.stringify({ 'order_code': pendingMaDon, 'status': pendingTrangThaiMoi })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        closeModal('modalConfirm');
+                        openModal('modalSuccess');
+                    } else {
+                        alert("Lỗi khi cập nhật: " + data.message);
+                    }
+                });
+            }
+        }
+
+        function closeSuccessModal() {
+            closeModal('modalSuccess');
+            if(currentActiveModalId){
+               closeModal(currentActiveModalId);
+            }
+            window.location.reload();
+        }
+    </script>
+{% endblock %}

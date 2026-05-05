@@ -1,0 +1,130 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load humanize %}
+
+{% block title %}Danh sách khách hàng - Rabona Sport{% endblock %}
+{% block page_title %}DANH SÁCH KHÁCH HÀNG{% endblock %}
+{% block breadcrumb %}Admin > <span>Danh sách khách hàng</span>{% endblock %}
+
+{% block content %}
+
+<style>
+    /* HEADER BẢNG MÀU XANH LÁ */
+    .table-container thead {
+        background-color: var(--primary-green);
+    }
+
+    .table-container thead th {
+        color: white;
+        font-weight: 600;
+    }
+
+    /* hover cho đẹp hơn */
+    .table-container tbody tr:hover {
+        background-color: #f0fdf4;
+    }
+</style>
+
+<div class="stats-cards">
+    <div class="stat-card">
+        <i class="fas fa-users stat-icon blue"></i>
+        <div class="stat-info">
+            <span class="stat-title">Tổng khách hàng</span>
+            <span class="stat-value">{{ tong_kh }}</span>
+        </div>
+    </div>
+</div>
+
+<form method="get" style="margin-bottom: 20px; display: flex; gap: 10px;">
+    <input type="text" name="q" value="{{ search }}" placeholder="Tìm theo tên hoặc email..."
+           style="padding: 8px 14px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; flex: 1; max-width: 400px;">
+    <button type="submit" style="padding: 8px 20px; background: var(--primary-green); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Tìm kiếm</button>
+</form>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Mã KH</th>
+                <th>Tên đăng nhập</th>
+                <th>Họ và tên</th>
+                <th style="text-align: center;">Email</th>
+                <th>Địa chỉ</th>
+                <th>Ngày tham gia</th>
+                <th>Trạng thái</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><span class="order-id">#{{ user.id }}</span></td>
+                <td style="text-align: left; font-weight: 600;">{{ user.username }}</td>
+                <td style="text-align: left;">{{ user.last_name }} {{ user.first_name }}</td>
+                <td style="text-align: left;">{{ user.email|default:"(Chưa cập nhật)" }}</td>
+                <td style="text-align: left; max-width: 200px; font-size: 13px;">{{ user.display_address }}</td>
+                <td>{{ user.date_joined|date:"d/m/Y" }}</td>
+                <td>
+                    {% if user.is_active %}
+                        <span style="color: #10b981; font-weight: 600;">Hoạt động</span>
+                    {% else %}
+                        <span style="color: #ef4444; font-weight: 600;">Bị khóa</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                    Không tìm thấy khách hàng nào.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if users.paginator.count > 0 %}
+<div class="pagination-bar">
+    <div>
+        Hiển thị {{ users.start_index }}-{{ users.end_index }}
+        của {{ users.paginator.count }} khách hàng
+    </div>
+
+    <ul class="pagination">
+        {% if users.has_previous %}
+            <li class="page-item">
+                <a href="?page={{ users.previous_page_number }}{% if search %}&q={{ search }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item" style="opacity: 0.5; pointer-events: none;">
+                <i class="fas fa-chevron-left"></i>
+            </li>
+        {% endif %}
+
+        {% for num in users.paginator.page_range %}
+            {% if users.number == num %}
+                <li class="page-item active">{{ num }}</li>
+            {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
+                <li class="page-item">
+                    <a href="?page={{ num }}{% if search %}&q={{ search }}{% endif %}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if users.has_next %}
+            <li class="page-item">
+                <a href="?page={{ users.next_page_number }}{% if search %}&q={{ search }}{% endif %}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item" style="opacity: 0.5; pointer-events: none;">
+                <i class="fas fa-chevron-right"></i>
+            </li>
+        {% endif %}
+    </ul>
+</div>
+{% endif %}
+
+{% endblock %}
