@@ -17,6 +17,7 @@ from .models import (
 #  TRANG CHỦ
 # ─────────────────────────────────────────
 
+
 def home(request):
     products = Product.objects.filter(is_active=True).prefetch_related('variants', 'images')
     return render(request, 'store/home.html', {'products': products})
@@ -73,7 +74,6 @@ def register(request):
 # ─────────────────────────────────────────
 #  SẢN PHẨM
 # ─────────────────────────────────────────
-
 def product_list(request):
     from django.db.models import Q
 
@@ -115,7 +115,7 @@ def product_detail(request, slug):
     images = product.images.all()
 
     colors = variants.values('color_name', 'color_hex').distinct()
-    sizes  = variants.values_list('size', flat=True).distinct()
+    sizes = variants.values_list('size', flat=True).distinct()
 
     return render(request, 'store/product_detail.html', {
         'product': product,
@@ -129,6 +129,7 @@ def product_detail(request, slug):
 # ─────────────────────────────────────────
 #  GIỎ HÀNG
 # ─────────────────────────────────────────
+
 
 @login_required
 def cart_redirect(request):
@@ -211,6 +212,7 @@ def cart_remove(request, item_id):
 # ─────────────────────────────────────────
 #  THANH TOÁN
 # ─────────────────────────────────────────
+
 
 @login_required
 @require_POST
@@ -430,6 +432,11 @@ def cancel_order(request, order_code):
 #  ĐƠN HÀNG
 # ─────────────────────────────────────────
 
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Order
+
 @login_required
 def order_list(request):
     status = request.GET.get('status', '')
@@ -442,7 +449,7 @@ def order_list(request):
         orders = orders.filter(status=status)
     return render(request, 'store/order_list.html', {
         'orders': orders,
-        'active_status': status,
+        'active_status': active_status,
     })
 
 
@@ -546,14 +553,15 @@ def return_request(request, order_code):
 #  HỒ SƠ
 # ─────────────────────────────────────────
 
+
 @login_required
 def profile(request):
     profile_obj, _ = UserProfile.objects.get_or_create(user=request.user)
     if request.method == 'POST':
         profile_obj.full_name = request.POST.get('full_name', '')
-        profile_obj.phone     = request.POST.get('phone', '')
-        profile_obj.dob       = request.POST.get('dob') or None
-        profile_obj.gender    = request.POST.get('gender', '')
+        profile_obj.phone = request.POST.get('phone', '')
+        profile_obj.dob = request.POST.get('dob') or None
+        profile_obj.gender = request.POST.get('gender', '')
         if 'avatar' in request.FILES:
             profile_obj.avatar = request.FILES['avatar']
         profile_obj.save()
@@ -564,6 +572,9 @@ def profile(request):
         'profile': profile_obj,
         'addresses': addresses,
     })
+
+
+from django.urls import reverse
 
 
 @login_required
@@ -602,6 +613,7 @@ def address_manage(request):
         is_default = request.POST.get('is_default') == 'on'
         if is_default:
             Address.objects.filter(user=request.user).update(is_default=False)
+
         Address.objects.create(
             user=request.user,
             full_name=full_name,

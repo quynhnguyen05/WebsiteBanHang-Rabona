@@ -133,7 +133,7 @@
       method: 'POST',
       headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'quantity=1'
-    }).then(r => r.json()).then(data => {
+    }).then(r => r.json()).then data => {
       if (data.success) showToast(name, img, data.cart_count);
     }).catch(() => showToast(name, img, null));
   }

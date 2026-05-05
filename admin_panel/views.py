@@ -11,12 +11,15 @@ from django.utils import timezone
 from datetime import timedelta
 import json
 
+
 from store.models import (
-    Product, ProductVariant, Category,
-    Order, OrderItem, ReturnRequest,
-    Cart, CartItem, Address, UserProfile,
-    PhiVanChuyen,
+   Product, ProductVariant, Category,
+   Order, OrderItem, ReturnRequest,
+   Cart, CartItem, Address, UserProfile,
+   PhiVanChuyen,
 )
+
+
 
 
 def admin_required(view_func):
@@ -66,15 +69,6 @@ def dashboard(request):
     tong_sp = Product.objects.count()
     tong_kh = User.objects.filter(is_staff=False).count()
 
-    context = {
-        'tong_don_hang': tong_don,
-        'doanh_thu': doanh_thu,
-        'don_dang_giao': dang_giao,
-        'don_hang_moi': don_moi,
-        'tong_sp': tong_sp,
-        'tong_kh': tong_kh,
-    }
-    return render(request, 'admin_panel/dashboard.html', context)
 
 
 # ─── QUẢN LÝ ĐƠN HÀNG ───────────────────────────────────────
@@ -151,22 +145,24 @@ def quan_ly_don_hang(request):
 
 @admin_required
 def xuat_hoa_don(request, order_code):
-    order = get_object_or_404(Order, order_code=order_code)
-    return render(request, 'admin_panel/hoa_don.html', {
-        'order': order,
-        'today': timezone.now(),
-    })
+   order = get_object_or_404(Order, order_code=order_code)
+   return render(request, 'admin_panel/hoa_don.html', {
+       'order': order,
+       'today': timezone.now(),
+   })
+
+
 
 
 # ─── 1. XỬ LÝ YÊU CẦU TRẢ HÀNG (CSKH - Duyệt/Từ chối) ────────────────────────
 
 @admin_required
 def tra_hang(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            rr = ReturnRequest.objects.select_related('order').get(id=data.get('id'))
-            new_status = data.get('status')
+   if request.method == 'POST':
+       try:
+           data = json.loads(request.body)
+           rr = ReturnRequest.objects.select_related('order').get(id=data.get('id'))
+           new_status = data.get('status')
 
             if new_status == 'approved':
                 order = rr.order
@@ -189,11 +185,34 @@ def tra_hang(request):
                 rr.order.status = 'delivered'
                 rr.order.save()
 
-            rr.status = new_status
-            rr.save()
-            return JsonResponse({'status': 'success'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
+               # Ưu tiên lấy số tiền Admin tự điều chỉnh trên giao diện
+               refund_val = data.get('refund_amount')
+               if refund_val and str(refund_val).strip() != '':
+                   rr.refund_amount = float(refund_val)
+               else:
+                   # Nếu Admin không chỉnh, lấy theo logic hệ thống mặc định (2 chiều)
+                   if rr.reason in shop_faults:
+                       rr.refund_amount = order.total
+                   else:
+                       calculated_refund = order.subtotal - order.shipping_fee
+                       rr.refund_amount = max(0, calculated_refund)  # Giới hạn mức thấp nhất là 0
+
+
+               order.status = 'returning'
+               order.save()
+               rr.save()
+           elif new_status == 'rejected':
+               rr.admin_note = f"Lý do từ chối: {data.get('ly_do_tu_choi', '').strip()}"
+               rr.order.status = 'delivered'
+               rr.order.save()
+
+
+           rr.status = new_status
+           rr.save()
+           return JsonResponse({'status': 'success'})
+       except Exception as e:
+           return JsonResponse({'status': 'error', 'message': str(e)})
+
 
     status_filter = request.GET.get('status', 'pending')
     search_query = request.GET.get('q', '').strip()
@@ -221,11 +240,53 @@ def tra_hang(request):
 
     qs = qs.filter(status=status_filter)
 
-    stats = {
-        'tong_yeu_cau': cho_duyet_count + tu_choi_count,
-        'cho_duyet': cho_duyet_count,
-        'tu_choi': tu_choi_count,
-    }
+   # 4. Tính toán số liệu (Stats) dựa trên kết quả đã tìm kiếm
+   cho_duyet_count = qs.filter(status='pending').count()
+   tu_choi_count = qs.filter(status='rejected').count()
+
+
+   # --- 5. LOGIC TỰ ĐỘNG CHUYỂN TAB THÔNG MINH ---
+   if search_query:
+       if status_filter == 'pending' and cho_duyet_count == 0 and tu_choi_count > 0:
+           status_filter = 'rejected'
+       elif status_filter == 'rejected' and tu_choi_count == 0 and cho_duyet_count > 0:
+           status_filter = 'pending'
+
+
+   # 6. Lọc lại QuerySet theo Tab cuối cùng sau khi đã kiểm tra
+   qs = qs.filter(status=status_filter)
+
+
+   stats = {
+       'tong_yeu_cau': cho_duyet_count + tu_choi_count,
+       'cho_duyet': cho_duyet_count,
+       'tu_choi': tu_choi_count,
+   }
+
+
+   paginator = Paginator(qs, 15)
+   paginator = Paginator(qs, 15)
+   page_number = request.GET.get('page', 1)
+   page_obj = paginator.get_page(page_number)
+
+
+   # TẠO DÃY TRANG CÓ DẤU "..."
+   # on_each_side: số trang hiện ra bên cạnh trang hiện tại
+   # on_ends: số trang hiện ra ở 2 đầu (trang 1 và trang cuối)
+   custom_page_range = paginator.get_elided_page_range(
+       page_number,
+       on_each_side=2,
+       on_ends=1
+   )
+
+
+   return render(request, 'admin_panel/xu_ly_yeu_cau.html', {
+       'phieu_list': page_obj,
+       'custom_page_range': custom_page_range,  # Truyền dãy trang mới này vào HTML
+       'current_status': status_filter,
+       'stats': stats,
+       'search': search_query,
+   })
 
     paginator = Paginator(qs, 15)
     page_number = request.GET.get('page', 1)
@@ -349,13 +410,11 @@ def cap_nhat_trang_thai_tra(request):
 
 @admin_required
 def quan_ly_san_pham(request):
-    qs = Product.objects.prefetch_related('variants').order_by('-id')
-    search = request.GET.get('q', '')
-    status_filter = request.GET.get('status', 'all')
-    category_filter = request.GET.get('category', 'all')
+   qs = Product.objects.prefetch_related('variants').order_by('-id')
+   search = request.GET.get('q', '')
+   status_filter = request.GET.get('status', 'all')
+   category_filter = request.GET.get('category', 'all')
 
-    if search:
-        qs = qs.filter(name__icontains=search)
 
     if status_filter == 'in_stock':
         qs = qs.filter(variants__stock__gt=0).distinct()
@@ -368,8 +427,46 @@ def quan_ly_san_pham(request):
     if category_filter != 'all':
         qs = qs.filter(category__slug=category_filter)
 
-    paginator = Paginator(qs, 15)
-    products = paginator.get_page(request.GET.get('page'))
+   # Lọc theo trạng thái
+   if status_filter == 'in_stock':
+       qs = qs.filter(variants__stock__gt=0).distinct()
+   elif status_filter == 'out_of_stock':
+       # Sản phẩm mà tất cả biến thể đều hết hàng (hoặc không có biến thể)
+       from django.db.models import Sum
+       qs = qs.annotate(tong_kho=Sum('variants__stock')).filter(
+           Q(tong_kho=0) | Q(tong_kho__isnull=True)
+       )
+
+
+   # Lọc theo danh mục
+   if category_filter != 'all':
+       qs = qs.filter(category__slug=category_filter)
+
+
+   paginator = Paginator(qs, 15)
+   products = paginator.get_page(request.GET.get('page'))
+
+
+   # Đếm số lượng sản phẩm theo trạng thái tồn kho
+   from django.db.models import Sum
+   all_products = Product.objects.annotate(tong_kho=Sum('variants__stock'))
+   stats = {
+       'tong': Product.objects.count(),
+       'con_hang': all_products.filter(tong_kho__gt=0).count(),
+       'het_hang': all_products.filter(Q(tong_kho=0) | Q(tong_kho__isnull=True)).count(),
+   }
+   categories = Category.objects.all()
+   return render(request, 'admin_panel/quan_ly_san_pham.html', {
+       'danh_sach_san_pham': products,
+       'tong_san_pham': stats['tong'],
+       'dang_kinh_doanh': stats['con_hang'],
+       'het_hang': stats['het_hang'],
+       'categories': categories,
+       'filter_status': status_filter,
+       'filter_category': category_filter,
+       'search': search,
+   })
+
 
     from django.db.models import Sum
     all_products = Product.objects.annotate(tong_kho=Sum('variants__stock'))
@@ -485,10 +582,12 @@ def sua_san_pham(request, pk):
 
 @admin_required
 def xoa_san_pham(request, pk):
-    if request.method == 'POST':
-        get_object_or_404(Product, pk=pk).delete()
-        return JsonResponse({'status': 'success'})
-    return JsonResponse({'status': 'error'}, status=405)
+   if request.method == 'POST':
+       get_object_or_404(Product, pk=pk).delete()
+       return JsonResponse({'status': 'success'})
+   return JsonResponse({'status': 'error'}, status=405)
+
+
 
 
 # ─── DANH SÁCH KHÁCH HÀNG ────────────────────────────────────
@@ -500,11 +599,10 @@ def ds_khach_hang(request):
         Prefetch('addresses', queryset=Address.objects.all(), to_attr='user_addresses')
     ).order_by('-date_joined')
 
-    if search:
-        qs = qs.filter(Q(username__icontains=search) | Q(email__icontains=search))
+   qs = User.objects.filter(is_staff=False).prefetch_related(
+       Prefetch('addresses', queryset=Address.objects.all(), to_attr='user_addresses')
+   ).order_by('-date_joined')
 
-    paginator = Paginator(qs, 15)
-    users_page = paginator.get_page(request.GET.get('page'))
 
     for user in users_page:
         default_addr = next((addr for addr in user.user_addresses if addr.is_default), None)
@@ -515,11 +613,6 @@ def ds_khach_hang(request):
         else:
             user.display_address = "(Chưa cập nhật)"
 
-    return render(request, 'admin_panel/ds_khach_hang.html', {
-        'users': users_page,
-        'search': search,
-        'tong_kh': User.objects.filter(is_staff=False).count(),
-    })
 
 
 # ─── BÁO CÁO DOANH THU ───────────────────────────────────────
@@ -573,21 +666,23 @@ def quan_ly_phi_ship(request):
 
 @admin_required
 def ajax_luu_phi_ship(request):
-    if request.method == 'POST':
-        try:
-            ten = request.POST.get('tenKhuVuc', '').strip()
-            phi = request.POST.get('phiShip', '0')
-            tg = request.POST.get('thoiGianGiao', '').strip() or None
-            if not ten:
-                return JsonResponse({'status': 'error', 'message': 'Thiếu tên khu vực'})
-            obj, _ = PhiVanChuyen.objects.update_or_create(
-                tenKhuVuc=ten,
-                defaults={'phiShip': phi, 'thoiGianGiao': tg},
-            )
-            return JsonResponse({'status': 'success', 'id': obj.pk})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
-    return JsonResponse({'status': 'error'}, status=405)
+   if request.method == 'POST':
+       try:
+           ten = request.POST.get('tenKhuVuc', '').strip()
+           phi = request.POST.get('phiShip', '0')
+           tg = request.POST.get('thoiGianGiao', '').strip() or None
+           if not ten:
+               return JsonResponse({'status': 'error', 'message': 'Thiếu tên khu vực'})
+           obj, _ = PhiVanChuyen.objects.update_or_create(
+               tenKhuVuc=ten,
+               defaults={'phiShip': phi, 'thoiGianGiao': tg},
+           )
+           return JsonResponse({'status': 'success', 'id': obj.pk})
+       except Exception as e:
+           return JsonResponse({'status': 'error', 'message': str(e)})
+   return JsonResponse({'status': 'error'}, status=405)
+
+
 
 
 @admin_required

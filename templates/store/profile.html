@@ -2,6 +2,7 @@
 {% load static %}
 {% block title %}Rabona Sport - Tài khoản{% endblock %}
 
+
 {% block extra_css %}
 <style>
 body { background: #f0f0f0; }
@@ -59,6 +60,7 @@ body { background: #f0f0f0; }
 </style>
 {% endblock %}
 
+
 {% block content %}
 <div class="pg-wrap">
   <aside class="sidebar">
@@ -108,7 +110,6 @@ body { background: #f0f0f0; }
     </form>
   </aside>
 
-  <main class="content-card">
 
     <!-- Tab: Hồ sơ -->
     <div class="tab-panel active" id="tab-profile">
@@ -288,8 +289,120 @@ body { background: #f0f0f0; }
       </div>
     </div>
 
-  </main>
+
+   <!-- Tab: Đổi mật khẩu -->
+   <div class="tab-panel" id="tab-password">
+     <div class="cc-title">Đổi mật khẩu</div>
+     <div class="cc-sub">Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu</div>
+     <div class="cc-divider"></div>
+     <div class="pw-form">
+       <div class="pw-group">
+         <label>Mật khẩu hiện tại</label>
+         <div class="pw-wrap">
+           <input type="password" id="pw-old" />
+           <button class="pw-eye" type="button" onclick="toggleEye('pw-old')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#9ca3af" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#9ca3af" stroke-width="1.5"/></svg></button>
+         </div>
+         <div class="pw-err" id="pw-old-err">Mật khẩu hiện tại không đúng.</div>
+       </div>
+       <div class="pw-group">
+         <label>Mật khẩu mới</label>
+         <div class="pw-wrap">
+           <input type="password" id="pw-new" />
+           <button class="pw-eye" type="button" onclick="toggleEye('pw-new')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#9ca3af" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#9ca3af" stroke-width="1.5"/></svg></button>
+         </div>
+         <div class="pw-err" id="pw-new-err">Mật khẩu tối thiểu 6 ký tự.</div>
+       </div>
+       <div class="pw-group">
+         <label>Xác nhận mật khẩu mới</label>
+         <div class="pw-wrap">
+           <input type="password" id="pw-confirm" />
+           <button class="pw-eye" type="button" onclick="toggleEye('pw-confirm')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#9ca3af" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#9ca3af" stroke-width="1.5"/></svg></button>
+         </div>
+         <div class="pw-err" id="pw-confirm-err">Mật khẩu không khớp.</div>
+       </div>
+       <button class="btn-save" onclick="savePassword()">Xác nhận</button>
+     </div>
+   </div>
+
+
+   <!-- Tab: Địa chỉ -->
+   <div class="tab-panel" id="tab-address">
+     <div class="cc-title">Địa chỉ của tôi</div>
+     <div class="cc-sub">Quản lý địa chỉ giao hàng</div>
+     <div class="cc-divider"></div>
+
+
+     <div class="addr-form">
+       <!-- 1. DANH SÁCH ĐỊA CHỈ CŨ KÈM NÚT BẤM -->
+       <div style="margin-bottom: 24px;">
+         {% if addresses %}
+           {% for addr in addresses %}
+           <div style="border:1px solid #e5e7eb;border-radius:6px;padding:14px;margin-bottom:12px;{% if addr.is_default %}border-color:#14ae5c;background:#f0fdf4;{% endif %} display: flex; justify-content: space-between; align-items: flex-start;">
+
+
+             <!-- Thông tin chữ -->
+             <div>
+               <div style="font-weight:600;font-size:14px;">
+                 {{ addr.full_name }}
+                 {% if addr.is_default %}
+                   <span style="font-size:11px;background:#14ae5c;color:#fff;border-radius:10px;padding:2px 8px;font-weight:700;margin-left:6px;">Đang chọn</span>
+                 {% endif %}
+               </div>
+               <div style="font-size:13px;color:#6b7280;margin-top:4px;">{{ addr.phone }}</div>
+               <div style="font-size:13px;color:#374151;margin-top:4px;">{{ addr.detail }}, {{ addr.city }}</div>
+             </div>
+
+
+             <!-- Cụm nút thao tác -->
+             <div style="display: flex; gap: 8px; flex-shrink: 0;">
+               {% if not addr.is_default %}
+               <form method="post" action="{% url 'store:address_manage' %}">
+                 {% csrf_token %}
+                 <input type="hidden" name="set_default" value="{{ addr.id }}" />
+                 <button type="submit" style="background:#fff; border:1px solid #14ae5c; color:#14ae5c; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:700; cursor:pointer; transition: 0.2s;" onmouseover="this.style.background='#14ae5c'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#14ae5c';">Chọn</button>
+               </form>
+               {% endif %}
+
+
+               <form method="post" action="{% url 'store:address_manage' %}" onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?');">
+                 {% csrf_token %}
+                 <input type="hidden" name="delete_id" value="{{ addr.id }}" />
+                 <button type="submit" style="background:#fff; border:1px solid #ef4444; color:#ef4444; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:700; cursor:pointer; transition: 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#ef4444';">Xóa</button>
+               </form>
+             </div>
+
+
+           </div>
+           {% endfor %}
+         {% else %}
+           <div style="text-align:center; padding:20px; color:#9ca3af; font-size:13px; border:1px dashed #d1d5db; border-radius:6px;">Bạn chưa có địa chỉ nào được lưu.</div>
+         {% endif %}
+       </div>
+
+
+       <div class="cc-divider"></div>
+
+
+       <!-- 2. FORM THÊM ĐỊA CHỈ MỚI -->
+       <div style="font-family:Montserrat,sans-serif; font-weight:700; font-size:15px; margin-bottom:14px; color:var(--brand-dark);">+ Thêm địa chỉ mới</div>
+       <form method="post" action="{% url 'store:address_manage' %}">
+         {% csrf_token %}
+         <div class="addr-group"><label>Họ và tên</label><input class="pf-input" name="full_name" type="text" placeholder="Nguyễn Văn A" required /></div>
+         <div class="addr-group"><label>Số điện thoại</label><input class="pf-input" name="phone" type="tel" placeholder="0xxxxxxxxx" required /></div>
+         <div class="addr-group"><label>Địa chỉ chi tiết</label><input class="pf-input" name="detail" type="text" placeholder="Số nhà, tên đường, phường/xã..." required /></div>
+         <div class="addr-group"><label>Tỉnh / Thành phố</label><input class="pf-input" name="city" type="text" placeholder="Đà Nẵng" required /></div>
+         <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:16px;cursor:pointer;">
+           <input type="checkbox" name="is_default" style="accent-color:#14ae5c;" /> Đặt làm địa chỉ mặc định
+         </label>
+         <button type="submit" class="btn-save">Lưu địa chỉ</button>
+       </form>
+     </div>
+   </div>
+
+
+ </main>
 </div>
+
 
 <!-- Toast -->
 <div class="save-toast" id="saveToast">
@@ -300,35 +413,21 @@ body { background: #f0f0f0; }
 </div>
 {% endblock %}
 
+
 {% block extra_js %}
 <script>
-  var params = new URLSearchParams(location.search);
-  var tabParam = params.get('tab');
-  if (tabParam === 'password') switchTab('password');
-  else if (tabParam === 'address') switchTab('address');
+ var params = new URLSearchParams(location.search);
+ var tabParam = params.get('tab');
+ if (tabParam === 'password') switchTab('password');
+ else if (tabParam === 'address') switchTab('address');
 
-  {% if messages %}
-  {% for msg in messages %}
-  showToast('{{ msg|escapejs }}');
-  {% endfor %}
-  {% endif %}
 
-  function switchTab(name) {
-    ['profile','password','address'].forEach(function(t) {
-      document.getElementById('tab-'+t).classList.toggle('active', t===name);
-    });
-    var lnkProfile = document.getElementById('lnk-profile');
-    var lnkPw = document.getElementById('lnk-password');
-    var lnkAddr = document.getElementById('lnk-address');
-    if (lnkProfile) lnkProfile.classList.toggle('active', name==='profile');
-    if (lnkPw) lnkPw.classList.toggle('active', name==='password');
-    if (lnkAddr) lnkAddr.classList.toggle('active', name==='address');
-  }
+ {% if messages %}
+ {% for msg in messages %}
+ showToast('{{ msg|escapejs }}');
+ {% endfor %}
+ {% endif %}
 
-  function toggleEye(id) {
-    var inp = document.getElementById(id);
-    inp.type = inp.type === 'password' ? 'text' : 'password';
-  }
 
   function savePassword() {
     ['pw-old-err','pw-new-err','pw-confirm-err'].forEach(function(id){
@@ -343,11 +442,33 @@ body { background: #f0f0f0; }
     showToast('Đổi mật khẩu thành công!');
   }
 
-  function showToast(msg) {
-    document.getElementById('toastMsg').textContent = msg;
-    var t = document.getElementById('saveToast');
-    t.classList.add('show');
-    setTimeout(function(){ t.classList.remove('show'); }, 3000);
-  }
+
+ function toggleEye(id) {
+   var inp = document.getElementById(id);
+   inp.type = inp.type === 'password' ? 'text' : 'password';
+ }
+
+
+ function savePassword() {
+   ['pw-old-err','pw-new-err','pw-confirm-err'].forEach(function(id){ document.getElementById(id).style.display='none'; });
+   var oldPw = document.getElementById('pw-old').value;
+   var newPw = document.getElementById('pw-new').value;
+   var confirmPw = document.getElementById('pw-confirm').value;
+   if (!oldPw) { document.getElementById('pw-old-err').style.display='block'; return; }
+   if (newPw.length < 6) { document.getElementById('pw-new-err').style.display='block'; return; }
+   if (newPw !== confirmPw) { document.getElementById('pw-confirm-err').style.display='block'; return; }
+   showToast('Đổi mật khẩu thành công!');
+ }
+
+
+ function showToast(msg) {
+   document.getElementById('toastMsg').textContent = msg;
+   var t = document.getElementById('saveToast');
+   t.classList.add('show');
+   setTimeout(function(){ t.classList.remove('show'); }, 3000);
+ }
 </script>
 {% endblock %}
+
+
+

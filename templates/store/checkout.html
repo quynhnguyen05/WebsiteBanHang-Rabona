@@ -74,13 +74,15 @@ body { background: #f3f4f6; }
   <span style="color:var(--brand-dark);">Thanh toán</span>
 </div>
 
+
 <div class="steps">
-  <div class="step"><div class="step-num">1</div> Giỏ Hàng</div>
-  <div class="step-line done"></div>
-  <div class="step active"><div class="step-num">2</div> Thanh toán</div>
-  <div class="step-line"></div>
-  <div class="step"><div class="step-num">3</div> Xác nhận</div>
+ <div class="step"><div class="step-num">1</div> Giỏ Hàng</div>
+ <div class="step-line done"></div>
+ <div class="step active"><div class="step-num">2</div> Thanh toán</div>
+ <div class="step-line"></div>
+ <div class="step"><div class="step-num">3</div> Xác nhận</div>
 </div>
+
 
 <form id="checkoutForm" method="post" action="{% url 'store:place_order' %}" enctype="multipart/form-data">
   {% csrf_token %}
@@ -321,3 +323,6 @@ function placeOrder() {
 }
 </script>
 {% endblock %}
+
+
+
