@@ -2,11 +2,11 @@
 {% load static store_filters %}
 {% block title %}Sản phẩm - Rabona Sport{% endblock %}
 
-{% block nav_giay %}{% if active_category.slug == 'giay-bong-da' or not active_category %}active{% endif %}{% endblock %}
-{% block nav_quan_ao %}{% if active_category.slug == 'quan-ao' %}active{% endif %}{% endblock %}
+{% block nav_giay %}{% if active_category.slug == 'giay-bong-da' %}active{% endif %}{% endblock %}
+{% block nav_quan_ao %}{% if active_category.slug == 'ao-dau' %}active{% endif %}{% endblock %}
 {% block nav_phu_kien %}{% if active_category.slug == 'phu-kien' %}active{% endif %}{% endblock %}
-{% block mobile_nav_giay %}{% if active_category.slug == 'giay-bong-da' or not active_category %}active{% endif %}{% endblock %}
-{% block mobile_nav_quan_ao %}{% if active_category.slug == 'quan-ao' %}active{% endif %}{% endblock %}
+{% block mobile_nav_giay %}{% if active_category.slug == 'giay-bong-da' %}active{% endif %}{% endblock %}
+{% block mobile_nav_quan_ao %}{% if active_category.slug == 'ao-dau' %}active{% endif %}{% endblock %}
 {% block mobile_nav_phu_kien %}{% if active_category.slug == 'phu-kien' %}active{% endif %}{% endblock %}
 
 {% block extra_css %}

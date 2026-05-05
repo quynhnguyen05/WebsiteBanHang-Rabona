@@ -2,77 +2,76 @@
 {% load static %}
 {% load store_filters %}
 {% block title %}Rabona Sport - Thanh toán{% endblock %}
+
 {% block extra_css %}
-   body { background: #f3f4f6; }
-   .breadcrumb { max-width: 1100px; margin: 0 auto; padding: 14px 16px; font-size: 13px; color: #6b7280; }
-   .breadcrumb a { color: #6b7280; text-decoration: none; }
-   .breadcrumb a:hover { color: var(--brand-green); }
-   .breadcrumb span { margin: 0 6px; }
-   .steps { display: flex; align-items: center; justify-content: center; gap: 0; margin: 0 auto 24px; max-width: 360px; padding: 0 16px; }
-   .step { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #9ca3af; }
-   .step.active { color: var(--brand-dark); font-weight: 700; }
-   .step-num { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: #fff; }
-   .step.active .step-num { background: var(--brand-green); border-color: var(--brand-green); color: #fff; }
-   .step-line { flex: 1; height: 2px; background: #d1d5db; margin: 0 8px; min-width: 40px; }
-   .step-line.done { background: var(--brand-green); }
-   .checkout-wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px 60px; display: grid; grid-template-columns: 1fr 360px; gap: 20px; }
-   @media (max-width: 768px) { .checkout-wrap { grid-template-columns: 1fr; } }
-   .section { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
-   .section-title { font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-   .addr-row { display: flex; align-items: flex-start; justify-content: space-between; }
-   .addr-name { font-weight: 600; font-size: 14px; }
-   .addr-phone { font-size: 13px; color: #6b7280; margin-left: 12px; }
-   .addr-detail { font-size: 13px; color: #6b7280; margin-top: 4px; }
-   .change-btn { font-size: 13px; color: var(--brand-green); font-weight: 600; background: none; border: none; cursor: pointer; white-space: nowrap; text-decoration: none; }
-   .product-item { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
-   .product-item img { width: 72px; height: 72px; object-fit: contain; border: 1px solid #e5e7eb; border-radius: 4px; background: #f9fafb; }
-   .product-item-info { flex: 1; }
-   .product-item-name { font-size: 14px; font-weight: 500; }
-   .product-item-meta { font-size: 12px; color: #9ca3af; margin-top: 3px; }
-   .product-item-price { font-size: 14px; font-weight: 700; margin-top: 4px; }
-   .product-item-qty { font-size: 13px; color: #6b7280; white-space: nowrap; }
-   .free-ship { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--brand-green); font-weight: 600; margin-bottom: 12px; }
-   .ship-option { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px; transition: border-color 0.15s; }
-   .ship-option.selected { border-color: var(--brand-green); background: #f0fdf4; }
-   .ship-option input[type=radio] { margin-top: 2px; accent-color: var(--brand-green); }
-   .ship-option-title { font-size: 14px; font-weight: 600; }
-   .ship-option-desc { font-size: 12px; color: #6b7280; margin-top: 3px; }
-   .pay-option { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; cursor: pointer; margin-bottom: 10px; transition: border-color 0.15s; }
-   .pay-option.selected { border-color: var(--brand-green); background: #f0fdf4; }
-   .pay-option-header { display: flex; align-items: center; gap: 10px; }
-   .pay-option-header input[type=radio] { accent-color: var(--brand-green); }
-   .pay-option-label { font-size: 14px; font-weight: 600; }
-   .bank-details { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
-   .bank-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb; }
-   .bank-label { font-size: 11px; color: #9ca3af; }
-   .bank-val { font-size: 14px; font-weight: 500; margin-top: 2px; }
-   .bank-val.green { color: var(--brand-green); font-weight: 700; }
-   .copy-btn { padding: 5px 14px; border: 1.5px solid var(--brand-green); border-radius: 5px; background: #fff; color: var(--brand-green); font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.15s; flex-shrink: 0; }
-   .copy-btn:hover { background: var(--brand-green); color: #fff; }
-   .upload-label { font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-   .upload-zone { border: 2px dashed #d1d5db; border-radius: 8px; padding: 32px 16px; text-align: center; cursor: pointer; transition: border-color 0.15s; display: block; }
-   .upload-zone:hover { border-color: var(--brand-green); }
-   .upload-zone input { display: none; }
-   .upload-zone-text { font-size: 14px; font-weight: 600; color: #374151; }
-   .upload-zone-sub { font-size: 12px; color: #9ca3af; margin-top: 4px; }
-   .right-panel { position: sticky; top: 90px; align-self: start; }
-   .discount-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
-   .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #6b7280; padding: 6px 0; }
-   .summary-row.total { font-size: 15px; font-weight: 700; color: #0f172a; padding-top: 12px; border-top: 1px solid #e5e7eb; margin-top: 6px; }
-   .summary-row .green { color: var(--brand-green); }
-   .order-btn { width: 100%; padding: 14px; background: var(--brand-green); color: #fff; border: none; border-radius: 6px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 16px; letter-spacing: 0.5px; transition: background 0.15s; }
-   .order-btn:hover { background: #0f9a4e; }
-   .order-toast-container { display: none; }
-   .order-toast { display: none; }
-   .form-input { width: 100%; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none; font-family: Inter, sans-serif; transition: border-color 0.15s; margin-bottom: 10px; }
-   .form-input:focus { border-color: var(--brand-green); }
-   .form-label { font-size: 13px; font-weight: 500; color: #374151; display: block; margin-bottom: 5px; }
+body { background: #f3f4f6; }
+.breadcrumb { max-width: 1100px; margin: 0 auto; padding: 14px 16px; font-size: 13px; color: #6b7280; }
+.breadcrumb a { color: #6b7280; text-decoration: none; }
+.breadcrumb a:hover { color: var(--brand-green); }
+.breadcrumb span { margin: 0 6px; }
+.steps { display: flex; align-items: center; justify-content: center; gap: 0; margin: 0 auto 24px; max-width: 360px; padding: 0 16px; }
+.step { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #9ca3af; }
+.step.active { color: var(--brand-dark); font-weight: 700; }
+.step-num { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: #fff; }
+.step.active .step-num { background: var(--brand-green); border-color: var(--brand-green); color: #fff; }
+.step-line { flex: 1; height: 2px; background: #d1d5db; margin: 0 8px; min-width: 40px; }
+.step-line.done { background: var(--brand-green); }
+.checkout-wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px 60px; display: grid; grid-template-columns: 1fr 360px; gap: 20px; }
+@media (max-width: 768px) { .checkout-wrap { grid-template-columns: 1fr; } }
+.section { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+.section-title { font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.addr-row { display: flex; align-items: flex-start; justify-content: space-between; }
+.addr-name { font-weight: 600; font-size: 14px; }
+.addr-phone { font-size: 13px; color: #6b7280; margin-left: 12px; }
+.addr-detail { font-size: 13px; color: #6b7280; margin-top: 4px; }
+.change-btn { font-size: 13px; color: var(--brand-green); font-weight: 600; background: none; border: none; cursor: pointer; white-space: nowrap; text-decoration: none; }
+.product-item { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.product-item img { width: 72px; height: 72px; object-fit: contain; border: 1px solid #e5e7eb; border-radius: 4px; background: #f9fafb; }
+.product-item-info { flex: 1; }
+.product-item-name { font-size: 14px; font-weight: 500; }
+.product-item-meta { font-size: 12px; color: #9ca3af; margin-top: 3px; }
+.product-item-price { font-size: 14px; font-weight: 700; margin-top: 4px; }
+.product-item-qty { font-size: 13px; color: #6b7280; white-space: nowrap; }
+.free-ship { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--brand-green); font-weight: 600; margin-bottom: 12px; }
+.ship-option { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px; transition: border-color 0.15s; }
+.ship-option.selected { border-color: var(--brand-green); background: #f0fdf4; }
+.ship-option input[type=radio] { margin-top: 2px; accent-color: var(--brand-green); }
+.ship-option-title { font-size: 14px; font-weight: 600; }
+.ship-option-desc { font-size: 12px; color: #6b7280; margin-top: 3px; }
+.pay-option { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; cursor: pointer; margin-bottom: 10px; transition: border-color 0.15s; }
+.pay-option.selected { border-color: var(--brand-green); background: #f0fdf4; }
+.pay-option-header { display: flex; align-items: center; gap: 10px; }
+.pay-option-header input[type=radio] { accent-color: var(--brand-green); }
+.pay-option-label { font-size: 14px; font-weight: 600; }
+.bank-details { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.bank-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb; }
+.bank-label { font-size: 11px; color: #9ca3af; }
+.bank-val { font-size: 14px; font-weight: 500; margin-top: 2px; }
+.bank-val.green { color: var(--brand-green); font-weight: 700; }
+.copy-btn { padding: 5px 14px; border: 1.5px solid var(--brand-green); border-radius: 5px; background: #fff; color: var(--brand-green); font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.15s; flex-shrink: 0; }
+.copy-btn:hover { background: var(--brand-green); color: #fff; }
+.upload-label { font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.upload-zone { border: 2px dashed #d1d5db; border-radius: 8px; padding: 32px 16px; text-align: center; cursor: pointer; transition: border-color 0.15s; display: block; }
+.upload-zone:hover { border-color: var(--brand-green); }
+.upload-zone input { display: none; }
+.upload-zone-text { font-size: 14px; font-weight: 600; color: #374151; }
+.upload-zone-sub { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+.right-panel { position: sticky; top: 90px; align-self: start; }
+.summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #6b7280; padding: 6px 0; }
+.summary-row.total { font-size: 15px; font-weight: 700; color: #0f172a; padding-top: 12px; border-top: 1px solid #e5e7eb; margin-top: 6px; }
+.summary-row .green { color: var(--brand-green); }
+.order-btn { width: 100%; padding: 14px; background: var(--brand-green); color: #fff; border: none; border-radius: 6px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 16px; letter-spacing: 0.5px; transition: background 0.15s; }
+.order-btn:hover { background: #0f9a4e; }
+.form-input { width: 100%; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none; font-family: Inter, sans-serif; transition: border-color 0.15s; margin-bottom: 10px; }
+.form-input:focus { border-color: var(--brand-green); }
+.form-label { font-size: 13px; font-weight: 500; color: #374151; display: block; margin-bottom: 5px; }
 {% endblock %}
+
 {% block content %}
 <div class="breadcrumb">
- <a href="{% url 'store:home' %}">Trang chủ</a><span>›</span>
- <a href="{% url 'store:cart_detail' %}">Giỏ hàng</a><span>›</span>
- Thanh toán
+  <a href="{% url 'store:home' %}">Trang chủ</a>
+  <span>›</span>
+  <span style="color:var(--brand-dark);">Thanh toán</span>
 </div>
 
 
@@ -86,231 +85,242 @@
 
 
 <form id="checkoutForm" method="post" action="{% url 'store:place_order' %}" enctype="multipart/form-data">
-{% csrf_token %}
-<input type="hidden" name="shipping_fee_amount" value="{{ shipping_fee }}" />
-<div class="checkout-wrap">
- <div>
-   <!-- Địa chỉ -->
-   <div class="section">
-     <div class="addr-row">
-       <div>
-         <div style="display:flex;align-items:center;gap:8px;">
-           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4.5 8-12a8 8 0 10-16 0c0 7.5 8 12 8 12z" stroke="#374151" stroke-width="1.8"/><circle cx="12" cy="10" r="3" stroke="#374151" stroke-width="1.8"/></svg>
-           {% if default_address %}
-           <span class="addr-name">{{ default_address.full_name }}</span>
-           <span class="addr-phone">{{ default_address.phone }}</span>
-           {% else %}
-           <span class="addr-name">Chưa có địa chỉ</span>
-           {% endif %}
-         </div>
-         {% if default_address %}
-         <div class="addr-detail">{{ default_address.detail }}, {{ default_address.city }}</div>
-         <input type="hidden" name="address_id" value="{{ default_address.id }}" />
-         {% endif %}
-       </div>
-       <a href="{% url 'store:address_manage' %}" class="change-btn">Thay đổi</a>
-     </div>
-     {% if not default_address %}
-     <div style="margin-top:14px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:14px;">
-       <div style="font-size:13px;color:#92400e;font-weight:600;margin-bottom:12px;">⚠️ Bạn chưa có địa chỉ giao hàng. Vui lòng nhập bên dưới:</div>
-       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-         <div><label class="form-label">Họ và tên *</label><input type="text" name="full_name" class="form-input" placeholder="Nguyễn Văn A" required /></div>
-         <div><label class="form-label">Số điện thoại *</label><input type="tel" name="phone" class="form-input" placeholder="0xxxxxxxxx" required /></div>
-       </div>
-       <label class="form-label">Địa chỉ chi tiết *</label><input type="text" name="detail" class="form-input" placeholder="Số nhà, tên đường..." required />
-       <label class="form-label">Tỉnh / Thành phố *</label><input type="text" name="city" class="form-input" placeholder="Đà Nẵng" required />
-     </div>
-     {% endif %}
-   </div>
+  {% csrf_token %}
+  <input type="hidden" name="shipping_fee_amount" value="{{ shipping_fee }}" />
+  <div class="checkout-wrap">
+    <div>
+      <!-- Địa chỉ -->
+      <div class="section">
+        <div class="addr-row">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4.5 8-12a8 8 0 10-16 0c0 7.5 8 12 8 12z" stroke="#374151" stroke-width="1.8"/><circle cx="12" cy="10" r="3" stroke="#374151" stroke-width="1.8"/></svg>
+              {% if default_address %}
+              <span class="addr-name">{{ default_address.full_name }}</span>
+              <span class="addr-phone">{{ default_address.phone }}</span>
+              {% else %}
+              <span class="addr-name">Chưa có địa chỉ</span>
+              {% endif %}
+            </div>
+            {% if default_address %}
+            <div class="addr-detail">{{ default_address.detail }}, {{ default_address.city }}</div>
+            <input type="hidden" name="address_id" value="{{ default_address.id }}" />
+            {% endif %}
+          </div>
+          <a href="{% url 'store:profile' %}?tab=address&next=checkout" class="change-btn">Thay đổi</a>
+        </div>
 
+        {% if not default_address %}
+        <div style="margin-top:14px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:14px;">
+          <div style="font-size:13px;color:#92400e;font-weight:600;margin-bottom:12px;">⚠️ Bạn chưa có địa chỉ giao hàng. Vui lòng nhập bên dưới:</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><label class="form-label">Họ và tên *</label><input type="text" name="full_name" class="form-input" placeholder="Nguyễn Văn A" required /></div>
+            <div><label class="form-label">Số điện thoại *</label><input type="tel" name="phone" class="form-input" placeholder="0xxxxxxxxx" required /></div>
+          </div>
+          <label class="form-label">Địa chỉ chi tiết *</label>
+          <input type="text" name="detail" class="form-input" placeholder="Số nhà, tên đường..." required />
+          <label class="form-label">Tỉnh / Thành phố *</label>
+          <input type="text" name="city" class="form-input" placeholder="Đà Nẵng" required />
+        </div>
+        {% endif %}
+      </div>
 
-   <!-- Sản phẩm -->
-   <div class="section">
-     <div class="section-title">
-       <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" stroke="#374151" stroke-width="1.5" stroke-linejoin="round"/><line x1="3" y1="6" x2="21" y2="6" stroke="#374151" stroke-width="1.5"/></svg>
-       Sản phẩm ({{ total_quantity }})
-     </div>
-     {% for item in checkout_items %}
-     <div class="product-item">
-       <img src="{{ item.variant.product.display_image }}" alt="{{ item.variant.product.name }}" onerror="this.style.display='none'" />
-       <div class="product-item-info">
-         <div class="product-item-name">{{ item.variant.product.name }}</div>
-         <div class="product-item-meta">{{ item.variant.color_name }} | {{ item.variant.size }}</div>
-         <div class="product-item-price">{{ item.subtotal|vnd }}</div>
-       </div>
-       <div class="product-item-qty">x{{ item.quantity }}</div>
-     </div>
-     {% endfor %}
-   </div>
+      <!-- Sản phẩm -->
+      <div class="section">
+        <div class="section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" stroke="#374151" stroke-width="1.5" stroke-linejoin="round"/><line x1="3" y1="6" x2="21" y2="6" stroke="#374151" stroke-width="1.5"/></svg>
+          Sản phẩm ({{ total_quantity }})
+        </div>
+        {% for item in checkout_items %}
+        <div class="product-item">
+          <img src="{{ item.variant.product.display_image }}" alt="{{ item.variant.product.name }}" onerror="this.style.display='none'" />
+          <div class="product-item-info">
+            <div class="product-item-name">{{ item.variant.product.name }}</div>
+            <div class="product-item-meta">{{ item.variant.color_name }} | {{ item.variant.size }}</div>
+            <div class="product-item-price">{{ item.subtotal|vnd }}</div>
+          </div>
+          <div class="product-item-qty">x{{ item.quantity }}</div>
+        </div>
+        {% endfor %}
+      </div>
 
+      <!-- Vận chuyển -->
+      <div class="section">
+        <div class="section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="8" width="15" height="10" rx="1" stroke="#374151" stroke-width="1.5"/><path d="M16 11h4l3 4v3h-7V11z" stroke="#374151" stroke-width="1.5" stroke-linejoin="round"/><circle cx="5.5" cy="18.5" r="1.5" stroke="#374151" stroke-width="1.5"/><circle cx="18.5" cy="18.5" r="1.5" stroke="#374151" stroke-width="1.5"/></svg>
+          Phương thức vận chuyển
+        </div>
+        {% if default_address and not is_supported_city %}
+        <div style="padding:14px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;color:#ef4444;font-size:13px;font-weight:600;margin-bottom:12px;">
+          ⚠️ {{ ship_note }}
+        </div>
+        {% else %}
+        {% if is_free_ship %}
+        <div class="free-ship">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="var(--brand-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          {{ ship_note }}
+        </div>
+        {% elif default_address %}
+        <div style="font-size:13px;color:#6b7280;margin-bottom:12px;">{{ ship_note }}: <strong style="color:#0f172a;">{{ shipping_fee|vnd }}</strong></div>
+        {% else %}
+        <div style="font-size:13px;color:#6b7280;margin-bottom:12px;">{{ ship_note }}</div>
+        {% endif %}
+        <label class="ship-option selected" id="ship-standard" onclick="selectShip(this,'standard')">
+          <input type="radio" name="shipping_method" value="standard" checked />
+          <div>
+            <div class="ship-option-title">Tiêu chuẩn</div>
+            <div class="ship-option-desc">Thời gian giao hàng tuỳ thuộc vào điều kiện của đơn vị vận chuyển.<br/>
+              {% if default_address and "Huế" in default_address.city %}Dự kiến giao hàng: Giao trong ngày{% else %}Dự kiến giao hàng: 2-5 ngày{% endif %}
+            </div>
+          </div>
+        </label>
+        {% endif %}
+      </div>
 
-   <!-- Vận chuyển -->
-   <div class="section">
-     <div class="section-title">
-       <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="8" width="15" height="10" rx="1" stroke="#374151" stroke-width="1.5"/><path d="M16 11h4l3 4v3h-7V11z" stroke="#374151" stroke-width="1.5" stroke-linejoin="round"/><circle cx="5.5" cy="18.5" r="1.5" stroke="#374151" stroke-width="1.5"/><circle cx="18.5" cy="18.5" r="1.5" stroke="#374151" stroke-width="1.5"/></svg>
-       Phương thức vận chuyển
-     </div>
+      <!-- Thanh toán -->
+      <div class="section">
+        <div class="section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="#374151" stroke-width="1.5"/><path d="M2 10h20" stroke="#374151" stroke-width="1.5"/></svg>
+          Phương thức thanh toán
+        </div>
+        <div class="pay-option" id="pay-cod" onclick="selectPay('cod')">
+          <div class="pay-option-header">
+            <input type="radio" name="payment_method" value="cod" id="radio-cod" />
+            <label class="pay-option-label" for="radio-cod">Thanh toán khi nhận hàng (COD)</label>
+          </div>
+        </div>
+        <div class="pay-option selected" id="pay-bank" onclick="selectPay('bank')">
+          <div class="pay-option-header">
+            <input type="radio" name="payment_method" value="bank" id="radio-bank" checked />
+            <label class="pay-option-label" for="radio-bank">Chuyển khoản ngân hàng</label>
+          </div>
+          <div class="bank-details" id="bankDetails">
+            <div class="bank-row">
+              <div><div class="bank-label">Ngân hàng</div><div class="bank-val">Vietcombank (VCB)</div></div>
+              <button type="button" class="copy-btn" onclick="copyText('Vietcombank (VCB)',event)">Copy</button>
+            </div>
+            <div class="bank-row">
+              <div><div class="bank-label">Số tài khoản</div><div class="bank-val">1234567890</div></div>
+              <button type="button" class="copy-btn" onclick="copyText('1234567890',event)">Copy</button>
+            </div>
+            <div class="bank-row">
+              <div><div class="bank-label">Người thụ hưởng</div><div class="bank-val">RABONA SPORT</div></div>
+              <button type="button" class="copy-btn" onclick="copyText('RABONA SPORT',event)">Copy</button>
+            </div>
+            <div class="bank-row">
+              <div><div class="bank-label">Số tiền</div><div class="bank-val green" id="bankAmount">{{ selected_total|vnd }}</div></div>
+              <button type="button" class="copy-btn" onclick="copyText(document.getElementById('bankAmount').textContent,event)">Copy</button>
+            </div>
+            <div style="margin-top:4px;">
+              <div class="upload-label">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" stroke="#374151" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Upload biên lai chuyển khoản
+              </div>
+              <label class="upload-zone">
+                <input type="file" name="payment_proof" accept="image/jpeg,image/png" onchange="previewUpload(event)" />
+                <div class="upload-zone-text">Kéo thả hoặc nhấn để chọn ảnh</div>
+                <div class="upload-zone-sub">Hỗ trợ JPG, PNG - Tối đa 5MB</div>
+                <img id="uploadPreview" style="max-width:100%;max-height:160px;border-radius:6px;margin-top:10px;display:none;" alt="Biên lai" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-
-     <!-- Cảnh báo nếu địa chỉ không được hỗ trợ vận chuyển -->
-     {% if default_address and not is_supported_city %}
-       <div style="padding:14px; background:#fef2f2; border:1px solid #fecaca; border-radius:6px; color:#ef4444; font-size:13px; font-weight:600; margin-bottom: 12px;">
-           ⚠️ {{ ship_note }}
-       </div>
-     {% else %}
-         <!-- Nếu hợp lệ thì mới cho chọn ship -->
-         {% if is_free_ship %}
-         <div class="free-ship">
-           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="var(--brand-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-           {{ ship_note }}
-         </div>
-         {% elif default_address %}
-         <div style="font-size:13px;color:#6b7280;margin-bottom:12px;">{{ ship_note }}: <strong style="color:#0f172a;">{{ shipping_fee|vnd }}</strong></div>
-         {% else %}
-         <div style="font-size:13px;color:#6b7280;margin-bottom:12px;">{{ ship_note }}</div>
-         {% endif %}
-
-
-         <label class="ship-option selected" id="ship-standard" onclick="selectShip(this,'standard')">
-           <input type="radio" name="shipping_method" value="standard" checked />
-           <div>
-             <div class="ship-option-title">Tiêu chuẩn</div>
-             <div class="ship-option-desc">Thời gian giao hàng tuỳ thuộc vào điều kiện của đơn vị vận chuyển.<br/>
-                 {% if default_address and "Huế" in default_address.city %}
-                     Dự kiến giao hàng: Giao trong ngày
-                 {% else %}
-                     Dự kiến giao hàng: 2-5 ngày
-                 {% endif %}
-             </div>
-           </div>
-         </label>
-     {% endif %}
-   </div>
-
-
-   <!-- Thanh toán -->
-   <div class="section">
-     <div class="section-title">
-       <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="#374151" stroke-width="1.5"/><path d="M2 10h20" stroke="#374151" stroke-width="1.5"/></svg>
-       Phương thức thanh toán
-     </div>
-     <div class="pay-option" id="pay-cod" onclick="selectPay('cod')">
-       <div class="pay-option-header">
-         <input type="radio" name="payment_method" value="cod" id="radio-cod" />
-         <label class="pay-option-label" for="radio-cod">Thanh toán khi nhận hàng (COD)</label>
-       </div>
-     </div>
-     <div class="pay-option selected" id="pay-bank" onclick="selectPay('bank')">
-       <div class="pay-option-header">
-         <input type="radio" name="payment_method" value="bank" id="radio-bank" checked />
-         <label class="pay-option-label" for="radio-bank">Chuyển khoản ngân hàng</label>
-       </div>
-       <div class="bank-details" id="bankDetails">
-         <div class="bank-row"><div><div class="bank-label">Ngân hàng</div><div class="bank-val">Vietcombank (VCB)</div></div><button type="button" class="copy-btn" onclick="copyText('Vietcombank (VCB)',event)">Copy</button></div>
-         <div class="bank-row"><div><div class="bank-label">Số tài khoản</div><div class="bank-val">1234567890</div></div><button type="button" class="copy-btn" onclick="copyText('1234567890',event)">Copy</button></div>
-         <div class="bank-row"><div><div class="bank-label">Người thụ hưởng</div><div class="bank-val">RABONA SPORT</div></div><button type="button" class="copy-btn" onclick="copyText('RABONA SPORT',event)">Copy</button></div>
-         <div class="bank-row"><div><div class="bank-label">Số tiền</div><div class="bank-val green" id="bankAmount">{{ selected_total|vnd }}</div></div><button type="button" class="copy-btn" onclick="copyText(document.getElementById('bankAmount').textContent,event)">Copy</button></div>
-         <div style="margin-top:4px;">
-           <div class="upload-label"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" stroke="#374151" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Upload biên lai chuyển khoản</div>
-           <label class="upload-zone"><input type="file" name="payment_proof" accept="image/jpeg,image/png" onchange="previewUpload(event)" /><div class="upload-zone-text">Kéo thả hoặc nhấn để chọn ảnh</div><div class="upload-zone-sub">Hỗ trợ JPG, PNG - Tối đa 5MB</div><img id="uploadPreview" style="max-width:100%;max-height:160px;border-radius:6px;margin-top:10px;display:none;" alt="Biên lai" /></label>
-         </div>
-       </div>
-     </div>
-   </div>
- </div>
-
-
- <!-- Right panel -->
- <div class="right-panel">
-   <div class="section">
-     <div style="margin-top:14px;">
-       <div class="section-title" style="margin-bottom:10px;">Chi tiết đơn hàng</div>
-       <div class="summary-row"><span>Tổng tiền hàng</span><span id="subtotalDisplay">{{ selected_total|vnd }}</span></div>
-       <div class="summary-row"><span>Tổng tiền phí vận chuyển</span><span id="shippingDisplay">{{ shipping_fee|vnd }}</span></div>
-       <div class="summary-row total"><span>Tổng thanh toán</span><span id="totalAmount">{{ total_payment|vnd }}</span></div>
-       <div style="font-size:11px;color:#9ca3af;text-align:right;margin-top:2px;">(Đã bao gồm thuế VAT)</div>
-     </div>
-     <button type="button" onclick="placeOrder()" class="order-btn"
-       {% if default_address and not is_supported_city %}
-           disabled style="background:#9ca3af; cursor:not-allowed;"
-       {% endif %}
-     >ĐẶT HÀNG</button>
-   </div>
- </div>
-</div>
+    <!-- Right panel -->
+    <div class="right-panel">
+      <div class="section">
+        <div style="margin-top:14px;">
+          <div class="section-title" style="margin-bottom:10px;">Chi tiết đơn hàng</div>
+          <div class="summary-row"><span>Tổng tiền hàng</span><span id="subtotalDisplay">{{ selected_total|vnd }}</span></div>
+          <div class="summary-row"><span>Tổng tiền phí vận chuyển</span><span id="shippingDisplay">{{ shipping_fee|vnd }}</span></div>
+          <div class="summary-row total"><span>Tổng thanh toán</span><span id="totalAmount">{{ total_payment|vnd }}</span></div>
+          <div style="font-size:11px;color:#9ca3af;text-align:right;margin-top:2px;">(Đã bao gồm thuế VAT)</div>
+        </div>
+        <button type="button" onclick="placeOrder()" class="order-btn"
+          {% if default_address and not is_supported_city %}disabled style="background:#9ca3af;cursor:not-allowed;"{% endif %}>
+          ĐẶT HÀNG
+        </button>
+      </div>
+    </div>
+  </div>
 </form>
-
-
 {% endblock %}
+
 {% block extra_js %}
 <script>
- function selectShip(el, val) {
-   document.querySelectorAll('.ship-option').forEach(o => o.classList.remove('selected'));
-   el.classList.add('selected');
- }
- function selectPay(type) {
-   document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
-   document.getElementById('pay-'+type).classList.add('selected');
-   document.getElementById('radio-'+type).checked = true;
-   document.getElementById('bankDetails').style.display = type === 'bank' ? 'flex' : 'none';
- }
- function copyText(text, e) {
-   e.stopPropagation();
-   navigator.clipboard.writeText(text).then(() => {
-     const btn = e.target; btn.textContent = 'Đã copy';
-     setTimeout(() => btn.textContent = 'Copy', 1500);
-   });
- }
- function previewUpload(e) {
-   const file = e.target.files[0]; if (!file) return;
-   const reader = new FileReader();
-   reader.onload = ev => { const img = document.getElementById('uploadPreview'); img.src = ev.target.result; img.style.display = 'block'; };
-   reader.readAsDataURL(file);
- }
+function selectShip(el, val) {
+  document.querySelectorAll('.ship-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
 
+function selectPay(type) {
+  document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('pay-'+type).classList.add('selected');
+  document.getElementById('radio-'+type).checked = true;
+  document.getElementById('bankDetails').style.display = type === 'bank' ? 'flex' : 'none';
+}
 
- function placeOrder() {
-   const form = document.getElementById('checkoutForm');
-   const formData = new FormData(form);
-   const btn = document.querySelector('.order-btn');
-   btn.disabled = true;
-   btn.textContent = 'Đang xử lý...';
+function copyText(text, e) {
+  e.stopPropagation();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = e.target;
+    btn.textContent = 'Đã copy';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
 
+function previewUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = document.getElementById('uploadPreview');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
 
-   fetch("{% url 'store:place_order' %}", {
-     method: 'POST',
-     headers: { 'X-Requested-With': 'XMLHttpRequest' },
-     body: formData
-   })
-   .then(r => r.json())
-   .then(data => {
-     if (data.success) {
-       // Hiện toast giống thông báo thêm giỏ hàng
-       const imgUrl = data.img_url || '';
-       const container = document.getElementById('toastContainer');
-       const el = document.createElement('div');
-       el.className = 'toast';
-       el.innerHTML = `
-         <img class="toast-img" src="${imgUrl}" alt="Sản phẩm" onerror="this.style.display='none'" />
-         <div class="toast-body"><div class="toast-msg" style="font-size:13px;font-weight:600;">Đặt hàng thành công!</div></div>
-         <button class="toast-btn green" onclick="window.location.href='{% url 'store:order_list' %}'">Xem đơn hàng</button>
-       `;
-       container.appendChild(el);
-       requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
-       setTimeout(() => { el.classList.remove('show'); el.classList.add('hide'); setTimeout(() => el.remove(), 350); }, 5000);
-       btn.textContent = 'Đã đặt hàng';
-     } else {
-       btn.disabled = false;
-       btn.textContent = 'ĐẶT HÀNG';
-       alert('Có lỗi xảy ra, vui lòng thử lại.');
-     }
-   })
-   .catch(() => {
-     btn.disabled = false;
-     btn.textContent = 'ĐẶT HÀNG';
-     alert('Có lỗi xảy ra, vui lòng thử lại.');
-   });
- }
+function placeOrder() {
+  const form = document.getElementById('checkoutForm');
+  const formData = new FormData(form);
+  const btn = document.querySelector('.order-btn');
+  btn.disabled = true;
+  btn.textContent = 'Đang xử lý...';
+
+  fetch("{% url 'store:place_order' %}", {
+    method: 'POST',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    body: formData
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      const imgUrl = data.img_url || '';
+      const container = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.innerHTML = `<img class="toast-img" src="${imgUrl}" alt="Sản phẩm" onerror="this.style.display='none'" />
+        <div class="toast-body"><div class="toast-msg" style="font-size:13px;font-weight:600;">Đặt hàng thành công!</div></div>
+        <button class="toast-btn green" onclick="window.location.href='{% url 'store:order_list' %}'">Xem đơn hàng</button>`;
+      container.appendChild(el);
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+      setTimeout(() => { el.classList.remove('show'); el.classList.add('hide'); setTimeout(() => el.remove(), 350); }, 5000);
+      btn.textContent = 'Đã đặt hàng';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'ĐẶT HÀNG';
+      alert(data.error || 'Có lỗi xảy ra, vui lòng thử lại.');
+    }
+  })
+  .catch(() => {
+    btn.disabled = false;
+    btn.textContent = 'ĐẶT HÀNG';
+    alert('Có lỗi xảy ra, vui lòng thử lại.');
+  });
+}
 </script>
 {% endblock %}
 

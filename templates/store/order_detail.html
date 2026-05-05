@@ -1,578 +1,428 @@
 {% extends "store/base.html" %}
 {% load static %}
 {% load store_filters %}
-{% block title %}Đơn hàng #{{ order.order_code }} - Rabona Sport{% endblock %}
-
-
+{% block title %}Don hang #{{ order.order_code }} - Rabona Sport{% endblock %}
 {% block extra_css %}
- .page-wrap { max-width:1440px; margin:0 auto; padding:24px 16px 60px; }
- @media(min-width:768px){ .page-wrap{ padding:32px 32px 60px; } }
- @media(min-width:1024px){ .page-wrap{ padding:32px 40px 60px; } }
- .breadcrumb { display:flex; align-items:center; gap:6px; font-size:12px; color:#9ca3af; margin-bottom:24px; flex-wrap:wrap; }
- .breadcrumb a { color:#9ca3af; text-decoration:none; }
- .breadcrumb a:hover { color:var(--brand-green); }
- .breadcrumb span { color:#d1d5db; }
- .od-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:28px; }
- .od-title { font-family:Montserrat,sans-serif; font-weight:800; font-size:22px; color:var(--brand-dark); margin:0; }
- .status-badge { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.3px; }
- .status-pending    { background:#fef9c3; color:#854d0e; }
- .status-confirmed  { background:#dbeafe; color:#1e40af; }
- .status-shipping   { background:#e0f2fe; color:#0369a1; }
- .status-delivered  { background:#dcfce7; color:#166534; }
- .status-completed  { background:#f0fdf4; color:#15803d; }
- .status-cancelled  { background:#fee2e2; color:#991b1b; }
- .status-returning  { background:#fef3c7; color:#92400e; }
- .status-returned   { background:#f3f4f6; color:#6b7280; }
- /* Grid */
- .od-grid { display:grid; grid-template-columns:1fr; gap:20px; }
- @media(min-width:1024px){ .od-grid{ grid-template-columns:1fr 340px; gap:28px; } }
- /* Sections */
- .od-section { border:1px solid #e5e7eb; border-radius:6px; overflow:hidden; margin-bottom:20px; }
- .od-section-title { font-family:Montserrat,sans-serif; font-weight:700; font-size:13px; color:var(--brand-dark); padding:14px 16px; background:#f9fafb; border-bottom:1px solid #e5e7eb; margin:0; }
- .od-section-body { padding:16px; }
- /* Info grid */
- .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
- @media(max-width:480px){ .info-grid{ grid-template-columns:1fr; } }
- .info-item label { font-size:11px; font-weight:600; color:#9ca3af; text-transform:uppercase; display:block; margin-bottom:4px; }
- .info-item span { font-size:13px; color:#374151; font-weight:500; }
- /* Order items */
- .od-item { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #f3f4f6; }
- .od-item:last-child { border-bottom:none; }
- .od-item-img { width:64px; height:64px; object-fit:contain; border:1px solid #e5e7eb; border-radius:4px; background:#f9fafb; flex-shrink:0; }
- .od-item-name { font-size:13px; font-weight:600; color:var(--brand-dark); }
- .od-item-meta { font-size:11px; color:#9ca3af; margin-top:3px; }
- .od-item-price { font-size:13px; font-weight:700; color:var(--brand-green); margin-left:auto; white-space:nowrap; }
- /* Summary */
- .sum-row { display:flex; justify-content:space-between; font-size:13px; color:#374151; padding:7px 0; border-bottom:1px solid #f9fafb; }
- .sum-total { display:flex; justify-content:space-between; font-family:Montserrat,sans-serif; font-weight:800; font-size:16px; color:var(--brand-dark); padding:12px 0 0; border-top:2px solid #e5e7eb; margin-top:4px; }
- /* Timeline */
- .timeline { padding:4px 0; }
- .tl-item { display:flex; gap:14px; padding-bottom:20px; position:relative; }
- .tl-item:last-child { padding-bottom:0; }
- .tl-item:not(:last-child)::before { content:''; position:absolute; left:11px; top:24px; bottom:0; width:2px; background:#e5e7eb; }
- .tl-dot { width:24px; height:24px; border-radius:50%; border:2px solid #e5e7eb; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; z-index:1; }
- .tl-dot.done { border-color:var(--brand-green); background:var(--brand-green); }
- .tl-dot.active { border-color:var(--brand-green); background:#fff; }
- .tl-content { flex:1; }
- .tl-label { font-size:13px; font-weight:600; color:var(--brand-dark); }
- .tl-date { font-size:11px; color:#9ca3af; margin-top:2px; }
-
-
- /* RETURN STEPPER FOR CUSTOMER */
- .return-stepper { display: flex; justify-content: space-between; position: relative; margin: 20px 0 30px; }
- .return-stepper::before { content: ''; position: absolute; top: 12px; background-color: #d1d5db; z-index: 1; left: 8%; right: 8%; height: 2px; }
- .rt-step { display: flex; flex-direction: column; align-items: center; z-index: 2; position: relative; width: 60px; text-align: center; }
- .rt-dot { width: 24px; height: 24px; border-radius: 50%; background-color: #fff; border: 2px solid #d1d5db; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #9ca3af; }
- .rt-label { font-size: 10px; color: #6b7280; font-weight: 500; line-height: 1.2; }
- .rt-step.completed .rt-dot { background-color: var(--brand-green); border-color: var(--brand-green); color: #fff; }
- .rt-step.active .rt-dot { border-color: var(--brand-green); color: var(--brand-green); border-width: 3px; }
- .rt-step.active .rt-label { color: var(--brand-dark); font-weight: 700; }
-
-
- /* Return form */
- .return-form { border:2px solid #fcd34d; border-radius:8px; padding:24px; background:#fffbeb; }
- .return-title { font-family:Montserrat,sans-serif; font-weight:800; font-size:16px; color:#92400e; margin:0 0 18px; display:flex; align-items:center; gap:8px; }
- .form-group { margin-bottom: 15px; }
- .form-label { font-size:12px; font-weight:700; color:#4b5563; display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
- .form-select, .form-input, .form-textarea { width:100%; padding:11px 14px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; outline:none; background:#fff; transition:0.2s; }
- .form-select:focus, .form-input:focus, .form-textarea:focus { border-color:var(--brand-green); box-shadow:0 0 0 3px rgba(22,163,74,0.1); }
- .return-btn { padding:12px 24px; background:#ef4444; color:#fff; border:none; border-radius:6px; font-family:Montserrat,sans-serif; font-weight:700; font-size:14px; cursor:pointer; width: 100%; margin-top: 10px; transition:0.2s; box-shadow:0 4px 6px -1px rgba(239,68,68,0.2); }
- .return-btn:hover { background:#dc2626; transform:translateY(-1px); }
- /* Toast notification */
- .success-toast { position:fixed; bottom:24px; right:24px; z-index:400; background:#fff; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.13); border-left:5px solid var(--brand-green); display:flex; align-items:center; gap:14px; padding:16px 20px 16px 16px; min-width:300px; max-width:380px; transform:translateX(120%); opacity:0; transition:transform 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease; }
- .success-toast.show { transform:translateX(0); opacity:1; }
-
-
- /* Payment Proof Upload */
- .upload-zone { display: block; border: 2px dashed #d1d5db; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
- .upload-zone:hover { border-color: var(--brand-green); }
- .upload-zone input[type="file"] { display: none; }
- .upload-zone-text { font-size: 14px; font-weight: 600; color: #374151; margin-top: 8px; }
- .upload-zone-sub { font-size: 12px; color: #9ca3af; margin-top: 4px; }
- .upload-preview { max-width: 100%; max-height: 200px; border-radius: 6px; margin-top: 15px; border: 1px solid #e5e7eb; display: block; margin-left: auto; margin-right: auto; }
- .upload-btn { background-color: var(--brand-green); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 15px; width: 100%; }
- .upload-btn:hover { background-color: #10b981; }
+.page-wrap{max-width:1440px;margin:0 auto;padding:24px 16px 60px;}
+@media(min-width:768px){.page-wrap{padding:32px 32px 60px;}}
+@media(min-width:1024px){.page-wrap{padding:32px 40px 60px;}}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:#9ca3af;margin-bottom:24px;flex-wrap:wrap;}
+.breadcrumb a{color:#9ca3af;text-decoration:none;}
+.breadcrumb a:hover{color:var(--brand-green);}
+.breadcrumb span{color:#d1d5db;}
+.od-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px;}
+.od-title{font-family:Montserrat,sans-serif;font-weight:800;font-size:22px;color:var(--brand-dark);margin:0;}
+.status-badge{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;}
+.status-pending{background:#fef9c3;color:#854d0e;}
+.status-confirmed{background:#dbeafe;color:#1e40af;}
+.status-shipping{background:#e0f2fe;color:#0369a1;}
+.status-delivered{background:#dcfce7;color:#166534;}
+.status-completed{background:#f0fdf4;color:#15803d;}
+.status-cancelled{background:#fee2e2;color:#991b1b;}
+.status-returning{background:#fef3c7;color:#92400e;}
+.status-returned{background:#f3f4f6;color:#6b7280;}
+.od-grid{display:grid;grid-template-columns:1fr;gap:20px;}
+@media(min-width:1024px){.od-grid{grid-template-columns:1fr 340px;gap:28px;}}
+.od-section{border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;margin-bottom:20px;}
+.od-section-title{font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;color:var(--brand-dark);padding:14px 16px;background:#f9fafb;border-bottom:1px solid #e5e7eb;margin:0;}
+.od-section-body{padding:16px;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:480px){.info-grid{grid-template-columns:1fr;}}
+.info-item label{font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;display:block;margin-bottom:4px;}
+.info-item span{font-size:13px;color:#374151;font-weight:500;}
+.od-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f3f4f6;}
+.od-item:last-child{border-bottom:none;}
+.od-item-img{width:64px;height:64px;object-fit:contain;border:1px solid #e5e7eb;border-radius:4px;background:#f9fafb;flex-shrink:0;}
+.od-item-name{font-size:13px;font-weight:600;color:var(--brand-dark);}
+.od-item-meta{font-size:11px;color:#9ca3af;margin-top:3px;}
+.od-item-price{font-size:13px;font-weight:700;color:var(--brand-green);margin-left:auto;white-space:nowrap;}
+.sum-row{display:flex;justify-content:space-between;font-size:13px;color:#374151;padding:7px 0;border-bottom:1px solid #f9fafb;}
+.sum-total{display:flex;justify-content:space-between;font-family:Montserrat,sans-serif;font-weight:800;font-size:16px;color:var(--brand-dark);padding:12px 0 0;border-top:2px solid #e5e7eb;margin-top:4px;}
+.timeline{padding:4px 0;}
+.tl-item{display:flex;gap:14px;padding-bottom:20px;position:relative;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-item:not(:last-child)::before{content:'';position:absolute;left:11px;top:24px;bottom:0;width:2px;background:#e5e7eb;}
+.tl-dot{width:24px;height:24px;border-radius:50%;border:2px solid #e5e7eb;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;}
+.tl-dot.done{border-color:var(--brand-green);background:var(--brand-green);}
+.tl-dot.active{border-color:var(--brand-green);background:#fff;}
+.tl-content{flex:1;}
+.tl-label{font-size:13px;font-weight:600;color:var(--brand-dark);}
+.tl-label.tl-muted{color:#9ca3af;}
+.tl-date{font-size:11px;color:#9ca3af;margin-top:2px;}
+.return-stepper{display:flex;justify-content:space-between;position:relative;margin:20px 0 30px;}
+.return-stepper::before{content:'';position:absolute;top:12px;background-color:#d1d5db;z-index:1;left:8%;right:8%;height:2px;}
+.rt-step{display:flex;flex-direction:column;align-items:center;z-index:2;position:relative;width:60px;text-align:center;}
+.rt-dot{width:24px;height:24px;border-radius:50%;background-color:#fff;border:2px solid #d1d5db;margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9ca3af;}
+.rt-label{font-size:10px;color:#6b7280;font-weight:500;line-height:1.2;}
+.rt-step.completed .rt-dot{background-color:var(--brand-green);border-color:var(--brand-green);color:#fff;}
+.rt-step.active .rt-dot{border-color:var(--brand-green);color:var(--brand-green);border-width:3px;}
+.rt-step.active .rt-label{color:var(--brand-dark);font-weight:700;}
+.return-form{border:2px solid #fcd34d;border-radius:8px;padding:24px;background:#fffbeb;}
+.return-title{font-family:Montserrat,sans-serif;font-weight:800;font-size:16px;color:#92400e;margin:0 0 18px;display:flex;align-items:center;gap:8px;}
+.form-group{margin-bottom:15px;}
+.form-label{font-size:12px;font-weight:700;color:#4b5563;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+.form-select,.form-input,.form-textarea{width:100%;padding:11px 14px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;background:#fff;transition:0.2s;}
+.form-select:focus,.form-input:focus,.form-textarea:focus{border-color:var(--brand-green);box-shadow:0 0 0 3px rgba(22,163,74,0.1);}
+.return-btn{padding:12px 24px;background:#ef4444;color:#fff;border:none;border-radius:6px;font-family:Montserrat,sans-serif;font-weight:700;font-size:14px;cursor:pointer;width:100%;margin-top:10px;transition:0.2s;}
+.return-btn:hover{background:#dc2626;}
+.success-toast{position:fixed;bottom:24px;right:24px;z-index:400;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.13);border-left:5px solid var(--brand-green);display:flex;align-items:center;gap:14px;padding:16px 20px 16px 16px;min-width:300px;max-width:380px;transform:translateX(120%);opacity:0;transition:transform 0.35s cubic-bezier(0.22,1,0.36,1),opacity 0.3s ease;}
+.success-toast.show{transform:translateX(0);opacity:1;}
+.upload-zone{display:block;border:2px dashed #d1d5db;border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:border-color 0.2s;}
+.upload-zone:hover{border-color:var(--brand-green);}
+.upload-zone input[type="file"]{display:none;}
+.upload-zone-text{font-size:14px;font-weight:600;color:#374151;margin-top:8px;}
+.upload-zone-sub{font-size:12px;color:#9ca3af;margin-top:4px;}
+.upload-preview{max-width:100%;max-height:200px;border-radius:6px;margin-top:15px;border:1px solid #e5e7eb;display:block;margin-left:auto;margin-right:auto;}
+.upload-btn{background-color:var(--brand-green);color:white;padding:10px 20px;border:none;border-radius:6px;font-weight:600;cursor:pointer;margin-top:15px;width:100%;}
+.upload-btn:hover{background-color:#10b981;}
 {% endblock %}
 
 
 {% block content %}
 <div class="page-wrap">
- <nav class="breadcrumb">
-   <a href="{% url 'store:home' %}">Trang chủ</a>
-   <span>›</span>
-   <a href="{% url 'store:order_list' %}">Đơn hàng</a>
-   <span>›</span>
-   <span style="color:var(--brand-dark);">#{{ order.order_code }}</span>
- </nav>
+  <nav class="breadcrumb">
+    <a href="{% url 'store:home' %}">Trang chu</a><span>›</span>
+    <a href="{% url 'store:order_list' %}">Don hang</a><span>›</span>
+    <span style="color:var(--brand-dark);">#{{ order.order_code }}</span>
+  </nav>
 
+  <div class="od-header">
+    <h1 class="od-title">Don hang #{{ order.order_code }}</h1>
+    <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+  </div>
 
- <div class="od-header">
-   <h1 class="od-title">Đơn hàng #{{ order.order_code }}</h1>
-   <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
- </div>
+  <div class="od-grid">
+    <div>
+      <!-- Thong tin don hang -->
+      <div class="od-section">
+        <div class="od-section-title">Thong tin don hang</div>
+        <div class="od-section-body">
+          <div class="info-grid">
+            <div class="info-item"><label>Ngay dat</label><span>{{ order.created_at|date:"d/m/Y H:i" }}</span></div>
+            <div class="info-item"><label>Phuong thuc thanh toan</label><span>{{ order.get_payment_method_display }}</span></div>
+            <div class="info-item"><label>Phuong thuc van chuyen</label><span>{{ order.get_shipping_method_display }}</span></div>
+            <div class="info-item"><label>Trang thai</label><span>{{ order.get_status_display }}</span></div>
+          </div>
+        </div>
+      </div>
 
+      <!-- Bien lai chuyen khoan -->
+      {% if order.payment_method == 'bank' %}
+      <div class="od-section">
+        <div class="od-section-title">Bien lai chuyen khoan</div>
+        <div class="od-section-body">
+          {% if order.payment_proof %}
+          <div style="text-align:center;">
+            <p style="font-size:13px;color:#374151;margin-bottom:10px;">Bien lai da duoc tai len:</p>
+            <a href="{{ order.payment_proof.url }}" target="_blank">
+              <img src="{{ order.payment_proof.url }}" alt="Bien lai" class="upload-preview" style="max-height:250px;" />
+            </a>
+            <p style="font-size:11px;color:#9ca3af;text-align:center;margin-top:10px;">(Nhan vao anh de xem kich thuoc day du)</p>
+          </div>
+          {% else %}
+          <form method="post" action="{% url 'store:upload_payment_proof' order.order_code %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label class="upload-zone">
+              <input type="file" name="payment_proof" accept="image/jpeg,image/png" onchange="previewUpload(event,'uploadPreviewPayment')" required />
+              <div class="upload-zone-text">Keo tha hoac nhan de chon anh</div>
+              <div class="upload-zone-sub">Ho tro JPG, PNG - Toi da 5MB</div>
+              <img id="uploadPreviewPayment" class="upload-preview" style="display:none;" />
+            </label>
+            <button type="submit" class="upload-btn">Tai len bien lai</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
 
- <div class="od-grid">
-   <!-- Left -->
-   <div>
-     <!-- Thông tin đơn hàng -->
-     <div class="od-section">
-       <div class="od-section-title">Thông tin đơn hàng</div>
-       <div class="od-section-body">
-         <div class="info-grid">
-           <div class="info-item">
-             <label>Ngày đặt</label>
-             <span>{{ order.created_at|date:"d/m/Y H:i" }}</span>
-           </div>
-           <div class="info-item">
-             <label>Phương thức thanh toán</label>
-             <span>{{ order.get_payment_method_display }}</span>
-           </div>
-           <div class="info-item">
-             <label>Phương thức vận chuyển</label>
-             <span>{{ order.get_shipping_method_display }}</span>
-           </div>
-           <div class="info-item">
-             <label>Trạng thái</label>
-             <span>{{ order.get_status_display }}</span>
-           </div>
-         </div>
-       </div>
-     </div>
+      <!-- Dia chi giao hang -->
+      <div class="od-section">
+        <div class="od-section-title">Dia chi giao hang</div>
+        <div class="od-section-body" style="font-size:13px;color:#374151;line-height:1.8;">
+          <strong>{{ order.recipient_name }}</strong> &nbsp;|&nbsp; {{ order.recipient_phone }}<br/>
+          {{ order.shipping_address }}, {{ order.shipping_city }}
+        </div>
+      </div>
 
+      <!-- San pham -->
+      <div class="od-section">
+        <div class="od-section-title">San pham dat hang</div>
+        <div class="od-section-body" style="padding:0 16px;">
+          {% for item in order.items.all %}
+          <div class="od-item">
+            {% if item.variant %}
+            <img class="od-item-img" src="{{ item.variant.product.display_image }}" alt="{{ item.product_name }}" />
+            {% else %}
+            <div class="od-item-img"></div>
+            {% endif %}
+            <div style="flex:1;min-width:0;">
+              <div class="od-item-name">{{ item.product_name }}</div>
+              <div class="od-item-meta">{{ item.color }} / {{ item.size }} x {{ item.quantity }}</div>
+              <div style="font-size:12px;color:#374151;margin-top:3px;">{{ item.price|vnd }} / san pham</div>
+            </div>
+            <div class="od-item-price">{{ item.subtotal|vnd }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
 
-     <!-- Biên lai chuyển khoản -->
-     {% if order.payment_method == 'bank' %}
-     <div class="od-section">
-       <div class="od-section-title">Biên lai chuyển khoản</div>
-       <div class="od-section-body">
-         {% if order.payment_proof %}
-           <div style="text-align: center;">
-             <p style="font-size:13px; color:#374151; margin-bottom:10px;">Biên lai đã được tải lên:</p>
-             <a href="{{ order.payment_proof.url }}" target="_blank">
-               <img src="{{ order.payment_proof.url }}" alt="Biên lai chuyển khoản" class="upload-preview" style="max-height: 250px;" />
-             </a>
-             <p style="font-size:11px; color:#9ca3af; text-align:center; margin-top:10px; font-weight:500;">(Nhấp vào ảnh để xem kích thước đầy đủ)</p>
-           </div>
-         {% else %}
-           <form method="post" action="{% url 'store:upload_payment_proof' order.order_code %}" enctype="multipart/form-data">
-             {% csrf_token %}
-             <label class="upload-zone">
-               <input type="file" name="payment_proof" accept="image/jpeg,image/png" onchange="previewUpload(event, 'uploadPreviewPayment')" required />
-               <i class="fas fa-cloud-upload-alt" style="font-size: 30px; color: #9ca3af;"></i>
-               <div class="upload-zone-text">Kéo thả hoặc nhấn để chọn ảnh</div>
-               <div class="upload-zone-sub">Hỗ trợ JPG, PNG - Tối đa 5MB</div>
-               <img id="uploadPreviewPayment" class="upload-preview" style="display:none;" />
-             </label>
-             <button type="submit" class="upload-btn">Tải lên biên lai</button>
-           </form>
-         {% endif %}
-       </div>
-     </div>
-     {% endif %}
+      {% if order.note %}
+      <div class="od-section">
+        <div class="od-section-title">Ghi chu</div>
+        <div class="od-section-body" style="font-size:13px;color:#374151;">{{ order.note }}</div>
+      </div>
+      {% endif %}
 
+      <!-- Yeu cau tra hang -->
+      {% if order.status == 'delivered' or order.status == 'completed' or order.status == 'returning' or order.status == 'returned' or order.return_request %}
+      <div id="return" class="od-section">
+        <div class="od-section-title">Yeu cau tra hang & Hoan tien</div>
+        <div class="od-section-body">
+          {% if order.return_request %}
+          <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:16px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div style="width:32px;height:32px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:14px;color:#166534;">Tien do xu ly tra hang</div>
+            </div>
+            {% with rs=order.return_request.status %}
+            <div class="return-stepper">
+              <div class="rt-step completed"><div class="rt-dot">1</div><span class="rt-label">Gui yeu cau</span></div>
+              <div class="rt-step {% if rs != 'pending' and rs != 'rejected' %}completed{% else %}active{% endif %}">
+                <div class="rt-dot">{% if rs != 'pending' and rs != 'rejected' %}✓{% else %}2{% endif %}</div>
+                <span class="rt-label">Da duyet</span>
+              </div>
+              <div class="rt-step {% if rs in 'picking,returning_to_warehouse,received,processing,completed' %}active{% endif %} {% if rs in 'returning_to_warehouse,received,processing,completed' %}completed{% endif %}">
+                <div class="rt-dot">{% if rs in 'returning_to_warehouse,received,processing,completed' %}✓{% else %}3{% endif %}</div>
+                <span class="rt-label">Thu hoi hang</span>
+              </div>
+              <div class="rt-step {% if rs in 'received,processing,completed' %}active{% endif %} {% if rs in 'processing,completed' %}completed{% endif %}">
+                <div class="rt-dot">{% if rs in 'processing,completed' %}✓{% else %}4{% endif %}</div>
+                <span class="rt-label">Da nhan hang</span>
+              </div>
+              <div class="rt-step {% if rs == 'completed' %}completed{% elif rs == 'processing' %}active{% endif %}">
+                <div class="rt-dot">{% if rs == 'completed' %}✓{% else %}5{% endif %}</div>
+                <span class="rt-label">Hoan tien</span>
+              </div>
+            </div>
+            {% endwith %}
+            <div style="font-size:13px;color:#374151;line-height:1.7;">
+              <div style="margin-bottom:6px;"><strong>Trang thai:</strong> <span style="color:#15803d;font-weight:700;">{{ order.return_request.get_status_display }}</span></div>
+              <div style="margin-bottom:6px;"><strong>Ly do:</strong> {{ order.return_request.get_reason_display }}</div>
+              {% if order.return_request.status != 'pending' and order.return_request.status != 'rejected' %}
+              <div style="margin-top:15px;padding:15px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;">
+                <div style="font-size:12px;font-weight:700;color:#166534;text-transform:uppercase;margin-bottom:5px;">
+                  {% if order.return_request.status == 'completed' %}So tien da hoan tra{% else %}So tien hoan du kien{% endif %}
+                </div>
+                <div style="font-size:20px;font-weight:800;color:#15803d;">{{ order.return_request.refund_amount|vnd }}</div>
+                {% if order.return_request.status != 'completed' %}
+                <p style="font-size:12px;color:#16a34a;margin-top:8px;font-style:italic;">Luuu y: Day la so tien du kien. Shop se kiem tra thuc te khi nhan lai hang.</p>
+                {% endif %}
+                {% if order.return_request.admin_note and order.return_request.status == 'completed' %}
+                <div style="margin-top:10px;font-size:13px;color:#065f46;background:#d1fae5;padding:10px;border-radius:4px;border-left:3px solid #10b981;">
+                  <strong>Ghi chu tu Cua hang:</strong> {{ order.return_request.admin_note }}
+                </div>
+                {% endif %}
+              </div>
+              {% endif %}
+              {% if order.return_request.customer_return_proof %}
+              <div style="margin:15px 0;padding:15px;background:white;border-radius:8px;border:2px solid #bbf7d0;">
+                <div style="font-weight:800;color:#166534;font-size:12px;margin-bottom:10px;text-transform:uppercase;">Anh/Video san pham khach hang cung cap</div>
+                <a href="{{ order.return_request.customer_return_proof.url }}" target="_blank">
+                  <img src="{{ order.return_request.customer_return_proof.url }}" style="max-width:100%;max-height:250px;border-radius:6px;border:1px solid #e5e7eb;display:block;margin:0 auto;">
+                </a>
+              </div>
+              {% endif %}
+              {% if order.return_request.refund_proof %}
+              <div style="margin:15px 0;padding:15px;background:white;border-radius:8px;border:2px solid #bbf7d0;">
+                <div style="font-weight:800;color:#166534;font-size:12px;margin-bottom:10px;text-transform:uppercase;">Bang chung hoan tien tu cua hang</div>
+                <a href="{{ order.return_request.refund_proof.url }}" target="_blank">
+                  <img src="{{ order.return_request.refund_proof.url }}" style="max-width:100%;max-height:250px;border-radius:6px;border:1px solid #e5e7eb;display:block;margin:0 auto;">
+                </a>
+              </div>
+              {% endif %}
+              {% if order.return_request.bank_name %}
+              <div style="margin:12px 0;padding:12px;background:white;border-radius:6px;border:1px solid #bbf7d0;">
+                <div style="font-weight:700;color:#166534;font-size:11px;margin-bottom:6px;text-transform:uppercase;">Tai khoan nhan hoan tien</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <div><small style="color:#9ca3af;display:block;">Ngan hang</small>{{ order.return_request.bank_name }}</div>
+                  <div><small style="color:#9ca3af;display:block;">So tai khoan</small>{{ order.return_request.bank_account_number }}</div>
+                  <div style="grid-column:span 2;"><small style="color:#9ca3af;display:block;">Chu tai khoan</small>{{ order.return_request.bank_account_holder }}</div>
+                </div>
+              </div>
+              {% endif %}
+              {% if order.return_request.note %}
+              <div style="margin-top:8px;"><strong>Ghi chu:</strong> {{ order.return_request.note }}</div>
+              {% endif %}
+            </div>
+          </div>
+          {% else %}
+          <div class="return-form">
+            <div class="return-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l-4 4 4 4m5-9a8 8 0 11-8 8V7a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+              Gui yeu cau tra hang & nhan hoan tien
+            </div>
+            <form method="post" action="{% url 'store:return_request' order.order_code %}" id="returnFormDetail" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="form-group">
+                <label class="form-label">Ly do tra hang *</label>
+                <select name="reason" class="form-select" required>
+                  <option value="">-- Chon ly do phu hop --</option>
+                  <option value="defective">San pham bi loi / hu hong</option>
+                  <option value="wrong_item">Nhan sai san pham / Kich thuoc</option>
+                  <option value="damaged">San pham bi vo do van chuyen</option>
+                  <option value="quality">Chat luong khong dung ky vong</option>
+                  <option value="late">Giao hang qua lau</option>
+                  <option value="other">Ly do khac</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Anh/Video san pham tra (bat buoc)</label>
+                <label class="upload-zone">
+                  <input type="file" name="customer_return_proof" accept="image/*,video/*" onchange="previewUpload(event,'uploadPreviewCustomerReturn')" required />
+                  <div class="upload-zone-text">Keo tha hoac nhan de chon anh/video</div>
+                  <div class="upload-zone-sub">Ho tro JPG, PNG, MP4 - Toi da 10MB</div>
+                  <img id="uploadPreviewCustomerReturn" class="upload-preview" style="display:none;" />
+                  <video id="videoPreviewCustomerReturn" class="upload-preview" controls style="display:none;"></video>
+                </label>
+              </div>
+              <div style="background:rgba(255,255,255,0.8);padding:18px;border-radius:8px;margin-bottom:15px;border:1px dashed #f59e0b;">
+                <div style="font-size:11px;font-weight:800;color:#b45309;margin-bottom:12px;text-transform:uppercase;">Thong tin chuyen khoan nhan tien hoan</div>
+                <div class="form-group">
+                  <label class="form-label">Ten ngan hang *</label>
+                  <input type="text" name="bank_name" class="form-input" placeholder="Vi du: Vietcombank, Techcombank..." required>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  <div class="form-group">
+                    <label class="form-label">So tai khoan *</label>
+                    <input type="text" name="bank_account_number" class="form-input" placeholder="Nhap so tai khoan..." required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Ten chu tai khoan *</label>
+                    <input type="text" name="bank_account_holder" class="form-input" placeholder="Ten viet hoa khong dau..." required>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ghi chu chi tiet</label>
+                <textarea name="note" class="form-textarea" rows="3" placeholder="Mo ta them ve tinh trang san pham..."></textarea>
+              </div>
+              <button type="submit" class="return-btn">XAC NHAN GUI YEU CAU</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
 
-     <!-- Địa chỉ giao hàng -->
-     <div class="od-section">
-       <div class="od-section-title">Địa chỉ giao hàng</div>
-       <div class="od-section-body" style="font-size:13px;color:#374151;line-height:1.8;">
-         <strong>{{ order.recipient_name }}</strong> &nbsp;|&nbsp; {{ order.recipient_phone }}<br/>
-         {{ order.shipping_address }}, {{ order.shipping_city }}
-       </div>
-     </div>
+    <!-- Right: Summary + Timeline -->
+    <div>
+      <div class="od-section" style="margin-bottom:20px;">
+        <div class="od-section-title">Tom tat thanh toan</div>
+        <div class="od-section-body">
+          <div class="sum-row"><span>Tam tinh</span><span>{{ order.subtotal|vnd }}</span></div>
+          <div class="sum-row"><span>Phi van chuyen</span><span>{{ order.shipping_fee|vnd }}</span></div>
+          <div class="sum-row"><span>Giam gia</span><span>-{{ order.discount_amount|vnd }}</span></div>
+          <div class="sum-total"><span>Tong cong</span><span style="color:var(--brand-green);">{{ order.total|vnd }}</span></div>
+        </div>
+      </div>
 
+      <div class="od-section">
+        <div class="od-section-title">Lich su don hang</div>
+        <div class="od-section-body">
+          <div class="timeline">
+            {% with status=order.status %}
+            <div class="tl-item">
+              <div class="tl-dot done"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="tl-content"><div class="tl-label">Dat hang thanh cong</div><div class="tl-date">{{ order.created_at|date:"d/m/Y H:i" }}</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot {% if status in 'confirmed,shipping,delivered,completed,returning,returned' %}done{% elif status == 'pending' %}active{% endif %}">
+                {% if status in 'confirmed,shipping,delivered,completed,returning,returned' %}<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>{% endif %}
+              </div>
+              <div class="tl-content"><div class="tl-label {% if status not in 'confirmed,shipping,delivered,completed,returning,returned' %}tl-muted{% endif %}">Da xac nhan</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot {% if status in 'shipping,delivered,completed,returning,returned' %}done{% elif status == 'confirmed' %}active{% endif %}">
+                {% if status in 'shipping,delivered,completed,returning,returned' %}<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>{% endif %}
+              </div>
+              <div class="tl-content"><div class="tl-label {% if status not in 'shipping,delivered,completed,returning,returned' %}tl-muted{% endif %}">Dang van chuyen</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot {% if status in 'delivered,completed,returning,returned' %}done{% elif status == 'shipping' %}active{% endif %}">
+                {% if status in 'delivered,completed,returning,returned' %}<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>{% endif %}
+              </div>
+              <div class="tl-content"><div class="tl-label {% if status not in 'delivered,completed,returning,returned' %}tl-muted{% endif %}">Da giao hang</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot {% if status in 'completed,returned' %}done{% elif status == 'delivered' or status == 'returning' %}active{% endif %}">
+                {% if status in 'completed,returned' %}<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>{% endif %}
+              </div>
+              <div class="tl-content">
+                <div class="tl-label {% if status not in 'completed,returned' %}tl-muted{% endif %}">
+                  {% if status == 'returned' %}Da tra hang{% elif status == 'returning' %}Dang xu ly tra hang{% else %}Hoan thanh{% endif %}
+                </div>
+              </div>
+            </div>
+            {% if status == 'cancelled' %}
+            <div class="tl-item">
+              <div class="tl-dot" style="border-color:#ef4444;background:#ef4444;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 18L18 6M6 6l12 12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
+              </div>
+              <div class="tl-content"><div class="tl-label" style="color:#ef4444;">Da huy</div><div class="tl-date">{{ order.updated_at|date:"d/m/Y H:i" }}</div></div>
+            </div>
+            {% endif %}
+            {% endwith %}
+          </div>
+        </div>
+      </div>
 
-     <!-- Sản phẩm -->
-     <div class="od-section">
-       <div class="od-section-title">Sản phẩm đặt hàng</div>
-       <div class="od-section-body" style="padding:0 16px;">
-         {% for item in order.items.all %}
-         <div class="od-item">
-           {% if item.variant %}
-           <img class="od-item-img" src="{{ item.variant.product.display_image }}" alt="{{ item.product_name }}" />
-           {% else %}
-           <div class="od-item-img"></div>
-           {% endif %}
-           <div style="flex:1;min-width:0;">
-             <div class="od-item-name">{{ item.product_name }}</div>
-             <div class="od-item-meta">{{ item.color }} / {{ item.size }} × {{ item.quantity }}</div>
-             <div style="font-size:12px;color:#374151;margin-top:3px;">{{ item.price|vnd }} / sản phẩm</div>
-           </div>
-           <div class="od-item-price">{{ item.subtotal|vnd }}</div>
-         </div>
-         {% endfor %}
-       </div>
-     </div>
-
-
-     <!-- Ghi chú -->
-     {% if order.note %}
-     <div class="od-section">
-       <div class="od-section-title">Ghi chú</div>
-       <div class="od-section-body" style="font-size:13px;color:#374151;">{{ order.note }}</div>
-     </div>
-     {% endif %}
-
-
-     <!-- Yêu cầu trả hàng -->
-     {% if order.status == 'delivered' or order.status == 'completed' or order.status == 'returning' or order.status == 'returned' or order.return_request %}
-     <div id="return" class="od-section">
-       <div class="od-section-title">Yêu cầu trả hàng & Hoàn tiền</div>
-       <div class="od-section-body">
-         {% if order.return_request %}
-         <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:16px;margin-bottom:12px;">
-           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-             <div style="width:32px;height:32px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-             </div>
-             <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:14px;color:#166534;">Tiến độ xử lý trả hàng</div>
-           </div>
-
-
-           <!-- CUSTOMER RETURN STEPPER -->
-           {% with rs=order.return_request.status %}
-           <div class="return-stepper">
-               <div class="rt-step completed"><div class="rt-dot">1</div><span class="rt-label">Gửi yêu cầu</span></div>
-               <div class="rt-step {% if rs != 'pending' and rs != 'rejected' %}completed{% else %}active{% endif %}">
-                   <div class="rt-dot">{% if rs != 'pending' and rs != 'rejected' %}✓{% else %}2{% endif %}</div>
-                   <span class="rt-label">Đã duyệt</span>
-               </div>
-               <div class="rt-step {% if rs in 'picking,returning_to_warehouse,received,processing,completed' %}active{% endif %} {% if rs in 'returning_to_warehouse,received,processing,completed' %}completed{% endif %}">
-                   <div class="rt-dot">{% if rs in 'returning_to_warehouse,received,processing,completed' %}✓{% else %}3{% endif %}</div>
-                   <span class="rt-label">Thu hồi hàng</span>
-               </div>
-               <div class="rt-step {% if rs in 'received,processing,completed' %}active{% endif %} {% if rs in 'processing,completed' %}completed{% endif %}">
-                   <div class="rt-dot">{% if rs in 'processing,completed' %}✓{% else %}4{% endif %}</div>
-                   <span class="rt-label">Đã nhận hàng</span>
-               </div>
-               <div class="rt-step {% if rs == 'completed' %}completed{% elif rs == 'processing' %}active{% endif %}">
-                   <div class="rt-dot">{% if rs == 'completed' %}✓{% else %}5{% endif %}</div>
-                   <span class="rt-label">Hoàn tiền</span>
-               </div>
-           </div>
-           {% endwith %}
-
-
-           <div style="font-size:13px;color:#374151;line-height:1.7;">
-             <div style="margin-bottom:6px;"><strong>Trạng thái hiện tại:</strong> <span style="color:#15803d;font-weight:700;">{{ order.return_request.get_status_display }}</span></div>
-             <div style="margin-bottom:6px;"><strong>Lý do yêu cầu:</strong> {{ order.return_request.get_reason_display }}</div>
-             <!-- HIỂN THỊ SỐ TIỀN TRỰC QUAN CHO KHÁCH HÀNG -->
-             {% if order.return_request and order.return_request.status != 'pending' and order.return_request.status != 'rejected' %}
-             <div style="margin-top: 15px; padding: 15px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
-                 <div style="font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; margin-bottom: 5px;">
-                     {% if order.return_request.status == 'completed' %}
-                         SỐ TIỀN ĐÃ HOÀN TRẢ
-                     {% else %}
-                         SỐ TIỀN HOÀN DỰ KIẾN
-                     {% endif %}
-                 </div>
-                 <div style="font-size: 20px; font-weight: 800; color: #15803d;">
-                     {{ order.return_request.refund_amount|vnd }}
-                 </div>
-
-
-                 {% if order.return_request.status == 'completed' %}
-                     {% if order.return_request.admin_note %}
-                     <div style="margin-top: 10px; font-size: 13px; color: #065f46; background: #d1fae5; padding: 10px; border-radius: 4px; border-left: 3px solid #10b981;">
-                         <strong>Ghi chú từ Cửa hàng:</strong> {{ order.return_request.admin_note }}
-                     </div>
-                     {% endif %}
-                 {% else %}
-                     <p style="font-size: 12px; color: #16a34a; margin-top: 8px; font-style: italic; line-height: 1.4;">
-                         <i class="fas fa-exclamation-circle"></i> <strong>Lưu ý:</strong> Đây là số tiền dự kiến. Shop sẽ kiểm tra tình trạng sản phẩm thực tế khi nhận lại tại kho để chốt số tiền hoàn chính thức cho bạn.
-                     </p>
-                 {% endif %}
-             </div>
-             {% endif %}
-
-
-             <!-- HIỂN THỊ ẢNH/VIDEO KHÁCH HÀNG TẢI LÊN -->
-             {% if order.return_request.customer_return_proof %}
-             <div style="margin:15px 0; padding:15px; background:white; border-radius:8px; border:2px solid #bbf7d0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-               <div style="font-weight:800; color:#166534; font-size:12px; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
-                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                   ẢNH/VIDEO SẢN PHẨM KHÁCH HÀNG CUNG CẤP
-               </div>
-               <a href="{{ order.return_request.customer_return_proof.url }}" target="_blank">
-                   <img src="{{ order.return_request.customer_return_proof.url }}" style="max-width:100%; max-height:250px; border-radius:6px; border:1px solid #e5e7eb; display:block; margin:0 auto; transition: 0.3s;" onmouseover="this.style.opacity='0.9'">
-               </a>
-               <p style="font-size:11px; color:#6b7280; text-align:center; margin-top:10px; font-weight:500;">(Nhấp vào ảnh để xem kích thước đầy đủ)</p>
-             </div>
-             {% endif %}
-
-
-             {% if order.return_request.refund_proof %}
-             <div style="margin:15px 0; padding:15px; background:white; border-radius:8px; border:2px solid #bbf7d0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-               <div style="font-weight:800; color:#166534; font-size:12px; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
-                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                   BẰNG CHỨNG HOÀN TIỀN TỪ CỬA HÀNG
-               </div>
-               <a href="{{ order.return_request.refund_proof.url }}" target="_blank">
-                   <img src="{{ order.return_request.refund_proof.url }}" style="max-width:100%; max-height:250px; border-radius:6px; border:1px solid #e5e7eb; display:block; margin:0 auto; transition: 0.3s;" onmouseover="this.style.opacity='0.9'">
-               </a>
-               <p style="font-size:11px; color:#6b7280; text-align:center; margin-top:10px; font-weight:500;">(Nhấp vào ảnh để xem kích thước đầy đủ)</p>
-             </div>
-             {% endif %}
-
-
-             {% if order.return_request.bank_name %}
-             <div style="margin:12px 0; padding:12px; background:white; border-radius:6px; border:1px solid #bbf7d0;">
-               <div style="font-weight:700; color:#166534; font-size:11px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Tài khoản nhận hoàn tiền của bạn</div>
-               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                   <div><small style="color:#9ca3af; display:block;">Ngân hàng</small> {{ order.return_request.bank_name }}</div>
-                   <div><small style="color:#9ca3af; display:block;">Số tài khoản</small> {{ order.return_request.bank_account_number }}</div>
-                   <div style="grid-column: span 2;"><small style="color:#9ca3af; display:block;">Chủ tài khoản</small> {{ order.return_request.bank_account_holder }}</div>
-               </div>
-             </div>
-             {% endif %}
-
-
-             {% if order.return_request.note %}<div style="margin-top:8px;"><strong>Ghi chú:</strong> {{ order.return_request.note }}</div>{% endif %}
-           </div>
-         </div>
-         {% else %}
-         <div class="return-form">
-           <div class="return-title">
-             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l-4 4 4 4m5-9a8 8 0 11-8 8V7a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
-             Gửi yêu cầu trả hàng & nhận hoàn tiền
-           </div>
-           <form method="post" action="{% url 'store:return_request' order.order_code %}" id="returnFormDetail" enctype="multipart/form-data">
-             {% csrf_token %}
-
-
-             <div class="form-group">
-               <label class="form-label">Lý do trả hàng *</label>
-               <select name="reason" class="form-select" required>
-                 <option value="">-- Chọn lý do phù hợp --</option>
-                 <option value="defective">Sản phẩm bị lỗi / hư hỏng</option>
-                 <option value="wrong_item">Nhận sai sản phẩm / Kích thước</option>
-                 <option value="damaged">Sản phẩm bị vỡ do vận chuyển</option>
-                 <option value="quality">Chất lượng không đúng kỳ vọng</option>
-                 <option value="late">Giao hàng quá lâu</option>
-                 <option value="other">Lý do khác</option>
-               </select>
-             </div>
-
-
-             <div class="form-group">
-               <label class="form-label">Ảnh/Video sản phẩm trả (nếu có)</label>
-               <label class="upload-zone">
-                 <input type="file" name="customer_return_proof" accept="image/*,video/*" onchange="previewUpload(event, 'uploadPreviewCustomerReturn')" />
-                 <i class="fas fa-cloud-upload-alt" style="font-size: 30px; color: #9ca3af;"></i>
-                 <div class="upload-zone-text">Kéo thả hoặc nhấn để chọn ảnh/video</div>
-                 <div class="upload-zone-sub">Hỗ trợ JPG, PNG, MP4 - Tối đa 10MB</div>
-                 <img id="uploadPreviewCustomerReturn" class="upload-preview" style="display:none;" />
-                 <video id="videoPreviewCustomerReturn" class="upload-preview" controls style="display:none;"></video>
-               </label>
-             </div>
-
-
-             <div style="background: rgba(255,255,255,0.8); padding: 18px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #f59e0b;">
-               <div style="font-size:11px; font-weight:800; color:#b45309; margin-bottom:12px; text-transform:uppercase; display:flex; align-items:center; gap:6px;">
-                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                 Thông tin chuyển khoản nhận tiền hoàn
-               </div>
-
-
-               <div class="form-group">
-                 <label class="form-label">Tên ngân hàng *</label>
-                 <input type="text" name="bank_name" class="form-input" placeholder="Ví dụ: Vietcombank, Techcombank..." required>
-               </div>
-
-
-               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                 <div class="form-group">
-                   <label class="form-label">Số tài khoản *</label>
-                   <input type="text" name="bank_account_number" class="form-input" placeholder="Nhập số tài khoản..." required>
-                 </div>
-                 <div class="form-group">
-                   <label class="form-label">Tên chủ tài khoản *</label>
-                   <input type="text" name="bank_account_holder" class="form-input" placeholder="Tên viết hoa không dấu..." required>
-                 </div>
-               </div>
-               <small style="color:#6b7280; font-size:11px; display:block; margin-top:-5px;">* Vui lòng nhập chính xác để tránh sai sót khi hoàn tiền.</small>
-             </div>
-
-
-             <div class="form-group">
-               <label class="form-label">Ghi chú chi tiết</label>
-               <textarea name="note" class="form-textarea" rows="3" placeholder="Mô tả thêm về tình trạng sản phẩm..."></textarea>
-             </div>
-
-
-             <button type="submit" class="return-btn">XÁC NHẬN GỬI YÊU CẦU</button>
-           </form>
-         </div>
-         {% endif %}
-       </div>
-     </div>
-     {% endif %}
-   </div>
-
-
-   <!-- Right: Summary + Timeline -->
-   <div>
-     <!-- Tóm tắt giá -->
-     <div class="od-section" style="margin-bottom:20px;">
-       <div class="od-section-title">Tóm tắt thanh toán</div>
-       <div class="od-section-body">
-         <div class="sum-row"><span>Tạm tính</span><span>{{ order.subtotal|vnd }}</span></div>
-         <div class="sum-row"><span>Phí vận chuyển</span><span>{{ order.shipping_fee|vnd }}</span></div>
-         <div class="sum-row"><span>Giảm giá</span><span>-{{ order.discount_amount|vnd }}</span></div>
-         <div class="sum-total">
-           <span>Tổng cộng</span>
-           <span style="color:var(--brand-green);">{{ order.total|vnd }}</span>
-         </div>
-       </div>
-     </div>
-
-
-     <!-- Timeline -->
-     <div class="od-section">
-       <div class="od-section-title">Lịch sử đơn hàng</div>
-       <div class="od-section-body">
-         <div class="timeline">
-           {% with status=order.status %}
-           <div class="tl-item">
-             <div class="tl-dot done">
-               <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-             </div>
-             <div class="tl-content">
-               <div class="tl-label">Đặt hàng thành công</div>
-               <div class="tl-date">{{ order.created_at|date:"d/m/Y H:i" }}</div>
-             </div>
-           </div>
-           <div class="tl-item">
-             <div class="tl-dot {% if status in 'confirmed,shipping,delivered,completed,returning,returned' %}done{% elif status == 'pending' %}active{% endif %}">
-               {% if status in 'confirmed,shipping,delivered,completed,returning,returned' %}
-               <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-               {% endif %}
-             </div>
-             <div class="tl-content">
-               <div class="tl-label" style="{% if status not in 'confirmed,shipping,delivered,completed,returning,returned' %}color:#9ca3af;{% endif %}">Đã xác nhận</div>
-             </div>
-           </div>
-           <div class="tl-item">
-             <div class="tl-dot {% if status in 'shipping,delivered,completed,returning,returned' %}done{% elif status == 'confirmed' %}active{% endif %}">
-               {% if status in 'shipping,delivered,completed,returning,returned' %}
-               <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-               {% endif %}
-             </div>
-             <div class="tl-content">
-               <div class="tl-label" style="{% if status not in 'shipping,delivered,completed,returning,returned' %}color:#9ca3af;{% endif %}">Đang vận chuyển</div>
-             </div>
-           </div>
-           <div class="tl-item">
-             <div class="tl-dot {% if status in 'delivered,completed,returning,returned' %}done{% elif status == 'shipping' %}active{% endif %}">
-               {% if status in 'delivered,completed,returning,returned' %}
-               <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-               {% endif %}
-             </div>
-             <div class="tl-content">
-               <div class="tl-label" style="{% if status not in 'delivered,completed,returning,returned' %}color:#9ca3af;{% endif %}">Đã giao hàng</div>
-             </div>
-           </div>
-           <div class="tl-item">
-             <div class="tl-dot {% if status in 'completed,returned' %}done{% elif status == 'delivered' or status == 'returning' %}active{% endif %}">
-               {% if status in 'completed,returned' %}
-               <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-               {% endif %}
-             </div>
-             <div class="tl-content">
-               <div class="tl-label" style="{% if status not in 'completed,returned' %}color:#9ca3af;{% endif %}">
-                   {% if status == 'returned' %}Đã trả hàng{% elif status == 'returning' %}Đang xử lý trả hàng{% else %}Hoàn thành{% endif %}
-               </div>
-             </div>
-           </div>
-           {% if status == 'cancelled' %}
-           <div class="tl-item">
-             <div class="tl-dot" style="border-color:#ef4444;background:#ef4444;">
-               <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 18L18 6M6 6l12 12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
-             </div>
-             <div class="tl-content">
-               <div class="tl-label" style="color:#ef4444;">Đã hủy</div>
-               <div class="tl-date">{{ order.updated_at|date:"d/m/Y H:i" }}</div>
-             </div>
-           </div>
-           {% endif %}
-           {% endwith %}
-         </div>
-       </div>
-     </div>
-
-
-     <div style="margin-top:16px;">
-       <a href="{% url 'store:order_list' %}" style="font-size:13px;color:var(--brand-green);text-decoration:none;font-weight:600;">← Quay lại danh sách đơn hàng</a>
-     </div>
-   </div>
- </div>
+      <div style="margin-top:16px;">
+        <a href="{% url 'store:order_list' %}" style="font-size:13px;color:var(--brand-green);text-decoration:none;font-weight:600;">← Quay lai danh sach don hang</a>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 
 {% block extra_js %}
+<div id="django-messages" data-has-messages="{% if messages %}1{% else %}0{% endif %}" data-messages="{% for msg in messages %}{{ msg.message|escapejs }}{% endfor %}" style="display:none;"></div>
 <script>
- // Xác nhận trước khi gửi yêu cầu trả hàng
- document.getElementById('returnFormDetail')?.addEventListener('submit', function(e) {
-   const reason = this.querySelector('[name="reason"]').value;
-   if (!reason) {
-     e.preventDefault();
-     alert('Vui lòng chọn lý do trả hàng');
-     return false;
-   }
-   if (!confirm('Bạn có chắc chắn muốn gửi yêu cầu trả hàng cho đơn hàng này? Tất cả thông tin hoàn tiền đã chính xác?')) {
-     e.preventDefault();
-     return false;
-   }
- });
+// @ts-nocheck
+document.getElementById('returnFormDetail')?.addEventListener('submit', function(e) {
+  const reason = this.querySelector('[name="reason"]').value;
+  if (!reason) { e.preventDefault(); alert('Vui long chon ly do tra hang'); return false; }
+  if (!confirm('Ban co chac chan muon gui yeu cau tra hang?')) { e.preventDefault(); return false; }
+});
 
+const msgEl = document.getElementById('django-messages');
+if (msgEl && msgEl.dataset.hasMessages === '1') {
+  const toast = document.createElement('div');
+  toast.className = 'success-toast show';
+  toast.innerHTML = '<div style="width:36px;height:36px;background:var(--brand-green);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="flex:1;"><div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:14px;">Thanh cong!</div><div style="font-size:12px;color:#6b7280;margin-top:3px;">' + msgEl.dataset.messages + '</div></div><button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:18px;">x</button>';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4500);
+}
 
- // Hiển thị toast nếu có message
- {% if messages %}
- const toast = document.createElement('div');
- toast.className = 'success-toast show';
- toast.innerHTML = `
-   <div style="width:36px;height:36px;background:var(--brand-green);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-   </div>
-   <div style="flex:1;">
-     <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:14px;color:#0f172a;">Thành công!</div>
-     <div style="font-size:12px;color:#6b7280;margin-top:3px;">{% for msg in messages %}{{ msg.message }}{% endfor %}</div>
-   </div>
-   <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:18px;line-height:1;padding:2px;">✕</button>
- `;
- document.body.appendChild(toast);
- setTimeout(() => toast.remove(), 4500);
- {% endif %}
-
-
- function previewUpload(event, imgId) {
-   const reader = new FileReader();
-   reader.onload = function(){
-     const output = document.getElementById(imgId);
-     const videoOutput = document.getElementById('videoPreviewCustomerReturn'); // Only for customer return proof
-
-
-     // Reset previous previews
-     if (output) output.style.display = 'none';
-     if (videoOutput) videoOutput.style.display = 'none';
-
-
-     const file = event.target.files[0];
-     if (file.type.startsWith('image/')) {
-       if (output) {
-         output.src = reader.result;
-         output.style.display = 'block';
-       }
-     } else if (file.type.startsWith('video/')) {
-       if (videoOutput) {
-         videoOutput.src = reader.result;
-         videoOutput.style.display = 'block';
-       }
-     }
-   };
-   reader.readAsDataURL(event.target.files[0]);
- }
+function previewUpload(event, imgId) {
+  const reader = new FileReader();
+  const file = event.target.files[0];
+  reader.onload = function() {
+    const output = document.getElementById(imgId);
+    const videoOutput = document.getElementById('videoPreviewCustomerReturn');
+    if (output) output.style.display = 'none';
+    if (videoOutput) videoOutput.style.display = 'none';
+    if (file.type.startsWith('image/')) {
+      if (output) { output.src = reader.result; output.style.display = 'block'; }
+    } else if (file.type.startsWith('video/')) {
+      if (videoOutput) { videoOutput.src = reader.result; videoOutput.style.display = 'block'; }
+    }
+  };
+  reader.readAsDataURL(file);
+}
 </script>
 {% endblock %}
 
