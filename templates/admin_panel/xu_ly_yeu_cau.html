@@ -1,7 +1,7 @@
 {% extends 'admin_panel/base_admin.html' %}
-{% block title %}Xu ly yeu cau tra hang - Rabona Sport{% endblock %}
-{% block page_title %}XU LY YEU CAU TRA HANG{% endblock %}
-{% block breadcrumb %}Admin > <span>Xu ly yeu cau</span>{% endblock %}
+{% block title %}Xử lý yêu cầu trả hàng - Rabona Sport{% endblock %}
+{% block page_title %}XỬ LÝ YÊU CẦU TRẢ HÀNG{% endblock %}
+{% block breadcrumb %}Admin > <span>Xử lý yêu cầu</span>{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -38,41 +38,41 @@
 <div class="stats-cards">
   <div class="stat-card">
     <i class="fas fa-undo-alt stat-icon blue"></i>
-    <div class="stat-info"><span class="stat-title">Tong yeu cau</span><span class="stat-value">{{ stats.tong_yeu_cau }}</span></div>
+    <div class="stat-info"><span class="stat-title">Tổng yêu cầu</span><span class="stat-value">{{ stats.tong_yeu_cau }}</span></div>
   </div>
   <div class="stat-card">
     <i class="fas fa-hourglass-half stat-icon orange"></i>
-    <div class="stat-info"><span class="stat-title">Cho xu ly</span><span class="stat-value">{{ stats.cho_duyet }}</span></div>
+    <div class="stat-info"><span class="stat-title">Chờ xử lý</span><span class="stat-value">{{ stats.cho_duyet }}</span></div>
   </div>
   <div class="stat-card">
     <i class="fas fa-ban stat-icon" style="color:#ef4444;"></i>
-    <div class="stat-info"><span class="stat-title">Da tu choi</span><span class="stat-value">{{ stats.tu_choi }}</span></div>
+    <div class="stat-info"><span class="stat-title">Đã từ chối</span><span class="stat-value">{{ stats.tu_choi }}</span></div>
   </div>
 </div>
 
 <form method="get" style="margin-bottom:20px;display:flex;gap:10px;">
   <input type="hidden" name="status" value="{{ current_status }}">
-  <input type="text" name="q" value="{{ search }}" placeholder="Tim trong muc nay..."
+  <input type="text" name="q" value="{{ search }}" placeholder="Tìm trong mục này..."
     style="padding:8px 14px;border:1px solid #d1d5db;border-radius:4px;font-size:14px;flex:1;max-width:450px;">
-  <button type="submit" style="padding:8px 20px;background:var(--primary-green);color:white;border:none;border-radius:4px;cursor:pointer;font-weight:600;">Tim kiem</button>
+  <button type="submit" style="padding:8px 20px;background:var(--primary-green);color:white;border:none;border-radius:4px;cursor:pointer;font-weight:600;">Tìm kiếm</button>
 </form>
 
 <div class="tabs">
-  <a href="?status=pending&q={{ search|default:'' }}" class="tab-item {% if current_status == 'pending' %}active{% endif %}">Cho xu ly ({{ stats.cho_duyet }})</a>
-  <a href="?status=rejected&q={{ search|default:'' }}" class="tab-item {% if current_status == 'rejected' %}active{% endif %}">Da tu choi ({{ stats.tu_choi }})</a>
+  <a href="?status=pending&q={{ search|default:'' }}" class="tab-item {% if current_status == 'pending' %}active{% endif %}">Chờ xử lý ({{ stats.cho_duyet }})</a>
+  <a href="?status=rejected&q={{ search|default:'' }}" class="tab-item {% if current_status == 'rejected' %}active{% endif %}">Đã từ chối ({{ stats.tu_choi }})</a>
 </div>
 
 <div class="table-container">
   <table>
     <thead>
       <tr>
-        <th>Ma phieu</th>
-        <th style="text-align:center;">Ma don</th>
-        <th>Khach hang</th>
-        <th>Ly do tra hang</th>
-        <th>Ngay yeu cau</th>
-        <th>Trang thai</th>
-        <th>Thao tac</th>
+        <th>Mã phiếu</th>
+        <th style="text-align:center;">Mã đơn</th>
+        <th>Khách hàng</th>
+        <th>Lý do trả hàng</th>
+        <th>Ngày yêu cầu</th>
+        <th>Trạng thái</th>
+        <th>Thao tác</th>
       </tr>
     </thead>
     <tbody>
@@ -84,8 +84,8 @@
         <td><span style="font-weight:600;color:#4b5563;">{{ phieu.get_reason_display }}</span></td>
         <td>{{ phieu.created_at|date:"d/m/Y H:i" }}</td>
         <td>
-          {% if phieu.status == 'pending' %}<span class="status-new">Cho xu ly</span>
-          {% elif phieu.status == 'rejected' %}<span class="status-rejected">Tu choi</span>
+          {% if phieu.status == 'pending' %}<span class="status-new">Chờ xử lý</span>
+          {% elif phieu.status == 'rejected' %}<span class="status-rejected">Từ chối</span>
           {% endif %}
         </td>
         <td>
@@ -97,8 +97,8 @@
       {% empty %}
       <tr>
         <td colspan="7" style="text-align:center;padding:40px;color:#666;">
-          {% if search %}Khong tim thay ket qua nao cho "<strong>{{ search }}</strong>".
-          {% else %}Khong co yeu cau tra hang nao trong muc nay.{% endif %}
+          {% if search %}Không tìm thấy kết quả nào cho "<strong>{{ search }}</strong>".
+          {% else %}Không có yêu cầu trả hàng nào trong mục này.{% endif %}
         </td>
       </tr>
       {% endfor %}
@@ -108,7 +108,7 @@
 
 {% if phieu_list.paginator.count > 0 %}
 <div class="pagination-bar">
-  <div>Hien thi tu {{ phieu_list.start_index }}-{{ phieu_list.end_index }} cua {{ phieu_list.paginator.count }} yeu cau</div>
+  <div>Hiển thị từ {{ phieu_list.start_index }}-{{ phieu_list.end_index }} của {{ phieu_list.paginator.count }} yêu cầu</div>
   <ul class="pagination">
     {% if phieu_list.has_previous %}
     <li class="page-item"><a href="?page={{ phieu_list.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if search %}&q={{ search }}{% endif %}"><i class="fas fa-chevron-left"></i></a></li>
@@ -135,25 +135,25 @@
 <div class="modal-overlay" id="modalReturnDetail_{{ phieu.id }}">
   <div class="modal-content modal-lg">
     <div class="modal-header">
-      <div class="modal-title">CHI TIET TRA HANG #{{ phieu.id }}</div>
+      <div class="modal-title">CHI TIẾT TRẢ HÀNG #{{ phieu.id }}</div>
       <button class="btn-close" onclick="closeModal('modalReturnDetail_{{ phieu.id }}')"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body">
       {% if phieu.status == 'rejected' %}
       <div style="background-color:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:15px;margin-bottom:20px;">
-        <strong style="color:#ef4444;"><i class="fas fa-exclamation-circle"></i> Yeu cau nay da bi tu choi</strong>
-        <p style="margin-top:5px;font-size:14px;color:#7f1d1d;">{{ phieu.admin_note|default:"Khong co ghi chu" }}</p>
+        <strong style="color:#ef4444;"><i class="fas fa-exclamation-circle"></i> Yêu cầu này đã bị từ chối</strong>
+        <p style="margin-top:5px;font-size:14px;color:#7f1d1d;">{{ phieu.admin_note|default:"Không có ghi chú" }}</p>
       </div>
       {% endif %}
 
       <div class="ret-info-section" style="border-left:4px solid #f59e0b;background:#fffbeb;margin-bottom:20px;">
-        <div class="ret-info-title"><i class="fas fa-calculator"></i> Xac dinh nghiep vu hoan tien</div>
+        <div class="ret-info-title"><i class="fas fa-calculator"></i> Xác định nghiệp vụ hoàn tiền</div>
         <div class="ret-info-row">
-          <span class="ret-info-label">Ly do khach chon:</span>
+          <span class="ret-info-label">Lý do khách chọn:</span>
           <span class="ret-info-value" style="font-weight:700;">{{ phieu.get_reason_display }}</span>
         </div>
         <div class="ret-info-row" style="margin-top:10px;align-items:center;">
-          <span class="ret-info-label">Hoan du kien (d):</span>
+          <span class="ret-info-label">Hoàn dự kiến (đ):</span>
           <input type="number" id="refund_amount_{{ phieu.id }}" class="form-textarea"
             style="width:150px;font-weight:bold;color:#ef4444;padding:8px;"
             value="{{ phieu.refund_amount|floatformat:0 }}">
@@ -177,56 +177,56 @@
         })();
         </script>
         <p style="font-size:11px;color:#b45309;margin-top:5px;font-style:italic;">
-          * He thong tu tinh: {% if phieu.reason in 'defective,wrong_item,damaged,late' %}Loi Shop (Hoan 100%){% else %}Loi Khach (Tru phi ship 2 chieu){% endif %}. Ban co the tu dieu chinh.
+          * Hệ thống tự tính: {% if phieu.reason in 'defective,wrong_item,damaged,late' %}Lỗi Shop (Hoàn 100%){% else %}Lỗi Khách (Trừ phí ship 2 chiều){% endif %}. Bạn có thể tự điều chỉnh.
         </p>
       </div>
 
       <div class="return-grid">
         <div class="return-col-left">
           <div class="ret-info-section">
-            <div class="ret-info-title">Thong tin khach hang</div>
-            <div class="ret-info-row"><span class="ret-info-label">Khach hang:</span><span class="ret-info-value">{{ phieu.order.user.last_name }} {{ phieu.order.user.first_name }}</span></div>
+            <div class="ret-info-title">Thông tin khách hàng</div>
+            <div class="ret-info-row"><span class="ret-info-label">Khách hàng:</span><span class="ret-info-value">{{ phieu.order.user.last_name }} {{ phieu.order.user.first_name }}</span></div>
           </div>
           <div class="ret-info-section">
-            <div class="ret-info-title">Thong tin tra hang</div>
-            <div class="ret-info-row"><span class="ret-info-label">Ma phieu tra:</span><span class="ret-info-value"><span class="order-id">#{{ phieu.id }}</span></span></div>
-            <div class="ret-info-row"><span class="ret-info-label">Ma don goc:</span><span class="ret-info-value"><span class="order-id">#{{ phieu.order.order_code }}</span></span></div>
-            <div class="ret-info-row"><span class="ret-info-label">Ly do KH:</span><span class="ret-info-value" style="font-weight:600;">{{ phieu.get_reason_display }}</span></div>
-            <div class="ret-info-row"><span class="ret-info-label">Ghi chu KH:</span><span class="ret-info-value">{{ phieu.note|default:"Khong co" }}</span></div>
+            <div class="ret-info-title">Thông tin trả hàng</div>
+            <div class="ret-info-row"><span class="ret-info-label">Mã phiếu trả:</span><span class="ret-info-value"><span class="order-id">#{{ phieu.id }}</span></span></div>
+            <div class="ret-info-row"><span class="ret-info-label">Mã đơn gốc:</span><span class="ret-info-value"><span class="order-id">#{{ phieu.order.order_code }}</span></span></div>
+            <div class="ret-info-row"><span class="ret-info-label">Lý do KH:</span><span class="ret-info-value" style="font-weight:600;">{{ phieu.get_reason_display }}</span></div>
+            <div class="ret-info-row"><span class="ret-info-label">Ghi chú KH:</span><span class="ret-info-value">{{ phieu.note|default:"Không có" }}</span></div>
             {% if phieu.bank_name %}
-            <div class="ret-info-row"><span class="ret-info-label">Ngan hang:</span><span class="ret-info-value">{{ phieu.bank_name }}</span></div>
-            <div class="ret-info-row"><span class="ret-info-label">So TK:</span><span class="ret-info-value">{{ phieu.bank_account_number }}</span></div>
-            <div class="ret-info-row"><span class="ret-info-label">Chu TK:</span><span class="ret-info-value">{{ phieu.bank_account_holder }}</span></div>
+            <div class="ret-info-row"><span class="ret-info-label">Ngân hàng:</span><span class="ret-info-value">{{ phieu.bank_name }}</span></div>
+            <div class="ret-info-row"><span class="ret-info-label">Số TK:</span><span class="ret-info-value">{{ phieu.bank_account_number }}</span></div>
+            <div class="ret-info-row"><span class="ret-info-label">Chủ TK:</span><span class="ret-info-value">{{ phieu.bank_account_holder }}</span></div>
             {% endif %}
           </div>
           {% if phieu.customer_return_proof %}
           <div class="ret-info-section">
-            <div class="ret-info-title">Bang chung khach hang cung cap</div>
+            <div class="ret-info-title">Bằng chứng khách hàng cung cấp</div>
             <div style="text-align:center;margin-top:10px;">
               <a href="{{ phieu.customer_return_proof.url }}" target="_blank">
-                <img src="{{ phieu.customer_return_proof.url }}" alt="Bang chung" style="max-width:100%;max-height:250px;border-radius:6px;border:1px solid #e5e7eb;">
+                <img src="{{ phieu.customer_return_proof.url }}" alt="Bằng chứng" style="max-width:100%;max-height:250px;border-radius:6px;border:1px solid #e5e7eb;">
               </a>
-              <p style="font-size:11px;color:#6b7280;text-align:center;margin-top:10px;">(Nhan vao de xem kich thuoc day du)</p>
+              <p style="font-size:11px;color:#6b7280;text-align:center;margin-top:10px;">(Nhấn vào để xem kích thước đầy đủ)</p>
             </div>
           </div>
           {% endif %}
         </div>
         <div class="return-col-right">
           <div class="proof-box">
-            <div class="ret-info-title">Don hang goc</div>
-            <div class="ret-info-row"><span class="ret-info-label">Tong tien:</span><span class="ret-info-value" style="color:#ef4444;font-weight:700;">{{ phieu.order.total|floatformat:0 }} d</span></div>
+            <div class="ret-info-title">Đơn hàng gốc</div>
+            <div class="ret-info-row"><span class="ret-info-label">Tổng tiền:</span><span class="ret-info-value" style="color:#ef4444;font-weight:700;">{{ phieu.order.total|floatformat:0 }} đ</span></div>
             <div style="margin-top:15px;text-align:center;">
               <a href="{% url 'admin_panel:xuat_hoa_don' phieu.order.order_code %}" target="_blank" style="font-size:13px;color:var(--primary-green);text-decoration:none;font-weight:600;">
-                <i class="fas fa-file-invoice"></i> Xem hoa don goc
+                <i class="fas fa-file-invoice"></i> Xem hóa đơn gốc
               </a>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="section-title" style="font-weight:600;margin-bottom:10px;color:#374151;">San pham tra lai</div>
+      <div class="section-title" style="font-weight:600;margin-bottom:10px;color:#374151;">Sản phẩm trả lại</div>
       <table class="modal-table">
-        <thead><tr><th>San pham</th><th>Kich thuoc</th><th>Mau</th><th>SL</th><th>Don gia</th></tr></thead>
+        <thead><tr><th>Sản phẩm</th><th>Kích thước</th><th>Màu</th><th>SL</th><th>Đơn giá</th></tr></thead>
         <tbody>
           {% for item in phieu.order.items.all %}
           <tr>
@@ -234,7 +234,7 @@
             <td>{{ item.size }}</td>
             <td>{{ item.color }}</td>
             <td>{{ item.quantity }}</td>
-            <td style="font-weight:600;">{{ item.price|floatformat:0 }} d</td>
+            <td style="font-weight:600;">{{ item.price|floatformat:0 }} đ</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -242,47 +242,45 @@
     </div>
     <div class="modal-footer">
       {% if phieu.status == 'pending' %}
-      <button class="btn-cancel" style="background-color:#9ca3af;color:white;border:none;padding:10px 25px;border-radius:4px;font-weight:600;cursor:pointer;" onclick="closeModal('modalReturnDetail_{{ phieu.id }}')">Thoat</button>
-      <button class="btn-reject" onclick="openRejectModal({{ phieu.id }})">Tu choi</button>
-      <button class="btn-confirm" onclick="openConfirmReturn({{ phieu.id }})">Chap nhan & Duyet</button>
+      <button class="btn-cancel" style="background-color:#9ca3af;color:white;border:none;padding:10px 25px;border-radius:4px;font-weight:600;cursor:pointer;" onclick="closeModal('modalReturnDetail_{{ phieu.id }}')">Thoát</button>
+      <button class="btn-reject" onclick="openRejectModal({{ phieu.id }})">Từ chối</button>
+      <button class="btn-confirm" onclick="openConfirmReturn({{ phieu.id }})">Chấp nhận & Duyệt</button>
       {% else %}
-      <button class="btn-cancel" style="background-color:#e5e7eb;color:#374151;border:none;padding:10px 25px;border-radius:4px;font-weight:600;cursor:pointer;" onclick="closeModal('modalReturnDetail_{{ phieu.id }}')">Dong</button>
+      <button class="btn-cancel" style="background-color:#e5e7eb;color:#374151;border:none;padding:10px 25px;border-radius:4px;font-weight:600;cursor:pointer;" onclick="closeModal('modalReturnDetail_{{ phieu.id }}')">Đóng</button>
       {% endif %}
     </div>
   </div>
 </div>
 {% endfor %}
 
-<!-- MODAL XAC NHAN CHAP NHAN -->
 <div class="modal-overlay" id="modalConfirmReturn" style="z-index:10000;">
   <div class="modal-content" style="max-width:400px;">
     <div class="modal-header">
-      <div class="modal-title" style="color:#333;font-size:16px;">XAC NHAN CHAP NHAN</div>
+      <div class="modal-title" style="color:#333;font-size:16px;">XÁC NHẬN CHẤP NHẬN</div>
       <button class="btn-close" onclick="closeModal('modalConfirmReturn')"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body" style="text-align:center;padding:30px 20px;">
-      Ban co chac chan muon <b style="color:var(--primary-green);">chap nhan yeu cau tra hang</b> nay?
+      Bạn có chắc chắn muốn <b style="color:var(--primary-green);">chấp nhận yêu cầu trả hàng</b> này?
     </div>
     <div class="modal-footer" style="justify-content:center;gap:15px;">
-      <button class="btn-cancel" style="background-color:#9ca3af;color:white;border:none;padding:10px 25px;border-radius:4px;font-weight:600;cursor:pointer;" onclick="closeModal('modalConfirmReturn')">Huy</button>
-      <button class="btn-confirm" onclick="processReturnAccept()">Xac nhan</button>
+      <button class="btn-cancel" style="background-color:#9ca3af;color:white;border:none;padding:10px 25px;border-radius:4px;font-weight:600;cursor:pointer;" onclick="closeModal('modalConfirmReturn')">Hủy</button>
+      <button class="btn-confirm" onclick="processReturnAccept()">Xác nhận</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL TU CHOI -->
 <div class="modal-overlay" id="modalRejectReason" style="z-index:10000;">
   <div class="modal-content" style="max-width:500px;">
     <div class="modal-header">
-      <div class="modal-title" style="color:#333;font-size:16px;">TU CHOI TRA HANG</div>
+      <div class="modal-title" style="color:#333;font-size:16px;">TỪ CHỐI TRẢ HÀNG</div>
       <button class="btn-close" onclick="closeModal('modalRejectReason')"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body" style="padding:25px;">
-      <p style="margin-bottom:12px;font-size:14px;font-weight:500;">Ly do tu choi:</p>
-      <textarea id="rejectReasonInput" class="form-textarea" rows="4" placeholder="Nhap ly do gui cho khach hang..."></textarea>
+      <p style="margin-bottom:12px;font-size:14px;font-weight:500;">Lý do từ chối:</p>
+      <textarea id="rejectReasonInput" class="form-textarea" rows="4" placeholder="Nhập lý do gửi cho khách hàng..."></textarea>
     </div>
     <div class="modal-footer" style="justify-content:flex-end;gap:10px;">
-      <button class="btn-confirm" onclick="processRejectSubmit()">Gui phan hoi</button>
+      <button class="btn-confirm" onclick="processRejectSubmit()">Gửi phản hồi</button>
     </div>
   </div>
 </div>
@@ -319,19 +317,19 @@ function processReturnAccept() {
   updateReturnStatusAPI('approved').then(data => {
     if (data.status === 'success') {
       closeModal('modalConfirmReturn');
-      showSuccessPopup("Da CHAP NHAN yeu cau tra hang!");
-    } else { alert("Loi: " + data.message); }
+      showSuccessPopup("Đã CHẤP NHẬN yêu cầu trả hàng!");
+    } else { alert("Lỗi: " + data.message); }
   });
 }
 
 function processRejectSubmit() {
   let reason = document.getElementById('rejectReasonInput').value;
-  if (reason.trim() === '') { alert('Vui long nhap ly do tu choi!'); return; }
+  if (reason.trim() === '') { alert('Vui lòng nhập lý do từ chối!'); return; }
   updateReturnStatusAPI('rejected', reason).then(data => {
     if (data.status === 'success') {
       closeModal('modalRejectReason');
-      showSuccessPopup("Da TU CHOI yeu cau tra hang.");
-    } else { alert("Loi: " + data.message); }
+      showSuccessPopup("Đã TỪ CHỐI yêu cầu trả hàng.");
+    } else { alert("Lỗi: " + data.message); }
   });
 }
 </script>

@@ -253,7 +253,6 @@ def checkout(request):
     default_address = addresses.filter(is_default=True).first() or addresses.exclude(full_name='').first()
 
     from .models import PhiVanChuyen
-    FREE_SHIP_THRESHOLD = 500000
     shipping_fee = 0
     is_free_ship = False
     is_supported_city = True
@@ -267,13 +266,8 @@ def checkout(request):
             is_supported_city = False
             ship_note = 'Khu vực này chưa hỗ trợ vận chuyển, vui lòng chọn địa chỉ khác để giao hàng.'
         else:
-            if selected_total >= FREE_SHIP_THRESHOLD:
-                shipping_fee = 0
-                is_free_ship = True
-                ship_note = 'Miễn phí vận chuyển cho đơn hàng từ 500.000đ'
-            else:
-                shipping_fee = int(phi_ship.phiShip)
-                ship_note = f'Phí vận chuyển đến {default_address.city}'
+            shipping_fee = int(phi_ship.phiShip)
+            ship_note = f'Phí vận chuyển đến {default_address.city}'
     else:
         ship_note = 'Vui lòng nhập địa chỉ giao hàng'
 
@@ -338,14 +332,9 @@ def place_order(request):
     if not address_id:
         address.save()
 
-    FREE_SHIP_THRESHOLD = 500000
     subtotal = sum(item.subtotal for item in order_items_qs)
     discount = 0
-
-    if subtotal >= FREE_SHIP_THRESHOLD:
-        shipping_fee = 0
-    else:
-        shipping_fee = int(phi_ship.phiShip)
+    shipping_fee = int(phi_ship.phiShip)
 
     order = Order.objects.create(
         user=request.user,
