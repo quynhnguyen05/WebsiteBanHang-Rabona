@@ -48,10 +48,19 @@ class Product(models.Model):
 
     @property
     def display_image(self):
-        """Trả về URL ảnh: ưu tiên image upload, fallback về static mẫu."""
+        """Trả về URL ảnh: ưu tiên image upload, fallback theo danh mục."""
         if self.image:
             return self.image.url
         from django.templatetags.static import static
+        if self.category:
+            slug = self.category.slug
+            if 'ao' in slug:
+                idx = ((self.pk - 1) % 5) + 1
+                return static(f'images/ao{idx}.png')
+            elif 'bong' in slug:
+                return static(f'images/bong1.png')
+            elif 'phu-kien' in slug or 'phu_kien' in slug:
+                return static(f'images/phu_kien1.png')
         idx = ((self.pk - 1) % 5) + 1
         return static(f'images/giay{idx}.png')
 
